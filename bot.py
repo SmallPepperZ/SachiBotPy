@@ -93,4 +93,4 @@ async def stop(ctx):
 		await quit()
 
 
-bot.run('')
+bot.run(token)
