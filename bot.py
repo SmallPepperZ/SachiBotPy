@@ -3,8 +3,7 @@ import discord
 import os
 from discord.ext import commands
 import logging
-import sys
-import io
+
 
 tokentxt = open("token.txt", "r", encoding="utf-8")
 token = tokentxt.read()
