@@ -1,6 +1,0 @@
-discordbot_env/
-discordbot_env/*
-.vscode
-bot.log
-token.txt
-*.config.js
