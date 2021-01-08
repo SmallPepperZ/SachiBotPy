@@ -91,8 +91,7 @@ async def stop(ctx):
 		await bot.logout()
 		await time.sleep(100)
 		await quit()
-
-
+		
 @bot.command()
 @bot.check(commands.is_owner())
 async def repeatembed(ctx, *, content:str):
