@@ -16,6 +16,10 @@ tokentxt = open("token.txt", "r", encoding="utf-8")
 token = tokentxt.read()
 tokentxt.close()
 
+with open('helputility.txt', 'r') as file:
+    helputility = file.read()
+with open('helpmod.txt', 'r') as file:
+    helpmod = file.read()
 
 color = 0x045e01
 prefix = '%'
