@@ -26,11 +26,7 @@ bot.remove_command('help')
 
 @bot.event
 async def on_ready():
-	print('--------------------')
-	print('Logged in as')
-	print(' - '+bot.user.name)
-	print(' - '+str(bot.user.id))
-	print('--------------------')
+	print("Bot initialized")
 	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a %"))
 	return
 
