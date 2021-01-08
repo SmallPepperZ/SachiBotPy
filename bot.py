@@ -1,9 +1,10 @@
-import time
+import time, datetime
 import discord
 import os
 from discord.ext import commands
 import logging
-
+from datetime import timedelta
+#from datetime import datetime
 
 tokentxt = open("token.txt", "r", encoding="utf-8")
 token = tokentxt.read()
@@ -11,6 +12,7 @@ tokentxt.close()
 
 color = 0x045e01
 prefix = '%'
+start_time = time.time()
 
 bot = commands.Bot(command_prefix=prefix)
 logging.basicConfig(level=logging.INFO)
@@ -46,8 +48,12 @@ async def help(ctx):
 @bot.command()
 async def ping(ctx):
 	await ctx.message.delete()
+	current_time = time.time()
+	difference = int(round(current_time - start_time))
+	uptime = str(datetime.timedelta(seconds=difference))
 	embed = discord.Embed(color=color)
-	embed.add_field(name="Ping", value=f'🏓 Pong! {round(bot.latency * 1000)}ms')
+	embed.add_field(name="Ping", value=f'🏓 Pong! {round(bot.latency * 1000)}ms', inline='false')
+	embed.add_field(name="Uptime", value=f'{uptime}')
 	embed.set_footer(text=f"Request by {ctx.author}")
 #	embed.set_timestamp()
 	await ctx.send(embed=embed)
@@ -70,11 +76,14 @@ async def restart(ctx):
 		return
 	else:
 		await ctx.message.delete()
+		current_time = time.time()
+		difference = int(round(current_time - start_time))
+		uptime = str(datetime.timedelta(seconds=difference))
 		embed = discord.Embed(color=color, title="Restarting...")
-		embed.set_footer(text=f"Request by {ctx.author}")
+		embed.set_footer(text=f"lasted for {uptime}")
 		await ctx.send(embed=embed)
 		logging.warning('Bot restarted by '+str(ctx.author))
-		await os.system("pm2 restart SachiBot")
+		await os.system("pm2 restart 0")
 		await bot.logout()
 
 @bot.command()
@@ -91,7 +100,7 @@ async def stop(ctx):
 		await bot.logout()
 		await time.sleep(100)
 		await quit()
-		
+
 @bot.command()
 @bot.check(commands.is_owner())
 async def repeatembed(ctx, *, content:str):
@@ -104,9 +113,14 @@ async def repeatembed(ctx, *, content:str):
 		logging.warning(content+' echoed by '+str(ctx.author))
 
 @bot.command()
-@bot.check(commands.is_owner())
+#@bot.check(commands.is_owner())
 async def simonsays(ctx, *, content:str):
-	if commands.NotOwner == True:
+	if ctx.message.author.id != 545463550802395146:
+		embed = discord.Embed(color=color, title="Insufficent permissions", description="This incident will be reported")
+		embed.set_footer(text=f"Attempted by {ctx.author}")
+		await ctx.send(embed=embed)
+		logging.warning('simonsays attempted by '+str(ctx.author))
+
 		return
 	else:
 		await ctx.message.delete()
