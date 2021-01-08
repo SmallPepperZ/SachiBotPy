@@ -16,6 +16,10 @@ tokentxt = open("token.txt", "r", encoding="utf-8")
 token = tokentxt.read()
 tokentxt.close()
 
+with open('helputility.txt', 'r') as file:
+    helputility = file.read()
+with open('helpmod.txt', 'r') as file:
+    helpmod = file.read()
 
 color = 0x045e01
 prefix = '%'
@@ -41,6 +45,7 @@ async def on_ready():
 async def help(ctx):
 	await ctx.message.delete()
 	embed = discord.Embed(color=color, title="Commands")
+<<<<<<< HEAD
 	embed.add_field(name="Utilities", 
 					value=f'**ping**\nreturns the bot\'s latency \n\n'
 					      f'**simonsays**\nthe bot says what you says (may or may not be snarky)',
@@ -51,6 +56,14 @@ async def help(ctx):
 						  f'**export**\nexports the specified channel into a csv file on the host machine\n\n'
 						  f'**delete**\nDeletes the linked message',
 					inline='true')
+=======
+    embed.add_field(name="Utilities",
+                    value=helputility,
+                    inline='true')
+    embed.add_field(name="Owner commands",
+                    value=helpmod,
+                    inline='true')
+>>>>>>> 481b7c310da76bd176bdf286c460690bfa124dba
 	embed.set_footer(text=f"Request by {ctx.author}")
 	await ctx.send(embed=embed)
 	logging.info('Help triggered by '+str(ctx.author))
