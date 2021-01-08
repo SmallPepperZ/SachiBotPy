@@ -103,9 +103,8 @@ async def stop(ctx):
 		embed.set_footer(text=f"Request by {ctx.author}")
 		await ctx.send(embed=embed)
 		logging.warning('Bot stopped by '+str(ctx.author))
+		await os.system("pm2 stop 0")
 		await bot.logout()
-		await time.sleep(100)
-		await quit()
 
 @bot.command()
 #@bot.check(commands.is_owner())
@@ -134,7 +133,7 @@ async def simonsays(ctx, *, content:str):
 		m9 = "I don't work for free"
 		m10 = "Make your own simonsays bot"
 		msg = random.choice([m1, m2, m3, m4, m5, m6, m7, m8, m9, m10])
-		await ctx.send(msg)
+		await ctx.reply(str(msg))
 		logging.warning(content+' echo attempted by '+str(ctx.author))
 	else:
 		await ctx.message.delete()
@@ -147,5 +146,8 @@ async def on_command_error(ctx, error):
 		await ctx.message.add_reaction(str('❔'))
 		return 
 
+@bot.command()
+async def test(ctx):
+	await ctx.reply('hi')
 
 bot.run(token)
