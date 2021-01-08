@@ -1,11 +1,14 @@
 import time, datetime
 import discord
+from discord import NotFound
 import os
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 import logging
 import random
 from datetime import timedelta
+from discord.ext.commands.errors import CommandError
+from discord.ext.commands import MessageConverter
 
 #from datetime import datetime
 
@@ -132,19 +135,27 @@ async def simonsays(ctx, *, content:str):
 		m8 = "You aren't paying me, so no thanks"
 		m9 = "I don't work for free"
 		m10 = "Make your own simonsays bot"
-		msg = random.choice([m1, m2, m3, m4, m5, m6, m7, m8, m9, m10])
+		m11 = str(ctx.author)+" asked me politely to say "+content
+		m12 = "I've always wanted to be a simon"
+		msg = random.choice([m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12])
 		await ctx.reply(str(msg))
 		logging.warning(content+' echo attempted by '+str(ctx.author))
 	else:
 		await ctx.message.delete()
 		await ctx.send(content)
 		logging.warning(content+' echoed by '+str(ctx.author))
-
+		
 @bot.event
 async def on_command_error(ctx, error):
-	if isinstance(error, CommandNotFound):
-		await ctx.message.add_reaction(str('❔'))
-		return 
+	if isinstance(error, CommandError):
+		if isinstance(error, CommandNotFound):
+			await ctx.message.add_reaction(str('❔'))
+			return 
+		else:
+			await ctx.reply(str("Bot received error :\n```"+str(error)+"```\n Pinging <@545463550802395146>"))
+			logging.error("Bot Broken: "+str(error))
+			return 		
+
 
 @bot.command()
 async def test(ctx):
