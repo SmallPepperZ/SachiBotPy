@@ -144,17 +144,34 @@ async def simonsays(ctx, *, content:str):
 		await ctx.message.delete()
 		await ctx.send(content)
 		logging.warning(content+' echoed by '+str(ctx.author))
+
+@bot.command()
+async def delete(ctx, messageid):
+	if ctx.message.author.id != 545463550802395146:
+		await ctx.message.add_reaction(str('❔'))
+		return
+	else:
+		await ctx.message.delete()
+		message = await MessageConverter().convert(ctx, messageid)
+		await message.delete()
+		logging.warning('delete attempted by '+str(ctx.author))
 		
 @bot.event
 async def on_command_error(ctx, error):
 	if isinstance(error, CommandError):
-		if isinstance(error, CommandNotFound):
-			await ctx.message.add_reaction(str('❔'))
-			return 
-		else:
-			await ctx.reply(str("Bot received error :\n```"+str(error)+"```\n Pinging <@545463550802395146>"))
-			logging.error("Bot Broken: "+str(error))
-			return 		
+		try:
+			if isinstance(error, CommandNotFound):
+				await ctx.message.add_reaction(str('❔'))
+				return 
+			else:
+				try:
+					await ctx.reply("Bot received error :\n```"+str(error)+"```\n Pinging <@545463550802395146>")
+					logging.error("Bot Broken: "+str(error))
+					return
+				except:
+					return
+		except:
+			return
 
 
 @bot.command()
