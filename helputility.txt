@@ -1,0 +1,4 @@
+**Bot utility commands:**
+`ping`: Returns the bot's latency
+
+`simonsays`: the bot says what you says (may or may not be snarky)

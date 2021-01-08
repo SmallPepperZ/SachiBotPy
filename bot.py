@@ -41,14 +41,12 @@ async def on_ready():
 async def help(ctx):
 	await ctx.message.delete()
 	embed = discord.Embed(color=color, title="Commands")
-	embed.add_field(name="Utilities", 
-					value=f'**ping**\nreturns the bot\'s latency \n\n '
-					      f'**export**\nexports the specified channel into a csv file on the host machine',
-					inline='true')
-	embed.add_field(name="Maintenance",
-					value=f'**stop**\nshuts down the bot\n\n' 
-						  f'**restart**\nRestarts the bot',
-					inline='true')
+    embed.add_field(name="Utilities",
+                    value=helputility,
+                    inline='true')
+    embed.add_field(name="Owner commands",
+                    value=helpmod,
+                    inline='true')
 	embed.set_footer(text=f"Request by {ctx.author}")
 	await ctx.send(embed=embed)
 	logging.info('Help triggered by '+str(ctx.author))
