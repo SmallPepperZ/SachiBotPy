@@ -10,4 +10,7 @@ Restarts the bot
 Exports the specified channel into a csv file on the host machine
 
 **delete:** 
-Deletes the linked message
+Deletes the linked messages
+
+**purge:**
+Deletes the previous x messages (x is first argument)
