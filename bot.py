@@ -47,9 +47,9 @@ async def on_ready():
 async def help(ctx):
 	await ctx.message.delete()
 	embed = discord.Embed(color=color, title="Commands")
-	embed.add_field(name="Utilities", value=helputility, inline='true')
-	embed.add_field(name="Fun", value=helpfun, inline='true')
-	embed.add_field(name="Owner", value=helpadmin, inline='false')
+	embed.add_field(name="__Utilities__", value=helputility, inline='true')
+	embed.add_field(name="__Fun__", value=helpfun, inline='true')
+	embed.add_field(name="__Owner__", value=helpadmin, inline='false')
 	
 	embed.set_footer(text=f"Request by {ctx.author}")
 	await ctx.send(embed=embed)
