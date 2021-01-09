@@ -183,6 +183,14 @@ async def delete(ctx, messageid):
 		await message.delete()
 		logging.warning('delete attempted by '+str(ctx.author))
 
+@bot.command()
+async def fact(ctx):
+	await ctx.message.delete()
+	fact = os.popen('curl -s -X GET "https://uselessfacts.jsph.pl/random.txt?language=en" | grep ">"').read()
+	embed = discord.Embed(color=embedcolor, title="Fact:", description=fact)
+	embed.set_footer(text=f"Request by {ctx.author}")
+	await ctx.send(embed=embed)
+
 		
 @bot.event
 async def on_command_error(ctx, error):
