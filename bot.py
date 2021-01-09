@@ -55,7 +55,18 @@ async def help(ctx):
 	await ctx.send(embed=embed)
 	logging.info('Help triggered by '+str(ctx.author))
 
-
+@bot.command()
+async def clear(ctx):
+    await ctx.message.delete()
+    args = ctx.message.content.split(" ")
+    if args[1]:
+        amount = int(args[1])
+        await ctx.channel.purge(limit=amount)
+        embed = discord.Embed(color=embedcolor)
+        embed.add_field(name="Clear", value="cleared " + args[1] + " messages")
+        embed.set_footer(text=f"Request by {ctx.author}")
+        await ctx.send(embed=embed)
+	
 @bot.command()
 async def ping(ctx):
 	await ctx.message.delete()
