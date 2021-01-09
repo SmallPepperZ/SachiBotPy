@@ -1,2 +1,5 @@
 **simonsays:** 
 The bot says what you say (may or may not be snarky)
+
+**fact:**
+displays a random fact about... something(?)
