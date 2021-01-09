@@ -1,6 +1,7 @@
 **ping:** 
 Returns the bot's latency
 
-
+**help:**
+Displays this message
 
 
