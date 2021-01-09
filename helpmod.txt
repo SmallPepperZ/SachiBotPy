@@ -1,8 +1,0 @@
-**Moderation commands:**
-`stop`: Shuts down the bot
-
-`restart`: Restarts the bot
-
-`export`: Exports the specified channel into a csv file on the host machine
-
-`delete`: Deletes the linked message
