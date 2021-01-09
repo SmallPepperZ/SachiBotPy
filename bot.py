@@ -16,6 +16,13 @@ tokentxt = open("token.txt", "r", encoding="utf-8")
 token = tokentxt.read()
 tokentxt.close()
 
+with open('help-pages/utility.txt', 'r') as file:
+    helputility = file.read()
+with open('help-pages/admin.txt', 'r') as file:
+    helpadmin = file.read()
+with open('help-pages/fun.txt', 'r') as file:
+	helpfun = file.read()
+
 color = 0x045e01
 prefix = '%'
 start_time = time.time()
@@ -40,8 +47,9 @@ async def on_ready():
 async def help(ctx):
 	await ctx.message.delete()
 	embed = discord.Embed(color=color, title="Commands")
-	embed.add_field(name="Utilities", value=f'**ping**\nreturns the bot\'s latency \n\n **export**\nexports the specified channel into a csv file on the host machine', inline='true')
-	embed.add_field(name="Maintenance", value=f'**stop**\nshuts down the bot\n\n **restart**\nRestarts the bot', inline='true')
+	embed.add_field(name="Utilities", value=helputility, inline='true')
+	embed.add_field(name="Owner", value=helpadmin, inline='true')
+	embed.add_field(name="Fun", value=helpfun, inline='false')
 	embed.set_footer(text=f"Request by {ctx.author}")
 	await ctx.send(embed=embed)
 	logging.info('Help triggered by '+str(ctx.author))
