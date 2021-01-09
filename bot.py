@@ -23,7 +23,7 @@ with open('help-pages/admin.txt', 'r') as file:
 with open('help-pages/fun.txt', 'r') as file:
 	helpfun = file.read()
 
-color = 0x045e01
+embedcolor = 0x045e01
 prefix = '%'
 start_time = time.time()
 
@@ -46,7 +46,7 @@ async def on_ready():
 @bot.command()
 async def help(ctx):
 	await ctx.message.delete()
-	embed = discord.Embed(color=color, title="Commands")
+	embed = discord.Embed(color=embedcolor, title="Commands")
 	embed.add_field(name="__Utilities__", value=helputility, inline='true')
 	embed.add_field(name="__Fun__", value=helpfun, inline='true')
 	embed.add_field(name="__Owner__", value=helpadmin, inline='false')
@@ -56,16 +56,23 @@ async def help(ctx):
 	logging.info('Help triggered by '+str(ctx.author))
 
 @bot.command()
-async def clear(ctx):
-    await ctx.message.delete()
-    args = ctx.message.content.split(" ")
-    if args[1]:
-        amount = int(args[1])
-        await ctx.channel.purge(limit=amount)
-        embed = discord.Embed(color=embedcolor)
-        embed.add_field(name="Clear", value="cleared " + args[1] + " messages")
-        embed.set_footer(text=f"Request by {ctx.author}")
-        await ctx.send(embed=embed)
+async def purge(ctx):
+	if ctx.message.author.id != 545463550802395146:
+		await ctx.message.add_reaction(str('🔒'))
+		return
+	else:
+		args = ctx.message.content.split(" ")
+		if args[1]:
+			try:
+				amount = int(args[1])
+				await ctx.message.delete()				
+				await ctx.channel.purge(limit=amount)
+				embed = discord.Embed(color=embedcolor)
+				embed.add_field(name="Clear", value="cleared " + args[1] + " messages")
+				embed.set_footer(text=f"Request by {ctx.author}")
+				await ctx.send(embed=embed)
+			except:
+				await ctx.reply("Error, most likely not a number")
 	
 @bot.command()
 async def ping(ctx):
@@ -73,7 +80,7 @@ async def ping(ctx):
 	current_time = time.time()
 	difference = int(round(current_time - start_time))
 	uptime = str(datetime.timedelta(seconds=difference))
-	embed = discord.Embed(color=color)
+	embed = discord.Embed(color=embedcolor)
 	embed.add_field(name="Ping", value=f'🏓 Pong! {round(bot.latency * 1000)}ms', inline='false')
 	embed.add_field(name="Uptime", value=f'{uptime}')
 	embed.set_footer(text=f"Request by {ctx.author}")
@@ -89,7 +96,7 @@ async def export(ctx, channel):
 		return
 	else:
 		await ctx.message.delete()
-		embed = discord.Embed(color=color)
+		embed = discord.Embed(color=embedcolor)
 		embed.add_field(name="Channel", value=f'{channel}')
 		embed.set_footer(text=f"Request by {ctx.author}")
 		#embed.add_timestamp()
@@ -107,7 +114,7 @@ async def restart(ctx):
 		current_time = time.time()
 		difference = int(round(current_time - start_time))
 		uptime = str(datetime.timedelta(seconds=difference))
-		embed = discord.Embed(color=color, title="Restarting...")
+		embed = discord.Embed(color=embedcolor, title="Restarting...")
 		embed.set_footer(text=f"lasted for {uptime}")
 		await ctx.send(embed=embed)
 		logging.warning('Bot restarted by '+str(ctx.author))
@@ -122,7 +129,7 @@ async def stop(ctx):
 		return
 	else:
 		await ctx.message.delete()
-		embed = discord.Embed(color=color, title="Stopping...")
+		embed = discord.Embed(color=embedcolor, title="Stopping...")
 		embed.set_footer(text=f"Request by {ctx.author}")
 		await ctx.send(embed=embed)
 		logging.warning('Bot stopped by '+str(ctx.author))
@@ -137,7 +144,7 @@ async def repeatembed(ctx, *, content:str):
 		return
 	else:
 		await ctx.message.delete()
-		embed = discord.Embed(color=color, description=content)
+		embed = discord.Embed(color=embedcolor, description=content)
 		await ctx.send(embed=embed)
 		logging.warning(content+' echoed by '+str(ctx.author))
 
@@ -175,6 +182,7 @@ async def delete(ctx, messageid):
 		message = await MessageConverter().convert(ctx, messageid)
 		await message.delete()
 		logging.warning('delete attempted by '+str(ctx.author))
+
 		
 @bot.event
 async def on_command_error(ctx, error):
