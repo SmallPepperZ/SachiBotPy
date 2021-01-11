@@ -41,12 +41,6 @@ bot.remove_command('help')
 async def on_ready():
 	print("Bot initialized")
 	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a %"))
-	while True: #loop (running your bot non-stop, so you just have to write "flip" in terminal to run it)
-		command = str(input())
-		if command.startswith("discord-say") == True:
-			print("Test")
-		#	channel1 = client.get_channel(1234567890) 
-		#	await channel1.send("It's {}!" .format(a)
 
 @bot.command(aliases=['commands'])
 async def help(ctx):
@@ -221,8 +215,8 @@ async def on_command_error(ctx, error):
 @bot.event
 async def on_message(message):
 	await bot.process_commands(message)
-	if (message.guild.id == 764981968579461130):
-		sentmsg2 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+", "+str(message.author)+", "+str(message.content)
+	if (message.guild.id == 764981968579461130) and (message.channel.id != 789195444957609994) and (message.channel.id != 789607866780745748):
+		sentmsg2 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+", "+str(message.channel.id)+", "+str(message.channel.name)+", "+str(message.author)+", "+str(message.content)
 		print(sentmsg2)
 		with open("logs/test.csv", 'a') as file_object:
 			file_object.write(sentmsg2+"\n")
