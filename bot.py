@@ -1,3 +1,4 @@
+#region Imports
 import time, datetime
 import discord
 from discord import NotFound
@@ -12,8 +13,9 @@ from discord.ext.commands import MessageConverter
 from discord_slash import SlashCommand
 from discord_slash import SlashContext
 
-#from datetime import datetime
+#endregion
 
+#region Variable Stuff
 tokentxt = open("token.txt", "r", encoding="utf-8")
 token = tokentxt.read()
 tokentxt.close()
@@ -33,6 +35,9 @@ bot = commands.Bot(command_prefix=prefix)
 slash = SlashCommand(bot)
 logging.basicConfig(level=logging.INFO)
 
+#endregion
+
+#region Logger Stuff
 logger = logging.getLogger("discord")
 logger.setLevel(logging.INFO) # Do not allow DEBUG messages through
 handler = logging.FileHandler(filename="bot.log", encoding="utf-8", mode="w")
@@ -40,10 +45,15 @@ handler.setFormatter(logging.Formatter("{asctime}: {levelname}: {name}: {message
 logger.addHandler(handler)
 bot.remove_command('help')
 
+#endregion
+
 @bot.event
 async def on_ready():
 	print("Bot initialized")
 	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a %"))
+
+
+#region Commands
 
 @bot.command(aliases=['commands'])
 async def help(ctx):
@@ -84,7 +94,6 @@ async def ping(ctx):
 	embed.add_field(name="Ping", value=f'🏓 Pong! {round(bot.latency * 1000)}ms', inline='false')
 	embed.add_field(name="Uptime", value=f'{uptime}')
 	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-#	embed.set_timestamp()
 	await ctx.reply(embed=embed)
 	print('Pinged by '+str(ctx.author))
 	
@@ -196,7 +205,10 @@ async def fact(ctx):
 	await ctx.send(embed=embed)
 	print("Fact requested by "+ctx.author)
 
-		
+#endregion
+
+#region Bot Events
+
 @bot.event
 async def on_command_error(ctx, error):
 	if isinstance(error, CommandError):
@@ -224,21 +236,35 @@ async def on_message(message):
 		with open("logs/test.csv", 'a') as file_object:
 			file_object.write(sentmsg2+"\n")
 
+@bot.event
+async def on_message(message):
+	if bot.user.mentioned_in(message):
+		embed = discord.Embed(color=embedcolor)
+		embed.add_field(name="Prefix", value="`%`", inline='true')
+		embed.add_field(name="Help", value="`%help`", inline='true')
+		embed.set_footer(text=f"Request by {message.author}", icon_url= message.author.avatar_url)
+		await message.reply(embed=embed)
+
+#endregion
+
+#region Testing
+
 @bot.command()
 @bot.check(commands.is_owner())
 async def channels(ctx):
 	await ctx.message.delete()
 	channels1 = ctx.guild.channels
 	cwd = os.popen('pwd').read().rstrip()
-#	try:
+	#	try:
 	filepath = str(cwd+'/logs/channels/'+ctx.guild.name+'.csv')
 	os.remove(filepath)
-#	except:
-#		print(cwd+"/logs/channels/"+ctx.guild.name+".csv not found, creating..." )
+	#	except:
+	#		print(cwd+"/logs/channels/"+ctx.guild.name+".csv not found, creating..." )
 	for channel1 in channels1:
 		towrite = str(str(channel1.category)+', '+channel1.name+', '+str(channel1.changed_roles))
 		with open(str("logs/channels/"+ctx.guild.name+".csv"), 'a') as file_object:
 			file_object.write(str(towrite+'\n'))
 
+#endregion
 
 bot.run(token)
