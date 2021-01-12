@@ -9,6 +9,8 @@ import random
 from datetime import timedelta
 from discord.ext.commands.errors import CommandError
 from discord.ext.commands import MessageConverter
+from discord_slash import SlashCommand
+from discord_slash import SlashContext
 
 #from datetime import datetime
 
@@ -17,9 +19,9 @@ token = tokentxt.read()
 tokentxt.close()
 
 with open('help-pages/utility.txt', 'r') as file:
-    helputility = file.read()
+	helputility = file.read()
 with open('help-pages/admin.txt', 'r') as file:
-    helpadmin = file.read()
+	helpadmin = file.read()
 with open('help-pages/fun.txt', 'r') as file:
 	helpfun = file.read()
 
@@ -28,6 +30,7 @@ prefix = '%'
 start_time = time.time()
 
 bot = commands.Bot(command_prefix=prefix)
+slash = SlashCommand(bot)
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger("discord")
@@ -41,15 +44,14 @@ bot.remove_command('help')
 async def on_ready():
 	print("Bot initialized")
 	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a %"))
-	return
 
 @bot.command(aliases=['commands'])
 async def help(ctx):
 	embed = discord.Embed(color=embedcolor, title="Commands")
 	embed.add_field(name="__Utilities__", value=helputility, inline='true')
 	embed.add_field(name="__Fun__", value=helpfun, inline='true')
-	embed.add_field(name="__Owner__", value=helpadmin, inline='false')
-	
+	if ctx.message.author.id == 545463550802395146:
+		embed.add_field(name="__Owner__", value=helpadmin, inline='false')
 	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 	await ctx.reply(embed=embed)
 	print('Help triggered by '+str(ctx.author))
@@ -216,10 +218,27 @@ async def on_command_error(ctx, error):
 @bot.event
 async def on_message(message):
 	await bot.process_commands(message)
-	if (message.guild.id == 764981968579461130):
-		sentmsg2 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+", "+str(message.author)+", "+str(message.content)
+	if (message.guild.id == 764981968579461130) and (message.channel.id != 789195444957609994) and (message.channel.id != 789607866780745748):
+		sentmsg2 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+", "+str(message.channel.id)+", "+str(message.channel.name)+", "+str(message.author)+", "+str(message.content)
 		print(sentmsg2)
 		with open("logs/test.csv", 'a') as file_object:
-  		  file_object.write(sentmsg2+"\n")
+			file_object.write(sentmsg2+"\n")
+
+@bot.command()
+@bot.check(commands.is_owner())
+async def channels(ctx):
+	await ctx.message.delete()
+	channels1 = ctx.guild.channels
+	cwd = os.popen('pwd').read().rstrip()
+#	try:
+	filepath = str(cwd+'/logs/channels/'+ctx.guild.name+'.csv')
+	os.remove(filepath)
+#	except:
+#		print(cwd+"/logs/channels/"+ctx.guild.name+".csv not found, creating..." )
+	for channel1 in channels1:
+		towrite = str(str(channel1.category)+', '+channel1.name+', '+str(channel1.changed_roles))
+		with open(str("logs/channels/"+ctx.guild.name+".csv"), 'a') as file_object:
+			file_object.write(str(towrite+'\n'))
+
 
 bot.run(token)
