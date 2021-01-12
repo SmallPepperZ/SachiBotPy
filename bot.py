@@ -9,6 +9,8 @@ import random
 from datetime import timedelta
 from discord.ext.commands.errors import CommandError
 from discord.ext.commands import MessageConverter
+from discord_slash import SlashCommand
+from discord_slash import SlashContext
 
 #from datetime import datetime
 
@@ -28,6 +30,7 @@ prefix = '%'
 start_time = time.time()
 
 bot = commands.Bot(command_prefix=prefix)
+slash = SlashCommand(bot)
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger("discord")
@@ -47,8 +50,8 @@ async def help(ctx):
 	embed = discord.Embed(color=embedcolor, title="Commands")
 	embed.add_field(name="__Utilities__", value=helputility, inline='true')
 	embed.add_field(name="__Fun__", value=helpfun, inline='true')
-	embed.add_field(name="__Owner__", value=helpadmin, inline='false')
-	
+	if ctx.message.author.id == 545463550802395146:
+		embed.add_field(name="__Owner__", value=helpadmin, inline='false')
 	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 	await ctx.reply(embed=embed)
 	print('Help triggered by '+str(ctx.author))
@@ -220,5 +223,22 @@ async def on_message(message):
 		print(sentmsg2)
 		with open("logs/test.csv", 'a') as file_object:
 			file_object.write(sentmsg2+"\n")
+
+@bot.command()
+@bot.check(commands.is_owner())
+async def channels(ctx):
+	await ctx.message.delete()
+	channels1 = ctx.guild.channels
+	cwd = os.popen('pwd').read().rstrip()
+#	try:
+	filepath = str(cwd+'/logs/channels/'+ctx.guild.name+'.csv')
+	os.remove(filepath)
+#	except:
+#		print(cwd+"/logs/channels/"+ctx.guild.name+".csv not found, creating..." )
+	for channel1 in channels1:
+		towrite = str(str(channel1.category)+', '+channel1.name+', '+str(channel1.changed_roles))
+		with open(str("logs/channels/"+ctx.guild.name+".csv"), 'a') as file_object:
+			file_object.write(str(towrite+'\n'))
+
 
 bot.run(token)
