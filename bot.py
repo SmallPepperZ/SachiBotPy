@@ -111,7 +111,7 @@ async def export(ctx, channel):
 		await ctx.reply(embed=embed)
 		print('Exported by '+str(ctx.author))
 
-@bot.command()
+@bot.command(aliases=['reload'])
 #@bot.check(commands.is_owner())
 async def restart(ctx):
 	if ctx.message.author.id != 545463550802395146:
@@ -206,6 +206,26 @@ async def fact(ctx):
 	await ctx.send(embed=embed)
 	print("Fact requested by "+ctx.author)
 
+@bot.command()
+async def cat(ctx):
+	catapi = os.popen('curl -s https://api.thecatapi.com/v1/images/search').read()
+	catjson = json.loads(catapi)
+	caturl = catjson[0]["url"]
+	embed = discord.Embed(title="Dog", color=embedcolor)
+	embed.set_image(url=caturl)
+	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+	await ctx.reply(embed=embed)
+
+@bot.command()
+async def dog(ctx):
+	dogapi = os.popen('curl -s https://api.thedogapi.com/v1/images/search').read()
+	dogjson = json.loads(dogapi)
+	dogurl = dogjson[0]["url"]
+	embed = discord.Embed(title="Cat", color=embedcolor)
+	embed.set_image(url=dogurl)
+	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+	await ctx.reply(embed=embed)
+
 #endregion
 
 #region Bot Events
@@ -266,27 +286,21 @@ async def channels(ctx):
 		with open(str("logs/channels/"+ctx.guild.name+".csv"), 'a') as file_object:
 			file_object.write(str(towrite+'\n'))
 
-@bot.command()
-async def cat(ctx):
-	catapi = os.popen('curl -s https://api.thecatapi.com/v1/images/search').read()
-	catjson = json.loads(catapi)
-	caturl = catjson[0]["url"]
-	print(caturl)
-	embed = discord.Embed(title="Dog", color=embedcolor)
-	embed.set_image(url=caturl)
-	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-	await ctx.reply(embed=embed)
+@bot.command(aliases=['tos'])
+@bot.check(commands.is_owner())
+async def siren(ctx, *, content:str=None):
+	if not content:
+		await ctx.reply("Give me something to say!")
+	else:
+		if ctx.message.author.id == 545463550802395146: 
+			await ctx.message.delete()
+			embed = discord.Embed(title="🚨  "+content+"  🚨", color=0xf21b1b )
+			await ctx.send(embed=embed)
+			print(content+' echoed by '+str(ctx.author))
+		else:
+			return
 
-@bot.command()
-async def dog(ctx):
-	catapi = os.popen('curl -s https://api.thedogapi.com/v1/images/search').read()
-	catjson = json.loads(catapi)
-	caturl = catjson[0]["url"]
-	print(caturl)
-	embed = discord.Embed(title="Cat", color=embedcolor)
-	embed.set_image(url=caturl)
-	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-	await ctx.reply(embed=embed)
+
 #endregion
 
 bot.run(token)
