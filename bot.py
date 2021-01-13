@@ -12,6 +12,7 @@ from discord.ext.commands.errors import CommandError
 from discord.ext.commands import MessageConverter
 from discord_slash import SlashCommand
 from discord_slash import SlashContext
+import json
 
 #endregion
 
@@ -236,14 +237,14 @@ async def on_message(message):
 		with open("logs/test.csv", 'a') as file_object:
 			file_object.write(sentmsg2+"\n")
 
-@bot.event
-async def on_message(message):
-	if bot.user.mentioned_in(message):
-		embed = discord.Embed(color=embedcolor)
-		embed.add_field(name="Prefix", value="`%`", inline='true')
-		embed.add_field(name="Help", value="`%help`", inline='true')
-		embed.set_footer(text=f"Request by {message.author}", icon_url= message.author.avatar_url)
-		await message.reply(embed=embed)
+#@bot.event
+#async def on_message(message):
+#	if bot.user.mentioned_in(message):
+#		embed = discord.Embed(color=embedcolor)
+#		embed.add_field(name="Prefix", value="`%`", inline='true')
+#		embed.add_field(name="Help", value="`%help`", inline='true')
+#		embed.set_footer(text=f"Request by {message.author}", icon_url= message.author.avatar_url)
+#		await message.reply(embed=embed)
 
 #endregion
 
@@ -265,6 +266,27 @@ async def channels(ctx):
 		with open(str("logs/channels/"+ctx.guild.name+".csv"), 'a') as file_object:
 			file_object.write(str(towrite+'\n'))
 
+@bot.command()
+async def cat(ctx):
+	catapi = os.popen('curl -s https://api.thecatapi.com/v1/images/search').read()
+	catjson = json.loads(catapi)
+	caturl = catjson[0]["url"]
+	print(caturl)
+	embed = discord.Embed(title="Cat", color=embedcolor)
+	embed.set_image(url=caturl)
+	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+	await ctx.reply(embed=embed)
+
+@bot.command()
+async def dog(ctx):
+	catapi = os.popen('curl -s https://api.thedogapi.com/v1/images/search').read()
+	catjson = json.loads(catapi)
+	caturl = catjson[0]["url"]
+	print(caturl)
+	embed = discord.Embed(title="Dog", color=embedcolor)
+	embed.set_image(url=caturl)
+	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+	await ctx.reply(embed=embed)
 #endregion
 
 bot.run(token)
