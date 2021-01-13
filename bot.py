@@ -272,7 +272,7 @@ async def cat(ctx):
 	catjson = json.loads(catapi)
 	caturl = catjson[0]["url"]
 	print(caturl)
-	embed = discord.Embed(title="Cat", color=embedcolor)
+	embed = discord.Embed(title="Dog", color=embedcolor)
 	embed.set_image(url=caturl)
 	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 	await ctx.reply(embed=embed)
@@ -283,7 +283,7 @@ async def dog(ctx):
 	catjson = json.loads(catapi)
 	caturl = catjson[0]["url"]
 	print(caturl)
-	embed = discord.Embed(title="Dog", color=embedcolor)
+	embed = discord.Embed(title="Cat", color=embedcolor)
 	embed.set_image(url=caturl)
 	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 	await ctx.reply(embed=embed)
