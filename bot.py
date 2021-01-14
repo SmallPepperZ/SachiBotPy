@@ -42,7 +42,8 @@ with open('help-pages/fun.txt', 'r') as file:
 bot.coglist = ['cogs.owner',
 			   'cogs.fun',
 		 	   'cogs.utility',
-	 	 	   'cogs.admin']
+	 	 	   'cogs.admin',
+			   'cogs.cogs']
 
 if __name__ == '__main__':
     for extension in bot.coglist:
@@ -79,7 +80,7 @@ async def on_command_error(ctx, error):
 			else:
 				try:
 					await ctx.reply("Bot received error :\n```"+str(error)+"```\n Pinging <@545463550802395146>")
-					logging.error("Bot Broken: \n"+str(error))
+					logging.error("Error: \n"+str(error))
 					return
 				except:
 					return
@@ -92,7 +93,7 @@ async def on_message(message):
 	await bot.process_commands(message)
 	if (message.guild.id == 764981968579461130) and (message.channel.id != 789195444957609994) and (message.channel.id != 789607866780745748):
 		sentmsg2 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+", "+str(message.channel.id)+", "+str(message.channel.name)+", "+str(message.author)+", "+str(message.content)
-		print(sentmsg2)
+		print(f"Message: {sentmsg2}")
 		with open("logs/test.csv", 'a') as file_object:
 			file_object.write(sentmsg2+"\n")
 
@@ -139,7 +140,7 @@ async def siren(ctx, *, content:str=None):
 		await ctx.message.delete()
 		embed = discord.Embed(title="🚨  "+content+"  🚨", color=0xf21b1b )
 		await ctx.send(embed=embed)
-		print(content+' echoed by '+str(ctx.author))
+		print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
 
 
 
