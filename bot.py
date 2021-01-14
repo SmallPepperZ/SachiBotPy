@@ -1,17 +1,12 @@
 #region Imports
-import time, datetime
+import time
 import discord
-from discord import NotFound
 import os
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 import logging
 import random
-from datetime import timedelta
 from discord.ext.commands.errors import CommandError
-from discord.ext.commands import MessageConverter
-from discord_slash import SlashCommand
-from discord_slash import SlashContext
 import json
 
 #endregion
@@ -44,13 +39,13 @@ with open('help-pages/fun.txt', 'r') as file:
 #endregion
 
 #region Cogs
-initial_extensions = ['cogs.owner',
-					  'cogs.fun',
-					  'cogs.utility',
-					  'cogs.admin']
+bot.coglist = ['cogs.owner',
+			   'cogs.fun',
+		 	   'cogs.utility',
+	 	 	   'cogs.admin']
 
 if __name__ == '__main__':
-    for extension in initial_extensions:
+    for extension in bot.coglist:
         bot.load_extension(extension)
 #endregion
 
@@ -70,13 +65,6 @@ async def on_ready():
 	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"))
 
 
-#region Commands
-
-
-
-
-#endregion
-
 #region Bot Events
 
 @bot.event
@@ -86,6 +74,8 @@ async def on_command_error(ctx, error):
 			if isinstance(error, CommandNotFound):
 				await ctx.message.add_reaction(str('❔'))
 				return 
+			if isinstance(error, commands.NotOwner):
+				await ctx.message.add_reaction(str('🔒'))
 			else:
 				try:
 					await ctx.reply("Bot received error :\n```"+str(error)+"```\n Pinging <@545463550802395146>")
@@ -146,13 +136,11 @@ async def siren(ctx, *, content:str=None):
 	if not content:
 		await ctx.reply("Give me something to say!")
 	else:
-		if ctx.message.author.id == 545463550802395146: 
-			await ctx.message.delete()
-			embed = discord.Embed(title="🚨  "+content+"  🚨", color=0xf21b1b )
-			await ctx.send(embed=embed)
-			print(content+' echoed by '+str(ctx.author))
-		else:
-			return
+		await ctx.message.delete()
+		embed = discord.Embed(title="🚨  "+content+"  🚨", color=0xf21b1b )
+		await ctx.send(embed=embed)
+		print(content+' echoed by '+str(ctx.author))
+
 
 
 #endregion

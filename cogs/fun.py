@@ -16,7 +16,7 @@ token = configjson["token"]
 
 
 
-class FunCog(commands.Cog):
+class FunCog(commands.Cog, name="Fun"):
 	def __init__(self, bot):
 		self.bot = bot
 
@@ -58,6 +58,19 @@ class FunCog(commands.Cog):
 		await ctx.send(embed=embed)
 		print("Fact requested by "+ctx.author)
 
+	
+	@commands.command()
+	async def advice(self, ctx):
+		catapi = os.popen('curl -s https://api.adviceslip.com/advice').read()
+		catjson = json.loads(catapi)
+		caturl = catjson["slip"]["advice"]
+		embed = discord.Embed(title="Advice", color=embedcolor)
+		embed.set_image(url=caturl)
+		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+		await ctx.reply(embed=embed)
+
+
+
 	@commands.command(aliases=['kitty', 'kitten'])
 	async def cat(self, ctx):
 		catapi = os.popen('curl -s https://api.thecatapi.com/v1/images/search').read()
@@ -77,11 +90,6 @@ class FunCog(commands.Cog):
 		embed.set_image(url=dogurl)
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
-
-
-
-
-
 
 
 def setup(bot):

@@ -45,6 +45,14 @@ class UtilityCog(commands.Cog):
 		await ctx.reply(embed=embed)
 		print('Pinged by '+str(ctx.author))
 	
+	@commands.command(aliases=['userinfo'])
+	async def whois(self,ctx):
+		user = ctx.message.mentions[0].id
+		isbot = user.bot
+		avatar = user.avatar_url
+		createdate = user.created_at
+		nickname = user.display_name
+		ctx.get_member(user)
 
 
 
