@@ -4,9 +4,6 @@ import json
 import time, datetime
 import os, sys
 
-from discord.ext.commands.errors import ExtensionNotLoaded
-from discord.ext.commands.errors import ExtensionFailed
-
 #region Variable Stuff
 
 with open('config.json', 'r') as file:
@@ -15,6 +12,7 @@ with open('config.json', 'r') as file:
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
 token = configjson["token"]
+prefix = configjson["prefix"]
 #endregion
 
 
@@ -58,32 +56,6 @@ class OwnerCog(commands.Cog):
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
 		print('Exported by '+str(ctx.author))
-
-	@commands.command()
-	@commands.is_owner()
-	async def reload(self, ctx, cog):
-		cogs = str(ctx.bot.coglist)
-		cognames = cogs.replace('cogs.', '').replace('[', '').replace(']', '').replace("\'", "").replace(",", "\n")
-		try:
-			self.bot.reload_extension(f'cogs.{cog}')
-			embed = discord.Embed(color=embedcolor, title="Reloading Cog...")
-			embed.add_field(name="Cog:", value=f'{cog}')
-			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-			await ctx.reply(embed=embed)
-		except ExtensionNotLoaded:			
-			
-			embed = discord.Embed(color=embedcolor, title="Cog not found", description=f"Cog \"{cog}\" not found")
-			embed.add_field(name="Cogs:", value=f'{cognames}')
-			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-			await ctx.reply(embed=embed)
-		except ExtensionFailed as error:
-			embed = discord.Embed(color=embedcolor, title="Cog errored")
-			embed.add_field(name="Cog:", value=f'{cog}')
-			embed.add_field(name="Error:", value=f'```{error}```', inline="false")
-			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-			await ctx.reply(embed=embed)
-		print("cog: "+str(cog)+' reloaded by '+str(ctx.author))
-
 
 def setup(bot):
     bot.add_cog(OwnerCog(bot))

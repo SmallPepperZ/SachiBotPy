@@ -11,6 +11,7 @@ with open('config.json', 'r') as file:
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
 token = configjson["token"]
+prefix = configjson["prefix"]
 #endregion
 
 
@@ -47,7 +48,7 @@ class AdminCog(commands.Cog):
 			await ctx.message.delete()
 			message = await MessageConverter().convert(ctx, messageid)
 			await message.delete()
-			print('delete attempted by '+str(ctx.author))
+			print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
 
 
 

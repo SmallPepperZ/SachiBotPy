@@ -12,6 +12,7 @@ with open('config.json', 'r') as file:
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
 token = configjson["token"]
+prefix = configjson["prefix"]
 #endregion
 
 
@@ -36,18 +37,13 @@ class FunCog(commands.Cog, name="Fun"):
 				m8 = "You aren't paying me, so no thanks"
 				m9 = "I don't work for free"
 				m10 = "Make your own simonsays bot"
-				try:
-					m11 = str(ctx.author.nickname)+" asked me politely to say "+content
-				except:
-					m11 = "somebody forgot to add a message"
+				m11 = str(ctx.author.mention)+" asked me politely to say "+content
 				m12 = "I've always wanted to be a simon"
 				msg = random.choice([m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12])
 				await ctx.reply(str(msg))
-				print(content+' echo attempted by '+str(ctx.author))
 			else:
 				await ctx.message.delete()
 				await ctx.send(content)
-				print(content+' echoed by '+str(ctx.author))
 
 	@commands.command(aliases=['factoid'])
 	async def fact(self, ctx):
@@ -68,6 +64,7 @@ class FunCog(commands.Cog, name="Fun"):
 		embed.set_image(url=caturl)
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
+		
 
 
 
