@@ -15,7 +15,8 @@ configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
 token = configjson["token"]
 prefix = configjson["prefix"]
-dbcon = sl.connect('logs/logging.db')
+dbpath = r"/Volumes/Pasghetti/Logs/DiscordMessages.db"
+dbcon = sl.connect(str(dbpath))
 #endregion
 
 
@@ -32,14 +33,31 @@ class LoggerCog(commands.Cog):
 #			print(f"Message: {sentmsg}")
 #			with open("logs/test.csv", 'a') as file_object:
 #				file_object.write(sentmsg+"\n")
+
+	@commands.Cog.listener("on_message")
+	async def logmessages(self, message):
+		sql = 'INSERT into Messages (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url, attachments) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+		sqldata = [
+				int(time.time()), 
+				int(message.id),
+				int(message.guild.id),
+				int(message.channel.id),
+				int(message.author.id),
+				str(message.guild.name),
+				str(message.channel.name),
+				str(message.author),
+				str(str(message.system_content)+str(message.embeds)),
+				str(message.jump_url),
+				str(message.attachments)
+					]
+		with dbcon:
+			dbcon.execute(sql, sqldata)
 	
 	@commands.Cog.listener("on_message")
 	async def logcommands(self, message):
 		content = message.content
 		if (content.startswith(prefix)):
-			sentmsg = f'{message.author.name} ({message.author.id}) just used \'{content}\''
-			print(sentmsg)
-			sql = 'INSERT into COMMANDS (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+			sql = 'INSERT into Commands (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 			sqldata = [
 					int(time.time()), 
 					int(message.id),
