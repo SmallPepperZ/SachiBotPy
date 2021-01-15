@@ -43,7 +43,8 @@ bot.coglist = ['cogs.owner',
 			   'cogs.fun',
 		 	   'cogs.utility',
 	 	 	   'cogs.admin',
-			   'cogs.cogs']
+			   'cogs.cogs',
+			   'cogs.logging']
 
 if __name__ == '__main__':
     for extension in bot.coglist:
@@ -88,14 +89,6 @@ async def on_command_error(ctx, error):
 			return
 
 
-@bot.event
-async def on_message(message):
-	await bot.process_commands(message)
-	if (message.guild.id == 764981968579461130) and (message.channel.id != 789195444957609994) and (message.channel.id != 789607866780745748):
-		sentmsg2 = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+", "+str(message.channel.id)+", "+str(message.channel.name)+", "+str(message.author)+", "+str(message.content)
-		print(f"Message: {sentmsg2}")
-		with open("logs/test.csv", 'a') as file_object:
-			file_object.write(sentmsg2+"\n")
 
 @bot.event
 async def on_member_join(member):
