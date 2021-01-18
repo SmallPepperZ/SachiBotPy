@@ -13,12 +13,15 @@ with open('config.json', 'r') as file:
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
 prefix = configjson["prefix"]
-dbpath = r"/Volumes/Pasghetti/Logs/DiscordMessages.db"
+dbpath = configjson["logpath"]
 dbcon = sl.connect(str(dbpath))
 #endregion
 
+with open("loggingignore.json", "r") as loggingignore:
+	ignorejson = loggingignore.read()
+channelignore = json.loads(ignorejson)["channels"]
+guildignore = json.loads(ignorejson)["guilds"]
 
 
 class LoggerCog(commands.Cog):
@@ -36,22 +39,25 @@ class LoggerCog(commands.Cog):
 
 	@commands.Cog.listener("on_message")
 	async def logmessages(self, message):
-		sql = 'INSERT into Messages (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url, attachments) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-		sqldata = [
-				int(time.time()), 
-				int(message.id),
-				int(message.guild.id),
-				int(message.channel.id),
-				int(message.author.id),
-				str(message.guild.name),
-				str(message.channel.name),
-				str(message.author),
-				str(str(message.system_content)+str(message.embeds)),
-				str(message.jump_url),
-				str(message.attachments)
-					]
-		with dbcon:
-			dbcon.execute(sql, sqldata)
+		if (not message.channel.id in channelignore) and (not message.guild.id in guildignore):
+			sql = 'INSERT into Messages (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url, attachments) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+			sqldata = [
+					int(time.time()), 
+					int(message.id),
+					int(message.guild.id),
+					int(message.channel.id),
+					int(message.author.id),
+					str(message.guild.name),
+					str(message.channel.name),
+					str(message.author),
+					str(str(message.system_content)),
+					str(message.jump_url),
+					str(message.attachments)
+						]
+			with dbcon:
+				dbcon.execute(sql, sqldata)
+		else:
+			return
 	
 	@commands.Cog.listener("on_message")
 	async def logcommands(self, message):
