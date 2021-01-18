@@ -47,22 +47,23 @@ class FunCog(commands.Cog, name="Fun"):
 
 	@commands.command(aliases=['factoid'])
 	async def fact(self, ctx):
-		await ctx.message.delete()
+#		message = await ctx.reply("Finding a fact...")
 		fact = os.popen('curl -s -X GET "https://uselessfacts.jsph.pl/random.txt?language=en" | grep ">" | sed s/\>\ //g').read()
 		embed = discord.Embed(color=embedcolor, title="Fact:", description=fact)
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-		await ctx.send(embed=embed)
-		print("Fact requested by "+ctx.author)
+#		await message.edit(content=None,embed=embed)
+		await ctx.reply(embed=embed)
 
 	
 	@commands.command()
 	async def advice(self, ctx):
-		catapi = os.popen('curl -s https://api.adviceslip.com/advice').read()
-		catjson = json.loads(catapi)
-		caturl = catjson["slip"]["advice"]
-		embed = discord.Embed(title="Advice", color=embedcolor)
-		embed.set_image(url=caturl)
+#		message = await ctx.reply("Finding some advice...")
+		api = os.popen('curl -sX GET https://api.adviceslip.com/advice').read()
+		apijson = json.loads(api)
+		advice = apijson["slip"]["advice"]
+		embed = discord.Embed(title="Advice", color=embedcolor, description=advice)
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+#		await message.edit(content=None,embed=embed)
 		await ctx.reply(embed=embed)
 		
 
