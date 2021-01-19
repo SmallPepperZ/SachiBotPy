@@ -78,7 +78,8 @@ class LoggerCog(commands.Cog):
 					   ]
 			with dbcon:
 				dbcon.execute(sql, sqldata)
+				
+#TODO Add command that admins can use to ignore their server or channel	
 
-	
 def setup(bot):
     bot.add_cog(LoggerCog(bot))
