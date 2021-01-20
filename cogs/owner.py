@@ -33,7 +33,7 @@ class OwnerCog(commands.Cog):
 		embed.set_footer(text=f"lasted for {uptime}")
 		await ctx.send(embed=embed)
 		print('Bot restarted by '+str(ctx.author))
-		await os.system("pm2 restart 0")
+		await os.system("pm2 restart SachiBot")
 		await self.bot.logout()
 		sys.exit(0)
 
@@ -45,7 +45,7 @@ class OwnerCog(commands.Cog):
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.send(embed=embed)
 		print('Bot stopped by '+str(ctx.author))
-		await os.system("pm2 stop 0")
+		await os.system("pm2 stop SachiBot")
 		await self.bot.logout()
 
 	@commands.command()
