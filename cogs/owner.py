@@ -35,7 +35,6 @@ class OwnerCog(commands.Cog):
 		print('Bot restarted by '+str(ctx.author))
 		os.system("pm2 restart SachiBot")
 		await self.bot.logout()
-		sys.exit(1)
 
 	@commands.command()
 	@commands.is_owner()
