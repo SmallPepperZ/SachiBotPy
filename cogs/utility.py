@@ -47,12 +47,26 @@ class UtilityCog(commands.Cog):
 	
 	@commands.command(aliases=['userinfo'])
 	async def whois(self,ctx):
-		user = ctx.message.mentions[0].id
+		user = ctx.message.mentions[0]
 		isbot = user.bot
 		avatar = user.avatar_url
+		try:
+			isowner = ctx.guild.owner.id == user.id
+		except AttributeError:
+			isowner = "N/A"
 		createdate = user.created_at
 		nickname = user.display_name
-		ctx.get_member(user)
+		joindate = user.joined_at
+		username = user.name+"#"+user.discriminator
+		color = user.color
+		embed = discord.Embed(color=color,title=username, description='d')
+		embed.set_image(url=avatar)
+		embed.add_field(name="Is a bot?", value=isbot, inline='false')
+		embed.add_field(name="Is the owner?", value=isowner, inline='true')
+		embed.add_field(name="Creation Date", value=createdate, inline='false')
+		embed.add_field(name="Join Date", value=joindate, inline='true')
+		await ctx.reply(embed=embed)
+		#ctx.guild.get_member(user)
 
 
 

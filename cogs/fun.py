@@ -47,7 +47,6 @@ class FunCog(commands.Cog, name="Fun"):
 
 	@commands.command(aliases=['repeatembed'])
 	async def simonsaysembed(self, ctx, *, content:str=None):
-		self=self
 		if not content:
 			await ctx.reply("Give me something to say!")
 		else:
