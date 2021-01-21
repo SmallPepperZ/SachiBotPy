@@ -49,7 +49,8 @@ bot.coglist = ['cogs.owner',
 		 	   'cogs.utility',
 	 	 	   'cogs.admin',
 			   'cogs.cogs',
-			   'cogs.logging']
+			   'cogs.logging',
+			   'cogs.testing']
 
 if __name__ == '__main__':
     for extension in bot.coglist:
@@ -164,42 +165,5 @@ async def on_member_join(member):
 
 #endregion
 
-#region Testing
-@bot.command()
-@bot.check(commands.is_owner())
-async def errorme(ctx):
-	await ctx.reply(1/0)
-
-
-@bot.command()
-@bot.check(commands.is_owner())
-async def channels(ctx):
-	await ctx.message.delete()
-	channels1 = ctx.guild.channels
-	cwd = os.popen('pwd').read().rstrip()
-	#	try:
-	filepath = str(cwd+'/logs/channels/'+ctx.guild.name+'.csv')
-	os.remove(filepath)
-	#	except:
-	#		print(cwd+"/logs/channels/"+ctx.guild.name+".csv not found, creating..." )
-	for channel1 in channels1:
-		towrite = str(str(channel1.category)+', '+channel1.name+', '+str(channel1.changed_roles))
-		with open(str("logs/channels/"+ctx.guild.name+".csv"), 'a') as file_object:
-			file_object.write(str(towrite+'\n'))
-
-@bot.command(aliases=['tos'])
-@bot.check(commands.is_owner())
-async def siren(ctx, *, content:str=None):
-	if not content:
-		await ctx.reply("Give me something to say!")
-	else:
-		await ctx.message.delete()
-		embed = discord.Embed(title="🚨  "+content+"  🚨", color=0xf21b1b )
-		await ctx.send(embed=embed)
-		print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
-
-
-
-#endregion
 
 bot.run(token)
