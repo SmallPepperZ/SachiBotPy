@@ -1,14 +1,15 @@
 #region Imports
 import time
 import discord
-import os
+import os, sys
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 import logging
-import random
 from discord.ext.commands.errors import CommandError
+from discord.ext.commands.errors import MissingPermissions, BotMissingPermissions, CommandNotFound
 import json
-
+import traceback, linecache
+import urllib, urllib.parse
 #endregion
 
 #region Variable Stuff
@@ -23,8 +24,12 @@ token = configjson["token"]
 
 prefix = configjson["prefix"]
 start_time_local = time.time()
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=prefix, intents = intents)
+
+errorchannel = int(configjson["errorchannel"])
+
 bot.start_time = start_time_local
 logging.basicConfig(level=logging.INFO)
 bot.remove_command('help')
@@ -69,24 +74,77 @@ async def on_ready():
 
 #region Bot Events
 
+#@bot.event
+#async def on_command_error(ctx, error):
+#	if isinstance(error, CommandError):
+#		try:
+#			if isinstance(error, CommandNotFound):
+#				await ctx.message.add_reaction(str('❔'))
+#				return 
+#			if isinstance(error, commands.NotOwner):
+#				await ctx.message.add_reaction(str('🔒'))
+#			else:
+#				try:
+#					await ctx.reply("Bot received error :\n```"+str(error)+"```\n Pinging <@545463550802395146>")
+#					logging.error("Error: \n"+str(error))
+#					return
+#				except:
+#					return
+#		except:
+#			return
+	
 @bot.event
 async def on_command_error(ctx, error):
-	if isinstance(error, CommandError):
+	if isinstance(error, CommandNotFound):
+		await ctx.message.add_reaction(str('❔'))
+		return 
+	elif isinstance(error, commands.NotOwner):
+		await ctx.message.add_reaction(str('🔏'))
+		return
+	elif isinstance(error, MissingPermissions):
+		await ctx.message.add_reaction(str('🔐'))
+		return
+	elif isinstance(error, BotMissingPermissions):
+		await ctx.reply("I do not have the requisite permissions")
+		return
+	elif isinstance(error, CommandError):
+		exc = error
+		etype = type(exc)
+		trace = exc.__traceback__
+
+		lines = traceback.format_exception(etype, exc, trace)
+		traceback_text = ''.join(lines)
+
+		channel = bot.get_channel(errorchannel)
+
+		api_dev_key=configjson["pbdevapikey"]
+		api_user_key=configjson["pbuserapikey"]
+		api_paste_code=urllib.parse.quote_plus(traceback_text)
+		api_paste_name=urllib.parse.quote_plus(ctx.message.clean_content)
+		api_option="paste"
+		api_paste_private="1"
+		api_paste_expire_date='1W'
+		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed")		
+		url1 = os.popen(f'curl -s -X POST -d api_option={api_option} -d api_paste_code={api_paste_code} -d api_paste_name={api_paste_name} -d api_dev_key={api_dev_key} -d api_paste_private={api_paste_private} -d api_user_key={api_user_key} -d api_paste_expire_date={api_paste_expire_date} https://pastebin.com/api/api_post.php').read()
+		print(url1)
 		try:
-			if isinstance(error, CommandNotFound):
-				await ctx.message.add_reaction(str('❔'))
-				return 
-			if isinstance(error, commands.NotOwner):
-				await ctx.message.add_reaction(str('🔒'))
-			else:
-				try:
-					await ctx.reply("Bot received error :\n```"+str(error)+"```\n Pinging <@545463550802395146>")
-					logging.error("Error: \n"+str(error))
-					return
-				except:
-					return
+			url = url1.split("com",1)[0]+'com/raw'+url1.split("com",1)[1]
 		except:
-			return
+			url = url1
+		embed1 = discord.Embed(title="Error", color=embedcolor)
+		embed1.add_field(name="Message Url:", value=ctx.message.jump_url, inline='false')
+		embed1.add_field(name="Message:", value=ctx.message.clean_content, inline='true')
+		embed1.add_field(name="Author:", value=ctx.message.author.mention, inline='true')
+		embed1.add_field(name="\u200B", value='\u200B', inline='true')
+		embed1.add_field(name="Guild:", value=ctx.guild.name, inline='true')
+		embed1.add_field(name="Channel:", value=ctx.channel.name, inline='true')
+		embed1.add_field(name="\u200B", value='\u200B', inline='true')
+		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
+		embed1.add_field(name="Traceback:", value=url, inline='false')
+		await channel.send(embed=embed1)
+		
+		logging.error("Error: \n"+str(error))
+		return
 
 
 
@@ -107,6 +165,11 @@ async def on_member_join(member):
 #endregion
 
 #region Testing
+@bot.command()
+@bot.check(commands.is_owner())
+async def errorme(ctx):
+	await ctx.reply(1/0)
+
 
 @bot.command()
 @bot.check(commands.is_owner())
