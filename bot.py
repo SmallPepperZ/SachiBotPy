@@ -23,8 +23,8 @@ token = configjson["token"]
 
 prefix = configjson["prefix"]
 start_time_local = time.time()
-
-bot = commands.Bot(command_prefix=prefix)
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix=prefix, intents = intents)
 bot.start_time = start_time_local
 logging.basicConfig(level=logging.INFO)
 bot.remove_command('help')
