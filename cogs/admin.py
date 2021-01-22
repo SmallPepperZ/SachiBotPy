@@ -16,7 +16,7 @@ prefix = configjson["prefix"]
 
 
 
-class AdminCog(commands.Cog):
+class AdminCog(commands.Cog, name="Admin"):
 	def __init__(self, bot):
 		self.bot = bot
 
