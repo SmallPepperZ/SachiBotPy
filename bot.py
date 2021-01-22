@@ -126,7 +126,7 @@ async def on_command_error(ctx, error):
 		api_paste_private="1"
 		api_paste_expire_date='1W'
 		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed")		
-		url1 = os.popen(f'curl -s -X POST -d api_option={api_option} -d api_paste_code={api_paste_code} -d api_paste_name={api_paste_name} -d api_dev_key={api_dev_key} -d api_paste_private={api_paste_private} -d api_user_key={api_user_key} -d api_paste_expire_date={api_paste_expire_date} https://pastebin.com/api/api_post.php').read()
+		url1 = os.popen(f'curl -s -X POST -d api_option={api_option} -d api_paste_code={api_paste_code} -d api_paste_name={api_paste_name} -d api_dev_key={api_dev_key} -d api_paste_private={api_paste_private} -d api_paste_expire_date={api_paste_expire_date} https://pastebin.com/api/api_post.php').read()
 		print(url1)
 		try:
 			url = url1.split("com",1)[0]+'com/raw'+url1.split("com",1)[1]

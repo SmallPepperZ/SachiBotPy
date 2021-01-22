@@ -24,7 +24,7 @@ channelignore = json.loads(ignorejson)["channels"]
 guildignore = json.loads(ignorejson)["guilds"]
 
 
-class LoggerCog(commands.Cog):
+class LoggerCog(commands.Cog, name="Logging"):
 	def __init__(self, bot):
 		self.bot = bot
 

@@ -15,7 +15,7 @@ prefix = configjson["prefix"]
 #endregion
 
 
-class TestingCog(commands.Cog):
+class TestingCog(commands.Cog, name="Testing"):
 	def __init__(self, bot):
 		self.bot = bot
 
@@ -49,13 +49,46 @@ class TestingCog(commands.Cog):
 			await ctx.message.delete()
 			embed = discord.Embed(title="<a:WeeWooRed:771082566874169394>  "+content+"  <a:WeeWooRed:771082566874169394>", color=0xf21b1b )
 			await ctx.send(embed=embed)
-			print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
+
+	@commands.command()
+	async def coglist(self, ctx):
+		print(self.bot.cogs)
+		cogjson=self.bot.cogs
+		print(cogjson.keys())
+		cogs=[cog for cog in cogjson.keys()]
+		print(cogs)
+		delim = ", "
+		coglist = delim.join(list(map(str, cogs)))
+		await ctx.reply(coglist)
 
 
+	@commands.command()
+	async def commandlist(self, ctx):
+		#print(self.get_commands())
+		
+		commands = [cmd.name for cmd in self.get_commands()]
+		
+		delim = ", "
+		cmdlist = delim.join(list(map(str, commands)))
+		await ctx.reply(cmdlist)
+		#TODO Get all bot commands for help page
 
 
+		
+	@commands.group()
+	async def newexport(self, ctx):
+		if ctx.invoked_subcommand is None:
+			delim=", "
+			subcommands = [cmd.name for cmd in ctx.command.commands]
+			await ctx.send(f'Please select one of the subcommands ({delim.join(list(map(str, subcommands)))})')
+	
+	@newexport.command()
+	async def channel(self, ctx, channelid: str):
+		await ctx.send(f'Pushing {channelid}')
 
-
+	@newexport.command()
+	async def guild(self, ctx, guildid: str):
+		await ctx.send(f'Exporting Guild {guildid}...')
 
 def setup(bot):
     bot.add_cog(TestingCog(bot))

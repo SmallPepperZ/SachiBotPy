@@ -18,39 +18,47 @@ prefix = configjson["prefix"]
 
 
 
-class CogsCog(commands.Cog):
+class CogsCog(commands.Cog, name="Cogs"):
 	def __init__(self, bot):
 		self.bot = bot
 
 	@commands.command()
 	@commands.is_owner()
-	async def reload(self, ctx, cog):
+	async def reload(self, ctx, cog="all"):
 		cogs = str(ctx.bot.coglist)
 		cog = cog.lower()
 		cognames = cogs.replace('cogs.', '').replace('[', '').replace(']', '').replace("\'", "").replace(",", "\n")
-		try:
-			self.bot.reload_extension(f'cogs.{cog}')
-			embed = discord.Embed(color=embedcolor, title="Reloading Cog...")
-			embed.add_field(name="Cog:", value=f'{cog}')
+		if cog=="all":
+			for eachcog in ctx.bot.coglist:
+				self.bot.reload_extension(eachcog)
+			embed = discord.Embed(color=embedcolor, title="Reloading Cogs...")
+			embed.add_field(name="Cogs:", value=f'{cognames}')
 			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 			await ctx.reply(embed=embed)
-		except ExtensionNotLoaded:
+		else:
 			try:
-				self.bot.load_extension(f'cogs.{cog}')
-				embed = discord.Embed(color=embedcolor, title="Cog Loaded")
-				embed.add_field(name="Cog", value=cog)
-				ctx.reply(embed=embed)
-			except ExtensionNotFound:
-				embed = discord.Embed(color=embedcolor, title="Cog not found", description=f"Cog \"{cog}\" not found")
-				embed.add_field(name="Cogs:", value=f'{cognames}')
+				self.bot.reload_extension(f'cogs.{cog}')
+				embed = discord.Embed(color=embedcolor, title="Reloading Cog...")
+				embed.add_field(name="Cog:", value=f'{cog}')
 				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 				await ctx.reply(embed=embed)
-		except ExtensionFailed as error:
-			embed = discord.Embed(color=embedcolor, title="Cog errored")
-			embed.add_field(name="Cog:", value=f'{cog}')
-			embed.add_field(name="Error:", value=f'```{error}```', inline="false")
-			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-			await ctx.reply(embed=embed)
+			except ExtensionNotLoaded:
+				try:
+					self.bot.load_extension(f'cogs.{cog}')
+					embed = discord.Embed(color=embedcolor, title="Cog Loaded")
+					embed.add_field(name="Cog", value=cog)
+					ctx.reply(embed=embed)
+				except ExtensionNotFound:
+					embed = discord.Embed(color=embedcolor, title="Cog not found", description=f"Cog \"{cog}\" not found")
+					embed.add_field(name="Cogs:", value=f'{cognames}')
+					embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+					await ctx.reply(embed=embed)
+			except ExtensionFailed as error:
+				embed = discord.Embed(color=embedcolor, title="Cog errored")
+				embed.add_field(name="Cog:", value=f'{cog}')
+				embed.add_field(name="Error:", value=f'```{error}```', inline="false")
+				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+				await ctx.reply(embed=embed)
 		print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}reload {cog}\'')
 
 	@commands.command()
