@@ -58,10 +58,13 @@ class UtilityCog(commands.Cog, name="Utility"):
 			nickname = user.display_name
 			joindate = user.joined_at
 			isowner = ctx.guild.owner.id == user.id
+			status = user.status
+			ismobile = '\u2705' if user.is_on_mobile() else '\u274E'
 			def embedsec1(embed):
 				embed.add_field(name="Is the owner?", value=isowner, inline='true')
 				embed.add_field(name="Is an admin?", value=isadmin, inline='true')
 				embed.add_field(name="Nickname", value=nickname, inline="True")
+				embed.add_field(name="Status", value=f'**Status:** {status}\n**Mobile:** {ismobile}', inline="false")
 			def embedsec2(embed):
 				embed.add_field(name="Join Date", value=joindate, inline='true')
 		else:
@@ -70,6 +73,23 @@ class UtilityCog(commands.Cog, name="Utility"):
 				return
 			def embedsec2(embed):
 				return
+		badges = user.public_flags.all()
+		badgelist = {
+			"staff": "<:developer:802021494778626080>",
+			"partner": "<:partneredserverowner:802021495089004544>",
+			"hypesquad": "<:hypesquad:802021494925557791>",
+			"bug_hunter": "<:bughunterl1:802021561967575040>",
+			"hypesquad_bravery": "<:hypesquadbravery:802021495185473556>",
+			"hypesquad_brilliance": "<:hypesquadbrilliance:802021495433461810>",
+			"hypesquad_balance": "<:hypesquadbalance:802010940698132490>",
+			"early_supporter": "<:earlysupporter:802021494989389885>",
+			"bug_hunter_level_2": "<:bughunterl2:802021494975889458>",
+			"verified_bot_developer": "<:earlybotdeveloper:802021494875488297>"
+		}
+		badgenames = [badge.name for badge in badges]
+		badgeicons = [badgelist[badge] for badge in badgenames]
+		delim = " "
+		badgesstr = delim.join(list(map(str, badgeicons)))
 		isbot = user.bot
 		avatar = user.avatar_url
 		createdate = user.created_at
@@ -85,6 +105,8 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed.add_field(name="Mention", value=mention, inline="False")
 		embed.add_field(name="ID", value=f'`{user.id}`', inline="False")
 		embed.add_field(name="Account Creation Date", value=createdate, inline='false')
+		if str(badges) != "[]":	
+			embed.add_field(name="Profile Badges", value=badgesstr, inline='false')
 		embedsec2(embed)
 		await ctx.send(embed=embed)
 		#ctx.guild.get_member(user)
