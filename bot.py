@@ -1,7 +1,7 @@
 #region Imports
 import time
 import discord
-import os, sys
+import os, sys, os.path
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 import logging
@@ -20,6 +20,8 @@ with open('config.json', 'r') as file:
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
 token = configjson["token"]
+
+errorlogdir = 'logs/errors/'
 
 
 prefix = configjson["prefix"]
@@ -50,7 +52,8 @@ bot.coglist = ['cogs.owner',
 	 	 	   'cogs.admin',
 			   'cogs.cogs',
 			   'cogs.logging',
-			   'cogs.testing']
+			   'cogs.testing',
+			   'cogs.mdsp']
 
 if __name__ == '__main__':
     for extension in bot.coglist:
@@ -115,24 +118,27 @@ async def on_command_error(ctx, error):
 
 		lines = traceback.format_exception(etype, exc, trace)
 		traceback_text = ''.join(lines)
-
-		channel = bot.get_channel(errorchannel)
-
-		api_dev_key=configjson["pbdevapikey"]
-		api_user_key=configjson["pbuserapikey"]
-		api_paste_code=urllib.parse.quote_plus(traceback_text)
-		api_paste_name=urllib.parse.quote_plus(ctx.message.clean_content)
-		api_option="paste"
-		api_paste_private="1"
-		api_paste_expire_date='1W'
 		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed")		
-		url1 = os.popen(f'curl -s -X POST -d api_option={api_option} -d api_paste_code={api_paste_code} -d api_paste_name={api_paste_name} -d api_dev_key={api_dev_key} -d api_paste_private={api_paste_private} -d api_paste_expire_date={api_paste_expire_date} https://pastebin.com/api/api_post.php').read()
-		print(url1)
-		try:
-			url = url1.split("com",1)[0]+'com/raw'+url1.split("com",1)[1]
-		except:
-			url = url1
-		embed1 = discord.Embed(title="Error", color=embedcolor)
+		channel = bot.get_channel(errorchannel)
+		"""
+			api_dev_key=configjson["pbdevapikey"]
+			api_user_key=configjson["pbuserapikey"]
+			api_paste_code=urllib.parse.quote_plus(traceback_text)
+			api_paste_name=urllib.parse.quote_plus(ctx.message.clean_content)
+			api_option="paste"
+			api_paste_private="1"
+			api_paste_expire_date='1W'
+			url1 = os.popen(f'curl -s -X POST -d api_option={api_option} -d api_paste_code={api_paste_code} -d api_paste_name={api_paste_name} -d api_dev_key={api_dev_key} -d api_paste_private={api_paste_private} -d api_paste_expire_date={api_paste_expire_date} https://pastebin.com/api/api_post.php').read()
+			try:
+				url = url1.split("com",1)[0]+'com/raw'+url1.split("com",1)[1]
+			except:
+				url = url1
+		"""	
+
+		errornumber = len([name for name in os.listdir(errorlogdir) if os.path.isfile(os.path.join(errorlogdir, name))])+1
+		with open(f'logs/errors/Error {errornumber}.log', 'x') as f:
+			f.write(traceback_text)
+		embed1 = discord.Embed(title=f"Error {errornumber}", color=embedcolor)
 		embed1.add_field(name="Message Url:", value=ctx.message.jump_url, inline='false')
 		embed1.add_field(name="Message:", value=ctx.message.clean_content, inline='true')
 		embed1.add_field(name="Author:", value=ctx.message.author.mention, inline='true')
@@ -141,7 +147,7 @@ async def on_command_error(ctx, error):
 		embed1.add_field(name="Channel:", value=ctx.channel.name, inline='true')
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
 		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
-		embed1.add_field(name="Traceback:", value=url, inline='false')
+		embed1.add_field(name="Traceback:", value=f'File saved to \'logs/errors/Error {errornumber}.log\'', inline='false')
 		await channel.send(embed=embed1)
 		
 		logging.error("Error: \n"+str(error))
