@@ -111,6 +111,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed.add_field(name="Account Creation Date", value=createdate, inline='false')
 		#if str(badges) != "[]":	
 	#		embed.add_field(name="Profile Badges", value=badgesstr, inline='false')
+		#FIXME figure out why I commented out this thing
 		embedsec2(embed)
 		await ctx.send(embed=embed)
 		#ctx.guild.get_member(user)
