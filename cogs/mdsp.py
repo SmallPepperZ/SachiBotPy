@@ -76,7 +76,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 	@invite.command()
 	async def update(self, ctx):
 		invitechannel = self.bot.get_channel(802245295291236442)
-		messages = await invitechannel.history(limit=1).flatten()
+		messages = await invitechannel.history(limit=1).flatten() #TODO change limit when ready for actual thing happening time
 		infomsg = await ctx.reply(f"Updating {invitechannel.mention}")
 		for message in messages:
 			try:
