@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import json
 import time, datetime
-
+from string import ascii_letters, punctuation, whitespace
 #region Variable Stuff
 
 with open('config.json', 'r') as file:
@@ -50,7 +50,10 @@ class UtilityCog(commands.Cog, name="Utility"):
 		try:
 			userid = ctx.message.mentions[0].id
 		except:
-			userid = int(userid)
+			try:
+				userid = int(userid)
+			except ValueError:
+				userid = int("".join([x for x in userid  if x.isdigit()]))
 		isguildmember = ctx.guild.get_member(userid) != None
 		if isguildmember:
 			user = ctx.guild.get_member(userid)
@@ -68,12 +71,13 @@ class UtilityCog(commands.Cog, name="Utility"):
 			def embedsec2(embed):
 				embed.add_field(name="Join Date", value=joindate, inline='true')
 		else:
-			user = self.bot.get_user(userid)
+			print(userid)
+			user = await self.bot.fetch_user(int(userid))
 			def embedsec1(embed):
 				return
 			def embedsec2(embed):
 				return
-		badges = user.public_flags.all()
+		#badges = user.public_flags.all()
 		badgelist = {
 			"staff": "<:developer:802021494778626080>",
 			"partner": "<:partneredserverowner:802021495089004544>",
@@ -86,10 +90,10 @@ class UtilityCog(commands.Cog, name="Utility"):
 			"bug_hunter_level_2": "<:bughunterl2:802021494975889458>",
 			"verified_bot_developer": "<:earlybotdeveloper:802021494875488297>"
 		}
-		badgenames = [badge.name for badge in badges]
-		badgeicons = [badgelist[badge] for badge in badgenames]
+		#badgenames = [badge.name for badge in badges]
+		#badgeicons = [badgelist[badge] for badge in badgenames]
 		delim = " "
-		badgesstr = delim.join(list(map(str, badgeicons)))
+		#badgesstr = delim.join(list(map(str, badgeicons)))
 		isbot = user.bot
 		avatar = user.avatar_url
 		createdate = user.created_at
@@ -105,8 +109,8 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed.add_field(name="Mention", value=mention, inline="False")
 		embed.add_field(name="ID", value=f'`{user.id}`', inline="False")
 		embed.add_field(name="Account Creation Date", value=createdate, inline='false')
-		if str(badges) != "[]":	
-			embed.add_field(name="Profile Badges", value=badgesstr, inline='false')
+		#if str(badges) != "[]":	
+	#		embed.add_field(name="Profile Badges", value=badgesstr, inline='false')
 		embedsec2(embed)
 		await ctx.send(embed=embed)
 		#ctx.guild.get_member(user)
