@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands import BadArgument
 import json
-from discord.ext.commands import MessageConverter
+from discord.ext.commands import BucketType
 from mee6_py_api import API
 
 
@@ -37,26 +38,36 @@ def listlines(messagecontents):
 	l6 = splitmessage[5]
 	return l1, l2, l3, l4, l5, l6
 
-async def updateinvitestatus(ctx, infomsg: discord.Message, messages, user: discord.User, invitechannel: discord.TextChannel, action:str):
+async def updateinvitestatus(self, ctx, userid, action):
+	invitechannel = self.bot.get_channel(invitechannelid)
+	user = await self.bot.fetch_user(int(userid))		
+	messages = await invitechannel.history(limit=invitechannellimit).flatten()
+	infomsg = await ctx.reply(f"Searching for {user.name} in {invitechannel.mention}...")
+	
 	terms = {
 		"approve":{
 			"word1": "Approving",
-			"word2": "<:Allowed:786997173845622824> - Approved",
+			"word2": f"<:Allowed:786997173845622824> - Approved by {ctx.author.mention}",
 			"word3": "approved",
 			"color": 0x00FF00
 		},
 		"deny":{
 			"word1": "Denying",
-			"word2": "<:Denied:786997173820588073> - Denied",
+			"word2": f"<:Denied:786997173820588073> - Denied by {ctx.author.mention}",
 			"word3": "denied",
 			"color": 0xFF0000
 		},
 		"pause":{
 			"word1": "Pausing",
-			"word2": "⏸️ - Paused",
+			"word2": f"⏸️ - Paused by {ctx.author.mention}",
 			"word3": "paused",
 			"color": 0x444444
-
+		},
+		"unpause":{
+			"word1": "Unpausing",
+			"word2": "None",
+			"word3": "unpaused",
+			"color": 0x444444
 		}
 	}
 	word1 = terms[action]["word1"]
@@ -81,7 +92,7 @@ async def updateinvitestatus(ctx, infomsg: discord.Message, messages, user: disc
 				addrow(embed, l4)
 				addrow(embed, l5)
 				
-				addfield(embed, "Invite Status", f'{word2} by {ctx.author.mention}')
+				addfield(embed, "Invite Status", word2)
 				embed.set_thumbnail(url=messagecontents.thumbnail.url)
 				await message.edit(embed=embed)			
 			else:
@@ -104,7 +115,8 @@ class MdspCog(commands.Cog, name="MDSP"):
 			await ctx.send(f'Please select one of the subcommands ({delim.join(list(map(str, subcommands)))})')
 
 	@invite.command()
-	async def add(self, ctx, userid):
+	@commands.cooldown(rate=1, per=120, type=BucketType.user)
+	async def add(self, ctx, userid:int):
 		try:
 			userid = ctx.message.mentions[0].id
 		except:
@@ -139,6 +151,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 
 	@invite.command()
+	@commands.cooldown(rate=1, per=300, type=BucketType.default)
 	async def update(self, ctx):
 		invitechannel = self.bot.get_channel(invitechannelid)
 		messages = await invitechannel.history(limit=invitechannellimit).flatten() 
@@ -172,21 +185,34 @@ class MdspCog(commands.Cog, name="MDSP"):
 		
 			
 	@invite.command()
-	async def approve(self, ctx, userid):		
-		invitechannel = self.bot.get_channel(invitechannelid)
-		user = await self.bot.fetch_user(int(userid))		
-		messages = await invitechannel.history(limit=invitechannellimit).flatten()
-		infomsg = await ctx.reply(f"Searching for {user.name} in {invitechannel.mention}...")
-		await updateinvitestatus(ctx, infomsg, messages, user, invitechannel, "approve")
+	@commands.has_role(796124089294782524)
+	async def approve(self, ctx, userid:int):		
+		await updateinvitestatus(self, ctx, userid, "approve")
 
 	@invite.command()
-	async def deny(self, ctx, userid):		
-		invitechannel = self.bot.get_channel(invitechannelid)
-		user = await self.bot.fetch_user(int(userid))		
-		messages = await invitechannel.history(limit=invitechannellimit).flatten()
-		infomsg = await ctx.reply(f"Searching for {user.name} in {invitechannel.mention}...")
-		await updateinvitestatus(ctx, infomsg, messages, user, invitechannel, "deny")
+	@commands.has_role(796124089294782524)
+	async def deny(self, ctx, userid:int):		
+		await updateinvitestatus(self, ctx, userid, "deny")
+	
+	@invite.command(aliases=['freeze'])
+	@commands.has_role(796124089294782524)
+	async def pause(self, ctx, userid:int):		
+		await updateinvitestatus(self, ctx, userid, "pause")
 
+	@invite.command(aliases=['unfreeze'])
+	@commands.has_role(796124089294782524)
+	async def unpause(self, ctx, userid:int):		
+		await updateinvitestatus(self, ctx, userid, "unpause")
+	
+	@add.error
+	@approve.error
+	@deny.error
+	@unpause.error
+	@pause.error
+	async def invite_cog_error_handler(self, ctx, error):
+		if isinstance(error, BadArgument):		
+			await ctx.reply(f"Invalid UserID!")
+			return
 
 
 def setup(bot):
