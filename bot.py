@@ -43,6 +43,13 @@ with open('help-pages/admin.txt', 'r') as file:
 with open('help-pages/fun.txt', 'r') as file:
 	bot.helpfun = file.read()
 
+"""
+async def listsubcommands(self, thecog, ctx):
+		commands = [cmd.name for cmd in thecog.get_commands()]
+		delim = ", "
+		return delim.join(list(map(str, commands)))
+
+"""
 #endregion
 
 #region Cogs
