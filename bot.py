@@ -5,10 +5,10 @@ import os, sys, os.path
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 import logging
-from discord.ext.commands.errors import CommandError
-from discord.ext.commands.errors import MissingPermissions, BotMissingPermissions, CommandNotFound
+from discord.ext.commands.errors import CommandError, MissingPermissions, BotMissingPermissions, CommandNotFound, MissingRole, CommandOnCooldown, BadArgument
 import json
-import traceback, linecache
+from discord import Status
+import traceback
 import urllib, urllib.parse
 #endregion
 
@@ -80,33 +80,16 @@ logger.addHandler(handler)
 @bot.event
 async def on_ready():
 	print("Bot initialized")
-	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"))
+	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"), status=Status.dnd)
 
 
 #region Bot Events
-
-#@bot.event
-#async def on_command_error(ctx, error):
-#	if isinstance(error, CommandError):
-#		try:
-#			if isinstance(error, CommandNotFound):
-#				await ctx.message.add_reaction(str('❔'))
-#				return 
-#			if isinstance(error, commands.NotOwner):
-#				await ctx.message.add_reaction(str('🔒'))
-#			else:
-#				try:
-#					await ctx.reply("Bot received error :\n```"+str(error)+"```\n Pinging <@545463550802395146>")
-#					logging.error("Error: \n"+str(error))
-#					return
-#				except:
-#					return
-#		except:
-#			return
 	
 @bot.event
 async def on_command_error(ctx, error):
-	if isinstance(error, CommandNotFound):
+	if hasattr(ctx.command, 'on_error'):
+		return
+	elif isinstance(error, CommandNotFound):
 		await ctx.message.add_reaction(str('❔'))
 		return 
 	elif isinstance(error, commands.NotOwner):
@@ -118,6 +101,15 @@ async def on_command_error(ctx, error):
 	elif isinstance(error, BotMissingPermissions):
 		await ctx.reply("I do not have the requisite permissions")
 		return
+	elif isinstance(error, MissingRole):
+		await ctx.message.add_reaction(str('🔐'))
+		return
+	elif isinstance(error, CommandOnCooldown):
+		await ctx.message.add_reaction(str('🕐'))
+		return
+	elif isinstance(error, BadArgument):
+		await ctx.reply("Invalid argument!")
+		return 
 	elif isinstance(error, CommandError):
 		exc = error
 		etype = type(exc)
@@ -163,10 +155,9 @@ async def on_command_error(ctx, error):
 
 
 @bot.event
-async def on_member_join(member):
-	print("someone joined")
-	channel = bot.get_channel(797308957478879234)
-	await channel.send("hi "+member.name)
+async def on_member_join(member:discord.Member):	
+	channel = bot.get_channel(member.guild.system_channel)
+	await channel.send("Hello, "+member.name)
 #@bot.event
 #async def on_message(message):
 #	if bot.user.mentioned_in(message):
