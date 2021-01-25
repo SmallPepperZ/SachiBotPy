@@ -25,6 +25,7 @@ class TestingCog(commands.Cog, name="Testing"):
 		await ctx.reply(1/0)
 
 
+
 	@commands.command()
 	@commands.check(commands.is_owner())
 	async def channels(self, ctx):
@@ -84,7 +85,7 @@ class TestingCog(commands.Cog, name="Testing"):
 	
 	@newexport.command()
 	async def channel(self, ctx, channelid: str):
-		await ctx.send(f'Pushing {channelid}')
+		await ctx.send(f'Exporting channel {channelid}...')
 
 	@newexport.command()
 	async def guild(self, ctx, guildid: str):
