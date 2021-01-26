@@ -28,7 +28,7 @@ prefix = configjson["prefix"]
 start_time_local = time.time()
 
 intents = discord.Intents.all()
-bot = commands.Bot(command_prefix=prefix, intents = intents)
+bot = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
 
 errorchannel = int(configjson["errorchannel"])
 
@@ -80,7 +80,7 @@ logger.addHandler(handler)
 @bot.event
 async def on_ready():
 	print("Bot initialized")
-	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"), status=Status.dnd)
+	#await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"), status=Status.online)
 
 
 #region Bot Events
