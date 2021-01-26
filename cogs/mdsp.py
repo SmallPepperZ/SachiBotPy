@@ -4,6 +4,9 @@ from discord.ext.commands import BadArgument
 import json
 from discord.ext.commands import BucketType
 from mee6_py_api import API
+from datetime import datetime, timedelta, timezone
+from tzlocal import get_localzone
+import pytz
 
 
 
@@ -18,7 +21,7 @@ embedcolor = int(configjson["embedcolor"], 16)
 mee6API = API(302094807046684672)
 
 invitechannelid = 802245295291236442
-invitechannellimit = 1
+invitechannellimit = 10
 prefix = configjson["prefix"]
 #endregion
 
@@ -37,11 +40,15 @@ def listlines(messagecontents):
 	l5 = splitmessage[4]
 	l6 = splitmessage[5]
 	return l1, l2, l3, l4, l5, l6
-
-async def updateinvitestatus(self, ctx, userid, action):
+def getidfrommessage(dictionary:dict, messageid:str):
+	for key, value in dictionary.items():
+		if messageid == value:
+			return key
+async def updateinvitestatus(self, ctx, userid, action, force=False):
+	if force == "force":
+		force = True
 	invitechannel = self.bot.get_channel(invitechannelid)
 	user = await self.bot.fetch_user(int(userid))		
-	messages = await invitechannel.history(limit=invitechannellimit).flatten()
 	infomsg = await ctx.reply(f"Searching for {user.name} in {invitechannel.mention}...")
 	
 	terms = {
@@ -49,13 +56,13 @@ async def updateinvitestatus(self, ctx, userid, action):
 			"word1": "Approving",
 			"word2": f"<:Allowed:786997173845622824> - Approved by {ctx.author.mention}",
 			"word3": "approved",
-			"color": 0x00FF00
+			"color": 0x17820e
 		},
 		"deny":{
 			"word1": "Denying",
 			"word2": f"<:Denied:786997173820588073> - Denied by {ctx.author.mention}",
 			"word3": "denied",
-			"color": 0xFF0000
+			"color": 0xa01116
 		},
 		"pause":{
 			"word1": "Pausing",
@@ -67,39 +74,77 @@ async def updateinvitestatus(self, ctx, userid, action):
 			"word1": "Unpausing",
 			"word2": "None",
 			"word3": "unpaused",
-			"color": 0x444444
+			"color": 0xFFFF00
+		},
+		"accept":{
+			"word1": "Accepting",
+			"word2": "<:Joined:796147287486627841> - Accepted invite/joined",
+			"word3": "changed status to accepted",
+			"color": 0x1bc912
+		},
+		"decline":{
+			"word1": "Declining",
+			"word2": "<:Leave:796147707709358100> - Invited, but declined",
+			"word3": "changed status to declined",
+			"color": 0xd81d1a
 		}
 	}
 	word1 = terms[action]["word1"]
 	word2 = terms[action]["word2"]
 	word3 = terms[action]["word3"]
 	color = terms[action]["color"]
-	for message in messages:	
-		try:
-			messagecontents = message.embeds[0]
-			splitmessage = messagecontents.description.splitlines()
-			l1 = splitmessage[0]
-			l2 = splitmessage[1]
-			l3 = splitmessage[2]
-			l4 = splitmessage[3]
-			l5 = splitmessage[4]
-			l6 = splitmessage[5]
-			if l1 == f'__**{user.name}#{user.discriminator}**__':		
-				await infomsg.edit(content=f"{word1} {user.name}...")
-				embed = discord.Embed(color=color, description=l1)
-				addrow(embed, l2)
-				addrow(embed, l3)
-				addrow(embed, l4)
-				addrow(embed, l5)
-				
-				addfield(embed, "Invite Status", word2)
-				embed.set_thumbnail(url=messagecontents.thumbnail.url)
-				await message.edit(embed=embed)			
+	with open('invitees.json', 'r') as file:
+		inviteesjson = json.loads(file.read())
+	try: #TODO add fallback if not found
+		messageid = inviteesjson[str(userid)]
+		print(messageid)
+		message = await self.bot.get_channel(invitechannelid).fetch_message(messageid)
+		messagecontents = message.embeds[0]
+		splitmessage = messagecontents.description.splitlines()
+		l1 = splitmessage[0]
+		l2 = splitmessage[1]
+		l3 = splitmessage[2]
+		l4 = splitmessage[3]
+		l5 = splitmessage[4]
+		l6 = splitmessage[5]
+		roles = [str(role.id) for role in ctx.author.roles]
+		if not "None" in l6 and (force == False or not str(796124089294782524) in roles):
+			if (action == "accept" or action == "decline"):
+				if "<:Allowed:786997173845622824>" in l6:
+					null = None			
+				else:
+					await infomsg.edit(content=f"{action.capitalize()} requires the user to be approved first")
+					return
+			elif action == "unpause":
+				if "⏸️" in l6:
+					null = None
+				else:
+					await infomsg.edit(content=f"{action.capitalize()} requires the user to be paused")
+					return
 			else:
+				await infomsg.edit(content=f"User already has an invite status. Append 'force' to your command if you want to force the status change")
 				return
-		except IndexError:
-			await ctx.reply(f'{user.name} not found in {invitechannel.mention}')
-	await infomsg.edit(content=f"{user.name} successfully {word3}")	
+		await infomsg.edit(content=f"{word1} {user.name}...")
+		embed = discord.Embed(color=color, description=l1)
+		addrow(embed, l2)
+		addrow(embed, l3)
+		addrow(embed, l4)
+		addrow(embed, l5)
+		
+		addfield(embed, "Invite Status", word2)
+		embed.set_thumbnail(url=messagecontents.thumbnail.url)
+		if action == "accept":
+			newmsg = await ctx.send(embed=embed)
+			await message.delete()
+			inviteesjson.pop(str(userid))
+			inviteesjson["archive"]["approved"][userid] = newmsg.id
+		else:
+			await message.edit(embed=embed)	
+		await infomsg.edit(content=f"{user.name} successfully {word3}")	
+	except:			 
+		await infomsg.edit(content=f"{user.name} not found")	
+	with open('invitees.json', 'w') as file:
+				json.dump(inviteesjson, file)
 	
 
 class MdspCog(commands.Cog, name="MDSP"):
@@ -107,63 +152,80 @@ class MdspCog(commands.Cog, name="MDSP"):
 		self.bot = bot
 
 
-	@commands.group()
+	@commands.group(aliases=['invitee', 'invitees'])
 	async def invite(self,ctx):
 		if ctx.invoked_subcommand is None:
-			delim=", "
-			subcommands = [cmd.name for cmd in ctx.command.commands]
-			await ctx.send(f'Please select one of the subcommands ({delim.join(list(map(str, subcommands)))})')
+			delim="\n\n"
+			#subcommands = [cmd.name for cmd in ctx.command.commands]
+			subcommands = [f'**{cmd.name}:** {cmd.description}' for cmd in ctx.command.commands]
+			embed = discord.Embed(color=embedcolor, title="Invite Subcommands:", description=delim.join(list(map(str, subcommands))))
+			await ctx.reply(embed=embed)
 
-	@invite.command()
-	@commands.cooldown(rate=1, per=120, type=BucketType.user)
+	@invite.command(description="*Cooldown: 2 minutes*\nAdds a user to #potential-invitees")
+	#@commands.cooldown(rate=1, per=120, type=BucketType.user)
 	async def add(self, ctx, userid:int):
 		try:
-			userid = ctx.message.mentions[0].id
-		except:
+			userid = int(userid)
+		except ValueError:
 			try:
-				userid = int(userid)
+				userid = int("".join([x for x in userid  if x.isdigit()]))
 			except ValueError:
-				try:
-					userid = int("".join([x for x in userid  if x.isdigit()]))
-				except ValueError:
-					await ctx.reply("Invalid User ID")
-		 
+				await ctx.reply("Invalid User ID")
+		with open('invitees.json', 'r') as file:
+			inviteesjson = json.loads(file.read())
 		user = await self.bot.fetch_user(int(userid))
 		invitechannel = self.bot.get_channel(invitechannelid)
-		infomsg = await ctx.reply(f'Adding "{user.name}" to {invitechannel.mention}...')
-		try:
-			details = await mee6API.levels.get_user_details(userid)
-			mclevel = details["level"]
-			mcmessages = details["message_count"]
-		except TypeError:
-			mclevel = "Not found, too low?"
-			mcmessages = "Not found, too low?"
+		if (inviteesjson.get(str(userid)) is None) and ctx.guild.get_member(userid) is None:	
+			infomsg = await ctx.reply(f'Adding "{user.name}" to {invitechannel.mention}...')
+			try:
+				details = await mee6API.levels.get_user_details(userid)
+				mclevel = details["level"]
+				mcmessages = details["message_count"]
+			except TypeError:
+				mclevel = "Not found, too low?"
+				mcmessages = "Not found, too low?"
 
-		embed = discord.Embed(color=0xffff00, description=f'__**{user.name}#{user.discriminator}**__')
-		embed.set_thumbnail(url=user.avatar_url)
-		addfield(embed, "Maincord Level", mclevel)
-		addfield(embed, "Maincord Messages", mcmessages)
-		addfield(embed, "Mention", user.mention)
-		addfield(embed, "User ID",  f'`{user.id}`')
-		addfield(embed, "Invite Status",  f'None')
-		await infomsg.edit(content=f'Added "{user.name}" to {invitechannel.mention}')
-		await invitechannel.send(embed=embed)
+			embed = discord.Embed(color=0xffff00, description=f'__**{user.name}#{user.discriminator}**__')
+			embed.set_thumbnail(url=user.avatar_url)
+			addfield(embed, "Maincord Level", mclevel)
+			addfield(embed, "Maincord Messages", mcmessages)
+			addfield(embed, "Mention", user.mention)
+			addfield(embed, "User ID",  f'`{user.id}`')
+			addfield(embed, "Invite Status",  f'None')
+			await infomsg.edit(content=f'Added "{user.name}" to {invitechannel.mention}')
+			message = await invitechannel.send(embed=embed)
+			inviteesjson[userid] = message.id
+			with open('invitees.json', 'w') as file:
+				json.dump(inviteesjson, file)
+		elif ctx.guild.get_member(userid) is not None:
+			await ctx.reply(f'{user.name} is offended that you didn\'t know they were here')
+		else:
+			await ctx.reply(f'{user.name} already exists in {invitechannel.mention}')
 
-
-	@invite.command()
+	@invite.command(description="*Cooldown: 5 minutes*\nUpdates maincord message counts, and moves declined/denied users when appropriate")
 	@commands.cooldown(rate=1, per=300, type=BucketType.default)
 	async def update(self, ctx):
-		invitechannel = self.bot.get_channel(invitechannelid)
-		messages = await invitechannel.history(limit=invitechannellimit).flatten() 
+		invitechannel = self.bot.get_channel(invitechannelid) 
 		infomsg = await ctx.reply(f"Updating {invitechannel.mention}")
+		with open('invitees.json', 'r') as file:
+			inviteesjson = json.loads(file.read())
+		messages = [await invitechannel.fetch_message(message) for message in list(inviteesjson.values())]
 		for message in messages:
-			try:
-				messagecontents = message.embeds[0]
-				l1, l2, l3, l4, l5, l6 = listlines(messagecontents)
+			messagecontents = message.embeds[0]
+			l1, l2, l3, l4, l5, l6 = listlines(messagecontents)
+			userid = getidfrommessage(inviteesjson, message.id)
+			user = await self.bot.fetch_user(userid)
+			xdaysago = datetime.now(pytz.timezone("UTC")) - timedelta(minutes=1)
+			lastedited = message.edited_at.replace(tzinfo=pytz.timezone("UTC"))
+			if ("<:Leave:796147707709358100>" in l6 or "<:Denied:786997173820588073>" in l6) and (lastedited <= xdaysago):				
+				newmsg = await ctx.send(embed=messagecontents) #TODO Move to #potential-invitees-discussion instead
+				await ctx.reply(f'{user.name} moved out of {invitechannel.mention}')
+				await message.delete()
+				inviteesjson.pop(str(userid))
+				inviteesjson["archive"]["denied"][userid] = newmsg.id
+			else:
 				
-					
-				userid = ''.join(x for x in l5 if x.isdigit())
-				await infomsg.edit(content=f"Updating {invitechannel.mention}:\n {l1}")
+				await infomsg.edit(content=f"Updating {invitechannel.mention}:\n{user.name}")
 				try:
 					details = await mee6API.levels.get_user_details(userid)
 					mclevel = details["level"]
@@ -178,37 +240,47 @@ class MdspCog(commands.Cog, name="MDSP"):
 				addrow(embed, l5)
 				addrow(embed, l6)
 				embed.set_thumbnail(url=messagecontents.thumbnail.url)
-				await message.edit(embed=embed)			
-			except IndexError:
-				return
-		await infomsg.edit(content=f"Updating {invitechannel.mention}:\n Completed")		
+				await message.edit(embed=embed)
+			with open('invitees.json', 'w') as file:
+				json.dump(inviteesjson, file)
+			await infomsg.edit(content=f"Updating {invitechannel.mention}:\nCompleted")		
 		
 			
-	@invite.command()
+	@invite.command(description="*Official Helpers Only*\nSets the approved status for a user, and allows `%invite accept` and `%invite decline`")
 	@commands.has_role(796124089294782524)
-	async def approve(self, ctx, userid:int):		
-		await updateinvitestatus(self, ctx, userid, "approve")
+	async def approve(self, ctx, userid:int, force:str=False):		
+		await updateinvitestatus(self, ctx, userid, "approve", force)
 
-	@invite.command()
+	@invite.command(description="*Official Helpers Only*\nSets the denied status for a user, and stops other commands from being used on that user, they will be moved to #potential-invitees-discussion after 7ish days")
 	@commands.has_role(796124089294782524)
-	async def deny(self, ctx, userid:int):		
-		await updateinvitestatus(self, ctx, userid, "deny")
+	async def deny(self, ctx, userid:int, force:str=False):		
+		await updateinvitestatus(self, ctx, userid, "deny", force)
 	
-	@invite.command(aliases=['freeze'])
+	@invite.command(aliases=['freeze'], description = "*Official Helpers Only*\nSets the paused status for a user, and prevents user from being approved or denied")
 	@commands.has_role(796124089294782524)
-	async def pause(self, ctx, userid:int):		
-		await updateinvitestatus(self, ctx, userid, "pause")
+	async def pause(self, ctx, userid:int, force:str=False):		
+		await updateinvitestatus(self, ctx, userid, "pause", force)
 
-	@invite.command(aliases=['unfreeze'])
+	@invite.command(aliases=['unfreeze'], description="*Official Helpers Only*\nResets a user's status from paused")
 	@commands.has_role(796124089294782524)
-	async def unpause(self, ctx, userid:int):		
-		await updateinvitestatus(self, ctx, userid, "unpause")
+	async def unpause(self, ctx, userid:int, force:str=False):		
+		await updateinvitestatus(self, ctx, userid, "unpause", force)
+
+	@invite.command(aliases=['declined', 'leave', 'left'], description="\nUsed by the person who invites a user if they decline the invitation")
+	async def decline(self, ctx, userid:int, force:str=False):		
+		await updateinvitestatus(self, ctx, userid, "decline", force)
+
+	@invite.command(aliases=['joined', 'accepted', 'join'], description="\nUsed by the person who invites a user if they accept the invitation (or when they join, coming soon™)")
+	async def accept(self, ctx, userid:int, force:str=False):		
+		await updateinvitestatus(self, ctx, userid, "accept", force)
 	
 	@add.error
 	@approve.error
 	@deny.error
 	@unpause.error
 	@pause.error
+	@accept.error
+	@decline.error
 	async def invite_cog_error_handler(self, ctx, error):
 		if isinstance(error, BadArgument):		
 			await ctx.reply(f"Invalid UserID!")
@@ -216,4 +288,4 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 
 def setup(bot):
-    bot.add_cog(MdspCog(bot))
+	bot.add_cog(MdspCog(bot))
