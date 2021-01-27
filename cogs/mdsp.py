@@ -237,7 +237,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 			lastedited = message.edited_at.replace(tzinfo=pytz.timezone("UTC"))
 			if ("<:Leave:796147707709358100>" in l6 or "<:Denied:786997173820588073>" in l6) and (lastedited <= xdaysago):				
 				
-				newmsg = await invitediscussionchannel.send(embed=messagecontents) #TODO Move to #potential-invitees-discussion instead
+				newmsg = await invitediscussionchannel.send(embed=messagecontents)
 				await ctx.reply(f'{user.name} moved out of {invitechannel.mention}')
 				await message.delete()
 				inviteesjson.pop(str(userid))

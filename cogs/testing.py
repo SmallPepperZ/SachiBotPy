@@ -75,7 +75,7 @@ class TestingCog(commands.Cog, name="Testing"):
 				print(cog)
 				commandsdict[str(cog)][str(qname)] = {"description": description, "usage": usage, "parent": parent, "aliases": aliases}
 				print("loop finished")
-		print("loop finished")
+		print("loop finished") #FIXME WHY WON'T YOU WORK YOU STUPID CODE
 		with open('commands.json', 'w') as file:
 			json.dump(commandsdict, file, indent=2)
 		print("dumping to json finished")
@@ -103,7 +103,7 @@ class TestingCog(commands.Cog, name="Testing"):
 		delim = ", "
 		cmdlist = delim.join(list(map(str, commands)))
 		await ctx.reply(cmdlist)
-		#TODO Get all bot commands for help page
+		
 
 		
 	@commands.group()
