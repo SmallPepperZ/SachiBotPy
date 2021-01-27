@@ -162,7 +162,7 @@ async def on_command_error(ctx, error):
 		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
 		embed1.add_field(name="Traceback:", value=f'File saved to \'logs/errors/Error {errornumber}.log\'', inline='false')
 		await channel.send(embed=embed1)
-		
+		#FIXME fix this error handling
 		logging.error("Error: \n"+str(error))
 		return
 
