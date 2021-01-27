@@ -2,12 +2,17 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import BadArgument
 import json
+import os, sys
 from discord.ext.commands import BucketType
 from mee6_py_api import API
 from datetime import datetime, timedelta, timezone
 from tzlocal import get_localzone
 import pytz
 
+BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_PATH)
+
+from customfunctions import checks as customchecks
 
 
 #region Variable Stuff
@@ -20,7 +25,8 @@ embedcolor = int(configjson["embedcolor"], 16)
 
 mee6API = API(302094807046684672)
 
-invitechannelid = 802245295291236442
+invitechannelid = 796109386715758652
+invitediscussionchannelid = 792558439863681046
 invitechannellimit = 10
 prefix = configjson["prefix"]
 #endregion
@@ -95,7 +101,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 	color = terms[action]["color"]
 	with open('invitees.json', 'r') as file:
 		inviteesjson = json.loads(file.read())
-	try: #TODO add fallback if not found
+	try:
 		messageid = inviteesjson[str(userid)]
 		print(messageid)
 		message = await self.bot.get_channel(invitechannelid).fetch_message(messageid)
@@ -134,7 +140,8 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 		addfield(embed, "Invite Status", word2)
 		embed.set_thumbnail(url=messagecontents.thumbnail.url)
 		if action == "accept":
-			newmsg = await ctx.send(embed=embed)
+			invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid) 
+			newmsg = await invitediscussionchannel.send(embed=embed)
 			await message.delete()
 			inviteesjson.pop(str(userid))
 			inviteesjson["archive"]["approved"][userid] = newmsg.id
@@ -144,15 +151,22 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 	except:			 
 		await infomsg.edit(content=f"{user.name} not found")	
 	with open('invitees.json', 'w') as file:
-				json.dump(inviteesjson, file)
-	
+		json.dump(inviteesjson, file, indent=2)
+
+
 
 class MdspCog(commands.Cog, name="MDSP"):
 	def __init__(self, bot):
 		self.bot = bot
 
+	def MDSPOnly():
+		def predicate(ctx):
+			print("hi")# a function that takes ctx as it's only arg, that returns a truethy or falsey value, or raises an exception
+		return commands.check(predicate)	
 
+	
 	@commands.group(aliases=['invitee', 'invitees'])
+	@customchecks.limit_to_guild(764981968579461130)
 	async def invite(self,ctx):
 		if ctx.invoked_subcommand is None:
 			delim="\n\n"
@@ -194,9 +208,11 @@ class MdspCog(commands.Cog, name="MDSP"):
 			addfield(embed, "Invite Status",  f'None')
 			await infomsg.edit(content=f'Added "{user.name}" to {invitechannel.mention}')
 			message = await invitechannel.send(embed=embed)
+		#	await message.add_reaction('<:upvote:771082566752665681>')
+		#	await message.add_reaction('<:downvote:771082566651609089>')
 			inviteesjson[userid] = message.id
 			with open('invitees.json', 'w') as file:
-				json.dump(inviteesjson, file)
+				json.dump(inviteesjson, file, indent=2)
 		elif ctx.guild.get_member(userid) is not None:
 			await ctx.reply(f'{user.name} is offended that you didn\'t know they were here')
 		else:
@@ -205,20 +221,23 @@ class MdspCog(commands.Cog, name="MDSP"):
 	@invite.command(description="*Cooldown: 5 minutes*\nUpdates maincord message counts, and moves declined/denied users when appropriate")
 	@commands.cooldown(rate=1, per=300, type=BucketType.default)
 	async def update(self, ctx):
-		invitechannel = self.bot.get_channel(invitechannelid) 
+		invitechannel = self.bot.get_channel(invitechannelid)
+		invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid) 
 		infomsg = await ctx.reply(f"Updating {invitechannel.mention}")
 		with open('invitees.json', 'r') as file:
 			inviteesjson = json.loads(file.read())
-		messages = [await invitechannel.fetch_message(message) for message in list(inviteesjson.values())]
+		inviteemessages =  [item for item in inviteesjson.values() if isinstance(item, int)]
+		messages = [await invitechannel.fetch_message(message) for message in inviteemessages]
 		for message in messages:
 			messagecontents = message.embeds[0]
 			l1, l2, l3, l4, l5, l6 = listlines(messagecontents)
 			userid = getidfrommessage(inviteesjson, message.id)
 			user = await self.bot.fetch_user(userid)
-			xdaysago = datetime.now(pytz.timezone("UTC")) - timedelta(minutes=1)
+			xdaysago = datetime.now(pytz.timezone("UTC")) - timedelta(days=7)
 			lastedited = message.edited_at.replace(tzinfo=pytz.timezone("UTC"))
 			if ("<:Leave:796147707709358100>" in l6 or "<:Denied:786997173820588073>" in l6) and (lastedited <= xdaysago):				
-				newmsg = await ctx.send(embed=messagecontents) #TODO Move to #potential-invitees-discussion instead
+				
+				newmsg = await invitediscussionchannel.send(embed=messagecontents) #TODO Move to #potential-invitees-discussion instead
 				await ctx.reply(f'{user.name} moved out of {invitechannel.mention}')
 				await message.delete()
 				inviteesjson.pop(str(userid))
@@ -242,7 +261,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				embed.set_thumbnail(url=messagecontents.thumbnail.url)
 				await message.edit(embed=embed)
 			with open('invitees.json', 'w') as file:
-				json.dump(inviteesjson, file)
+				json.dump(inviteesjson, file, indent=2)
 			await infomsg.edit(content=f"Updating {invitechannel.mention}:\nCompleted")		
 		
 			
