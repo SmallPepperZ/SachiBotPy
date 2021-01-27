@@ -48,7 +48,7 @@ class AdminCog(commands.Cog, name="Admin"):
 			await ctx.message.delete()
 			message = await MessageConverter().convert(ctx, messageid)
 			await message.delete()
-			print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
+			logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
 
 
 

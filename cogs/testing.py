@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import json
-import os
+import os, logging
 
 #region Variable Stuff
 
@@ -36,7 +36,7 @@ class TestingCog(commands.Cog, name="Testing"):
 		filepath = str(cwd+'/logs/channels/'+ctx.guild.name+'.csv')
 		os.remove(filepath)
 		#	except:
-		#		print(cwd+"/logs/channels/"+ctx.guild.name+".csv not found, creating..." )
+		#		logging.info(cwd+"/logs/channels/"+ctx.guild.name+".csv not found, creating..." )
 		for channel1 in channels1:
 			towrite = str(str(channel1.category)+', '+channel1.name+', '+str(channel1.changed_roles))
 			with open(str("logs/channels/"+ctx.guild.name+".csv"), 'a') as file_object:
@@ -60,35 +60,35 @@ class TestingCog(commands.Cog, name="Testing"):
 		
 		for cmd in commands:
 			if (not cmd.hidden) and cmd.enabled:
-				print("loop started")
+				logging.info("loop started")
 				qname =	cmd.qualified_name
-				print(qname)
+				logging.info(qname)
 				description = cmd.description
-				print(description)
+				logging.info(description)
 				usage = cmd.usage
-				print(usage)
+				logging.info(usage)
 				parent = cmd.parent.name
-				print(parent)
+				logging.info(parent)
 				aliases = cmd.aliases
-				print(aliases)
+				logging.info(aliases)
 				cog = cmd.cog_name
-				print(cog)
+				logging.info(cog)
 				commandsdict[str(cog)][str(qname)] = {"description": description, "usage": usage, "parent": parent, "aliases": aliases}
-				print("loop finished")
-		print("loop finished") #FIXME WHY WON'T YOU WORK YOU STUPID CODE
+				logging.info("loop finished")
+		logging.info("loop finished") #FIXME WHY WON'T YOU WORK YOU STUPID CODE
 		with open('commands.json', 'w') as file:
 			json.dump(commandsdict, file, indent=2)
-		print("dumping to json finished")
-		print(commandsdict)
+		logging.info("dumping to json finished")
+		logging.info(commandsdict)
 
 
 		"""
 		cogdict=self.bot.cogs
-		print("got cogs")
+		logging.info("got cogs")
 		commandlist=[cog.get_commands() for cog in cogdict.values()]
-		print("got commands")
+		logging.info("got commands")
 		commandnames = [command.name for command in commandlist]
-		print("got command names")
+		logging.info("got command names")
 		#delim = ", "
 		#coglist = delim.join(list(map(str, cogs)))
 		await ctx.reply(commandnames)
@@ -96,7 +96,7 @@ class TestingCog(commands.Cog, name="Testing"):
 
 	@commands.command()
 	async def commandlistold(self, ctx):
-		#print(self.get_commands())
+		#logging.info(self.get_commands())
 		
 		commands = [cmd.name for cmd in self.get_commands()]
 		

@@ -30,6 +30,7 @@ prefix = configjson["prefix"]
 start_time_local = time.time()
 
 intents = discord.Intents.all()
+intents.typing = False
 bot = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
 
 errorchannel = int(configjson["errorchannel"])
@@ -64,7 +65,7 @@ if __name__ == '__main__':
 
 #region Logger Stuff
 logger = logging.getLogger("discord")
-logger.setLevel(logging.INFO) # Do not allow DEBUG messages through
+logger.setLevel(logging.DEBUG) # Do not allow DEBUG messages through
 handler = logging.FileHandler(filename="bot.log", encoding="utf-8", mode="w")
 handler.setFormatter(logging.Formatter("{asctime}: {levelname}: {name}: {message}", style="{"))
 logger.addHandler(handler)
@@ -74,7 +75,7 @@ logger.addHandler(handler)
 
 @bot.event
 async def on_ready():
-	print("Bot initialized")
+	logging.info("Bot initialized")
 	#await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"), status=Status.online)
 
 
@@ -112,14 +113,16 @@ async def on_command_error(ctx, error):
 	elif isinstance(error, customchecks.IncorrectGuild):
 		await ctx.reply(content="This command does not work in this server.", delete_after=10)
 	elif isinstance(error, CommandError):
+		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed")		
 		exc = error
 		etype = type(exc)
 		trace = exc.__traceback__
 
 		lines = traceback.format_exception(etype, exc, trace)
 		traceback_text = ''.join(lines)
-		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed")		
+		
 		channel = bot.get_channel(errorchannel)
+		
 		"""
 			api_dev_key=configjson["pbdevapikey"]
 			api_user_key=configjson["pbuserapikey"]
@@ -134,7 +137,7 @@ async def on_command_error(ctx, error):
 			except:
 				url = url1
 		"""	
-
+"""
 		errornumber = len([name for name in os.listdir(errorlogdir) if os.path.isfile(os.path.join(errorlogdir, name))])+1
 		with open(f'logs/errors/Error {errornumber}.log', 'x') as f:
 			f.write(traceback_text)
@@ -154,10 +157,9 @@ async def on_command_error(ctx, error):
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
 		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
 		embed1.add_field(name="Traceback:", value=f'File saved to \'logs/errors/Error {errornumber}.log\'', inline='false')
-		await channel.send(embed=embed1)
+"""#		await channel.send(embed=embed1)
 		#FIXME fix this error handling
-		logging.error("Error: \n"+str(error))
-		return
+
 
 
 
