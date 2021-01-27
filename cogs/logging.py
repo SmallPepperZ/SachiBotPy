@@ -39,16 +39,26 @@ class LoggerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener("on_message")
 	async def logmessages(self, message):
-		if (not message.channel.id in channelignore) and (not message.guild.id in guildignore):
+		try:
+			channel = message.channel.id
+			channelname = message.channel.name
+			guild = message.guild.id
+			guildname = message.guild.name
+		except AttributeError:
+			channel = message.author.id
+			channelname = message.author.name
+			guild = 0
+			guildname = "DM"
+		if (not channel in channelignore) and (not guild in guildignore):
 			sql = 'INSERT into Messages (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url, attachments) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 			sqldata = [
 					int(time.time()), 
 					int(message.id),
-					int(message.guild.id),
-					int(message.channel.id),
+					int(guild),
+					int(channel),
 					int(message.author.id),
-					str(message.guild.name),
-					str(message.channel.name),
+					str(guildname),
+					str(channelname),
 					str(message.author),
 					str(str(message.system_content)),
 					str(message.jump_url),
@@ -63,15 +73,25 @@ class LoggerCog(commands.Cog, name="Logging"):
 	async def logcommands(self, message):
 		content = message.content
 		if (content.startswith(prefix)):
+			try:
+				channel = message.channel.id
+				channelname = message.channel.name
+				guild = message.guild.id
+				guildname = message.guild.name
+			except AttributeError:
+				channel = message.author.id
+				channelname = message.author.name
+				guild = 0
+				guildname = "DM"
 			sql = 'INSERT into Commands (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 			sqldata = [
 					int(time.time()), 
 					int(message.id),
-					int(message.guild.id),
-					int(message.channel.id),
+					int(guild),
+					int(channel),
 					int(message.author.id),
-					str(message.guild.name),
-					str(message.channel.name),
+					str(guildname),
+					str(channelname),
 					str(message.author),
 					str(message.content),
 					str(message.jump_url)

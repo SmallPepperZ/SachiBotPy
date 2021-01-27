@@ -52,19 +52,50 @@ class TestingCog(commands.Cog, name="Testing"):
 			await ctx.send(embed=embed)
 
 	@commands.command()
-	async def coglist(self, ctx):
-		print(self.bot.cogs)
-		cogjson=self.bot.cogs
-		print(cogjson.keys())
-		cogs=[cog for cog in cogjson.keys()]
-		print(cogs)
-		delim = ", "
-		coglist = delim.join(list(map(str, cogs)))
-		await ctx.reply(coglist)
+	async def commandlist(self, ctx):
+		commandsdict = {}
+		for cog in self.bot.cogs.keys():
+			commandsdict[str(cog)] = {}
+		commands = self.bot.walk_commands()
+		
+		for cmd in commands:
+			if (not cmd.hidden) and cmd.enabled:
+				print("loop started")
+				qname =	cmd.qualified_name
+				print(qname)
+				description = cmd.description
+				print(description)
+				usage = cmd.usage
+				print(usage)
+				parent = cmd.parent.name
+				print(parent)
+				aliases = cmd.aliases
+				print(aliases)
+				cog = cmd.cog_name
+				print(cog)
+				commandsdict[str(cog)][str(qname)] = {"description": description, "usage": usage, "parent": parent, "aliases": aliases}
+				print("loop finished")
+		print("loop finished")
+		with open('commands.json', 'w') as file:
+			json.dump(commandsdict, file, indent=2)
+		print("dumping to json finished")
+		print(commandsdict)
 
+
+		"""
+		cogdict=self.bot.cogs
+		print("got cogs")
+		commandlist=[cog.get_commands() for cog in cogdict.values()]
+		print("got commands")
+		commandnames = [command.name for command in commandlist]
+		print("got command names")
+		#delim = ", "
+		#coglist = delim.join(list(map(str, cogs)))
+		await ctx.reply(commandnames)
+"""
 
 	@commands.command()
-	async def commandlist(self, ctx):
+	async def commandlistold(self, ctx):
 		#print(self.get_commands())
 		
 		commands = [cmd.name for cmd in self.get_commands()]
@@ -73,7 +104,6 @@ class TestingCog(commands.Cog, name="Testing"):
 		cmdlist = delim.join(list(map(str, commands)))
 		await ctx.reply(cmdlist)
 		#TODO Get all bot commands for help page
-
 
 		
 	@commands.group()

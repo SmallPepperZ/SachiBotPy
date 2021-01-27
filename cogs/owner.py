@@ -26,8 +26,10 @@ statuses={
 
 #endregion
 async def changestatus(self, ctx, type):
-	if ctx.guild.me.activity != None:
-		await self.bot.change_presence(activity=discord.Activity(type=ctx.guild.me.activity.type, name=ctx.guild.me.activity.name), status=type)
+	global botuser
+	botuser = self.bot.get_guild(797308956162392094).me
+	if botuser.activity != None:
+		await self.bot.change_presence(activity=discord.Activity(type=botuser.activity.type, name=botuser.activity.name), status=type)
 	else:
 		await self.bot.change_presence(status=type)
 
@@ -36,10 +38,14 @@ class OwnerCog(commands.Cog,name="Owner"):
 	def __init__(self, bot):
 		self.bot = bot
 
+
 	@commands.command()
 	@commands.is_owner()
 	async def restart(self, ctx):
-		await ctx.message.delete()
+		try:
+			await ctx.message.delete()
+		except:
+			null = None
 		current_time = time.time()
 		start_time = ctx.bot.start_time
 		difference = int(round(current_time - start_time))
@@ -64,6 +70,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 
 	@commands.command()
 	@commands.is_owner()
+	@commands.guild_only()
 	async def export(self, ctx, channel):
 		embed = discord.Embed(color=embedcolor)
 		embed.add_field(name="Channel", value=f'{channel}')
@@ -74,9 +81,10 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.group()
 	@commands.is_owner()
 	async def status(self,ctx):
-
+		global botuser
+		botuser = self.bot.get_guild(797308956162392094).me
 		if ctx.invoked_subcommand is None:
-			status = ctx.guild.me.raw_status
+			status = botuser.raw_status
 			if status == "online":
 				statusemoji = '🟢 - '
 				statuscolor = 0x00FF00
@@ -92,7 +100,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 			else:
 				statusemoji = ''
 				statuscolor = embedcolor
-			embed = discord.Embed(color=statuscolor, title="Status:", description=f'**Status:** {statusemoji}{status} - {statuses[ctx.guild.me.activity.type.value]} {ctx.guild.me.activity.name}')
+			embed = discord.Embed(color=statuscolor, title="Status:", description=f'**Status:** {statusemoji}{status} - {statuses[botuser.activity.type.value]} {botuser.activity.name}')
 			await ctx.reply(embed=embed)
 	
 	@status.command(aliases=['green', 'good'])
@@ -120,22 +128,22 @@ class OwnerCog(commands.Cog,name="Owner"):
 
 	@activity.command()
 	async def playing(self, ctx, *, status:str):
-		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=status), status=ctx.guild.me.status)
+		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=status), status=botuser.status)
 		await ctx.message.add_reaction(str('✅'))
 
 	@activity.command()
 	async def competing(self, ctx, *, status:str):
-		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.competing, name=status), status=ctx.guild.me.status)
+		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.competing, name=status), status=botuser.status)
 		await ctx.message.add_reaction(str('✅'))
 
 	@activity.command()
 	async def listening(self, ctx, *, status:str):
-		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=status), status=ctx.guild.me.status)
+		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=status), status=botuser.status)
 		await ctx.message.add_reaction(str('✅'))
 
 	@activity.command()
 	async def watching(self, ctx, *, status:str):
-		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status), status=ctx.guild.me.status)
+		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status), status=botuser.status)
 		await ctx.message.add_reaction(str('✅'))
 
 	@status.command()

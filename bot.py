@@ -10,6 +10,8 @@ import json
 from discord import Status
 import traceback
 import urllib, urllib.parse
+
+import customfunctions.checks as customchecks
 #endregion
 
 #region Variable Stuff
@@ -33,7 +35,7 @@ bot = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=Tr
 errorchannel = int(configjson["errorchannel"])
 
 bot.start_time = start_time_local
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 bot.remove_command('help')
 
 with open('help-pages/utility.txt', 'r') as file:
@@ -87,6 +89,7 @@ async def on_ready():
 	
 @bot.event
 async def on_command_error(ctx, error):
+	error = getattr(error, "original", error)
 	if hasattr(ctx.command, 'on_error'):
 		return
 	elif isinstance(error, CommandNotFound):
@@ -110,6 +113,11 @@ async def on_command_error(ctx, error):
 	elif isinstance(error, BadArgument):
 		await ctx.reply("Invalid argument!")
 		return 
+	elif isinstance(error, commands.NoPrivateMessage):
+		await ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>'))
+		return
+	elif isinstance(error, customchecks.IncorrectGuild):
+		await ctx.reply(content="This command does not work in this server.", delete_after=10)
 	elif isinstance(error, CommandError):
 		exc = error
 		etype = type(exc)
@@ -142,8 +150,14 @@ async def on_command_error(ctx, error):
 		embed1.add_field(name="Message:", value=ctx.message.clean_content, inline='true')
 		embed1.add_field(name="Author:", value=ctx.message.author.mention, inline='true')
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
-		embed1.add_field(name="Guild:", value=ctx.guild.name, inline='true')
-		embed1.add_field(name="Channel:", value=ctx.channel.name, inline='true')
+		try:
+			guildname = ctx.guild.name
+			channelname = ctx.channel.name
+		except:
+			guildname = "DM"
+			channelname = "DM"
+		embed1.add_field(name="Guild:", value=guildname, inline='true')
+		embed1.add_field(name="Channel:", value=channelname, inline='true')
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
 		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
 		embed1.add_field(name="Traceback:", value=f'File saved to \'logs/errors/Error {errornumber}.log\'', inline='false')
