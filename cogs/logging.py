@@ -33,7 +33,7 @@ class LoggerCog(commands.Cog, name="Logging"):
 #		await self.bot.process_commands(message)
 #		if (message.guild.id == 764981968579461130) and (message.channel.id != 789195444957609994) and (message.channel.id != 789607866780745748):
 #			sentmsg = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+", "+str(message.channel.id)+", "+str(message.channel.name)+", "+str(message.author)+", "+str(message.content)
-#			print(f"Message: {sentmsg}")
+#			logging.info(f"Message: {sentmsg}")
 #			with open("logs/test.csv", 'a') as file_object:
 #				file_object.write(sentmsg+"\n")
 

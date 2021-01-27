@@ -59,7 +59,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 				embed.add_field(name="Error:", value=f'```{error}```', inline="false")
 				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 				await ctx.reply(embed=embed)
-		print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}reload {cog}\'')
+		logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}reload {cog}\'')
 
 	@commands.command()
 	@commands.is_owner()
@@ -73,7 +73,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 			embed.add_field(name="Cog:", value=f'{cog}')
 			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 			await ctx.reply(embed=embed)
-			print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}unload {cog}\'')
+			logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}unload {cog}\'')
 		except ExtensionNotLoaded as error:
 			try:
 				self.bot.unload_extension(f'cogs.{cog_lower}')
@@ -81,7 +81,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 				embed.add_field(name="Cog:", value=f'{cog}')
 				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 				await ctx.reply(embed=embed)
-				print(f'{ctx.message.author.name} ({ctx.message.author.id}) got handled error "ExtensionNotLoaded" when using \'{prefix}unload {cog}\'')
+				logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) got handled error "ExtensionNotLoaded" when using \'{prefix}unload {cog}\'')
 			except:
 				embed = discord.Embed(color=embedcolor, title="Cog Not Loaded")
 				embed.add_field(name="Cog", value=cog)

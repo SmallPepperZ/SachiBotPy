@@ -1,3 +1,4 @@
+import logging as logger, traceback
 import discord
 from discord.ext import commands
 from discord.ext.commands import BadArgument
@@ -103,7 +104,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 		inviteesjson = json.loads(file.read())
 	try:
 		messageid = inviteesjson[str(userid)]
-		print(messageid)
+		logger.debug(messageid)
 		message = await self.bot.get_channel(invitechannelid).fetch_message(messageid)
 		messagecontents = message.embeds[0]
 		splitmessage = messagecontents.description.splitlines()
@@ -161,7 +162,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 	def MDSPOnly():
 		def predicate(ctx):
-			print("hi")# a function that takes ctx as it's only arg, that returns a truethy or falsey value, or raises an exception
+			logger.debug("hi")# a function that takes ctx as it's only arg, that returns a truethy or falsey value, or raises an exception
 		return commands.check(predicate)	
 
 	
@@ -226,40 +227,55 @@ class MdspCog(commands.Cog, name="MDSP"):
 		infomsg = await ctx.reply(f"Updating {invitechannel.mention}")
 		with open('invitees.json', 'r') as file:
 			inviteesjson = json.loads(file.read())
-		inviteemessages =  [item for item in inviteesjson.values() if isinstance(item, int)]
-		messages = [await invitechannel.fetch_message(message) for message in inviteemessages]
+		inviteemessages =  [item for item in inviteesjson["active"].values()]
+		messages = [await invitechannel.fetch_message(message) for message in inviteesjson["active"].values()]
 		for message in messages:
 			messagecontents = message.embeds[0]
 			l1, l2, l3, l4, l5, l6 = listlines(messagecontents)
-			userid = getidfrommessage(inviteesjson, message.id)
+			userid = getidfrommessage(inviteesjson["active"], message.id)
 			user = await self.bot.fetch_user(userid)
-			xdaysago = datetime.now(pytz.timezone("UTC")) - timedelta(days=7)
-			lastedited = message.edited_at.replace(tzinfo=pytz.timezone("UTC"))
-			if ("<:Leave:796147707709358100>" in l6 or "<:Denied:786997173820588073>" in l6) and (lastedited <= xdaysago):				
-				
-				newmsg = await invitediscussionchannel.send(embed=messagecontents)
-				await ctx.reply(f'{user.name} moved out of {invitechannel.mention}')
-				await message.delete()
-				inviteesjson.pop(str(userid))
-				inviteesjson["archive"]["denied"][userid] = newmsg.id
+			sevendaysago = datetime.now(pytz.timezone("UTC")) - timedelta(days=7)
+			yesterday = datetime.now(pytz.timezone("UTC")) - timedelta(days=1)
+			try:
+				lastedited = message.edited_at.replace(tzinfo=pytz.timezone("UTC"))
+			except:
+				lastedited = message.created_at.replace(tzinfo=pytz.timezone("UTC"))
+			logger.debug("Times fetched")
+			if (lastedited <= yesterday):
+				logger.debug("first if succeeded")
+				if ("<:Leave:796147707709358100>" in l6 or "<:Denied:786997173820588073>" in l6) and (lastedited <= sevendaysago):				
+					logger.debug("if activated")
+					newmsg = await invitediscussionchannel.send(embed=messagecontents)
+					await ctx.reply(f'{user.name} moved out of {invitechannel.mention}')
+					await message.delete()
+					inviteesjson["active"].pop(str(userid))
+					inviteesjson["archive"]["denied"][userid] = newmsg.id
+					logger.debug("if comopleted")
+				else:
+					logger.debug("Else activated")
+					await infomsg.edit(content=f"Updating {invitechannel.mention}:\n{user.name}")
+					logger.debug("infomsg edited")
+					try:
+						details = await mee6API.levels.get_user_details(userid)
+						mclevel = details["level"]
+						mcmessages = details["message_count"]
+					except TypeError:
+						mclevel = "Not found, too low?"
+						mcmessages = "Not found, too low?"
+					logger.debug("mee6 part done")
+					embed = discord.Embed(color=0xffff00, description=l1)
+					addfield(embed, "Maincord Level", mclevel)
+					addfield(embed, "Maincord Messages", mcmessages)
+					addrow(embed, l4)
+					addrow(embed, l5)
+					addrow(embed, l6)
+					embed.set_thumbnail(url=messagecontents.thumbnail.url)
+					logger.debug("embed built")
+					await message.edit(embed=embed)
+					logger.debug("embed sent")
 			else:
-				
-				await infomsg.edit(content=f"Updating {invitechannel.mention}:\n{user.name}")
-				try:
-					details = await mee6API.levels.get_user_details(userid)
-					mclevel = details["level"]
-					mcmessages = details["message_count"]
-				except TypeError:
-					mclevel = "Not found, too low?"
-					mcmessages = "Not found, too low?"
-				embed = discord.Embed(color=0xffff00, description=l1)
-				addfield(embed, "Maincord Level", mclevel)
-				addfield(embed, "Maincord Messages", mcmessages)
-				addrow(embed, l4)
-				addrow(embed, l5)
-				addrow(embed, l6)
-				embed.set_thumbnail(url=messagecontents.thumbnail.url)
-				await message.edit(embed=embed)
+				logger.debug("User message updated too recently")
+
 			with open('invitees.json', 'w') as file:
 				json.dump(inviteesjson, file, indent=2)
 			await infomsg.edit(content=f"Updating {invitechannel.mention}:\nCompleted")		
@@ -300,9 +316,21 @@ class MdspCog(commands.Cog, name="MDSP"):
 	@pause.error
 	@accept.error
 	@decline.error
+	@invite.error
+	@update.error
 	async def invite_cog_error_handler(self, ctx, error):
 		if isinstance(error, BadArgument):		
 			await ctx.reply(f"Invalid UserID!")
+			return
+		else:
+			await ctx.reply(error)
+			exc = error
+			etype = type(exc)
+			trace = exc.__traceback__
+
+			lines = traceback.format_exception(etype, exc, trace)
+			traceback_text = ''.join(lines)
+			logger.error(str(traceback_text))
 			return
 
 

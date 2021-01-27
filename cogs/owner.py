@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import json
 import time, datetime
-import os, sys
+import os, sys, logging
 from discord import Status
 #region Variable Stuff
 
@@ -53,7 +53,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Restarting...")
 		embed.set_footer(text=f"lasted for {uptime}")
 		await ctx.send(embed=embed)
-		print('Bot restarted by '+str(ctx.author))
+		logging.info('Bot restarted by '+str(ctx.author))
 		os.system("pm2 restart SachiBot")
 		await self.bot.logout()
 
@@ -64,7 +64,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Stopping...")
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.send(embed=embed)
-		print('Bot stopped by '+str(ctx.author))
+		logging.info('Bot stopped by '+str(ctx.author))
 		os.system("pm2 stop SachiBot")
 		await self.bot.logout()
 
@@ -76,7 +76,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed.add_field(name="Channel", value=f'{channel}')
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
-		print('Exported by '+str(ctx.author))
+		logging.info('Exported by '+str(ctx.author))
 
 	@commands.group()
 	@commands.is_owner()
@@ -124,7 +124,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	
 	@status.group()
 	async def activity(self, ctx):
-		print()
+		logging.info()
 
 	@activity.command()
 	async def playing(self, ctx, *, status:str):
