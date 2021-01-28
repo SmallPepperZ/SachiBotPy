@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
 #region Logger Stuff
 logger = logging.getLogger("discord")
-logger.setLevel(logging.DEBUG) # Do not allow DEBUG messages through
+logger.setLevel(logging.INFO) # Do not allow DEBUG messages through
 handler = logging.FileHandler(filename="bot.log", encoding="utf-8", mode="w")
 handler.setFormatter(logging.Formatter("{asctime}: {levelname}: {name}: {message}", style="{"))
 logger.addHandler(handler)

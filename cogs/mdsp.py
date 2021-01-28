@@ -103,7 +103,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 	with open('invitees.json', 'r') as file:
 		inviteesjson = json.loads(file.read())
 	try:
-		messageid = inviteesjson[str(userid)]
+		messageid = inviteesjson["active"][str(userid)]
 		logger.debug(messageid)
 		message = await self.bot.get_channel(invitechannelid).fetch_message(messageid)
 		messagecontents = message.embeds[0]
@@ -144,7 +144,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 			invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid) 
 			newmsg = await invitediscussionchannel.send(embed=embed)
 			await message.delete()
-			inviteesjson.pop(str(userid))
+			inviteesjson["active"].pop(str(userid))
 			inviteesjson["archive"]["approved"][userid] = newmsg.id
 		else:
 			await message.edit(embed=embed)	
@@ -152,7 +152,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 	except:			 
 		await infomsg.edit(content=f"{user.name} not found")	
 	with open('invitees.json', 'w') as file:
-		json.dump(inviteesjson, file, indent=2)
+		json.dump(inviteesjson, file, indent=4)
 
 
 
@@ -190,7 +190,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 			inviteesjson = json.loads(file.read())
 		user = await self.bot.fetch_user(int(userid))
 		invitechannel = self.bot.get_channel(invitechannelid)
-		if (inviteesjson.get(str(userid)) is None) and ctx.guild.get_member(userid) is None:	
+		if (inviteesjson["active"].get(str(userid)) is None) and ctx.guild.get_member(userid) is None:	
 			infomsg = await ctx.reply(f'Adding "{user.name}" to {invitechannel.mention}...')
 			try:
 				details = await mee6API.levels.get_user_details(userid)
@@ -211,9 +211,9 @@ class MdspCog(commands.Cog, name="MDSP"):
 			message = await invitechannel.send(embed=embed)
 		#	await message.add_reaction('<:upvote:771082566752665681>')
 		#	await message.add_reaction('<:downvote:771082566651609089>')
-			inviteesjson[userid] = message.id
+			inviteesjson["active"][userid] = message.id
 			with open('invitees.json', 'w') as file:
-				json.dump(inviteesjson, file, indent=2)
+				json.dump(inviteesjson, file, indent=4)
 		elif ctx.guild.get_member(userid) is not None:
 			await ctx.reply(f'{user.name} is offended that you didn\'t know they were here')
 		else:
@@ -277,7 +277,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				logger.debug("User message updated too recently")
 
 			with open('invitees.json', 'w') as file:
-				json.dump(inviteesjson, file, indent=2)
+				json.dump(inviteesjson, file, indent=4)
 			await infomsg.edit(content=f"Updating {invitechannel.mention}:\nCompleted")		
 		
 			
