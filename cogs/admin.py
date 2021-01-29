@@ -16,7 +16,7 @@ prefix = configjson["prefix"]
 
 
 
-class AdminCog(commands.Cog):
+class AdminCog(commands.Cog, name="Admin"):
 	def __init__(self, bot):
 		self.bot = bot
 
@@ -48,7 +48,7 @@ class AdminCog(commands.Cog):
 			await ctx.message.delete()
 			message = await MessageConverter().convert(ctx, messageid)
 			await message.delete()
-			print(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
+			logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
 
 
 
