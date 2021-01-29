@@ -10,7 +10,7 @@ with open('config.json', 'r') as file:
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
+
 
 
 
@@ -31,7 +31,6 @@ class UtilityCog(commands.Cog, name="Utility"):
 			embed.add_field(name="__Owner__", value=ctx.bot.helpadmin, inline='false')
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
-		logging.info('Help triggered by '+str(ctx.author))
 
 	@commands.command(aliases=['uptime'])
 	async def ping(self, ctx):
@@ -43,7 +42,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed.add_field(name="Uptime", value=f'{uptime}')
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
-		logging.info('Pinged by '+str(ctx.author))
+
 	
 	@commands.command(aliases=['userinfo'])
 	async def whois(self,ctx, userid):
@@ -71,7 +70,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 			def embedsec2(embed):
 				embed.add_field(name="Join Date", value=joindate, inline='true')
 		else:
-			logging.info(userid)
+
 			user = await self.bot.fetch_user(int(userid))
 			def embedsec1(embed):
 				return

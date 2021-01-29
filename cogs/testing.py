@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import json
 import os, logging
-
+from disputils import BotEmbedPaginator
 #region Variable Stuff
 
 with open('config.json', 'r') as file:
@@ -10,8 +10,7 @@ with open('config.json', 'r') as file:
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
-prefix = configjson["prefix"]
+
 #endregion
 
 
@@ -20,27 +19,20 @@ class TestingCog(commands.Cog, name="Testing"):
 		self.bot = bot
 
 	@commands.command()
+	@commands.cooldown(rate=1, per=300)
 	@commands.check(commands.is_owner())
-	async def errorme(self, ctx):
-		await ctx.reply(1/0)
-
+	async def custom(self, ctx, *, contents):
+		channel = self.bot.get_channel(792558439863681046)
+		message = await channel.fetch_message(804147923285573633)
+		embed=discord.Embed(color=embedcolor, description=contents)
+		await message.edit(embed=embed)
+		
 
 
 	@commands.command()
 	@commands.check(commands.is_owner())
-	async def channels(self, ctx):
-		await ctx.message.delete()
-		channels1 = ctx.guild.channels
-		cwd = os.popen('pwd').read().rstrip()
-		#	try:
-		filepath = str(cwd+'/logs/channels/'+ctx.guild.name+'.csv')
-		os.remove(filepath)
-		#	except:
-		#		logging.info(cwd+"/logs/channels/"+ctx.guild.name+".csv not found, creating..." )
-		for channel1 in channels1:
-			towrite = str(str(channel1.category)+', '+channel1.name+', '+str(channel1.changed_roles))
-			with open(str("logs/channels/"+ctx.guild.name+".csv"), 'a') as file_object:
-				file_object.write(str(towrite+'\n'))
+	async def errorme(self, ctx):
+		await ctx.reply(1/0)
 
 	@commands.command(aliases=['tos'])
 	async def siren(self, ctx, *, content:str=None):
@@ -60,39 +52,53 @@ class TestingCog(commands.Cog, name="Testing"):
 		
 		for cmd in commands:
 			if (not cmd.hidden) and cmd.enabled:
-				logging.info("loop started")
+				logging.debug("loop started")
 				qname =	cmd.qualified_name
-				logging.info(qname)
+				logging.debug('qname')
 				description = cmd.description
-				logging.info(description)
+				logging.debug('description')
 				usage = cmd.usage
-				logging.info(usage)
-				parent = cmd.parent.name
-				logging.info(parent)
+				logging.debug('usage')
+				parent = cmd.full_parent_name
+				logging.debug('parent')
 				aliases = cmd.aliases
-				logging.info(aliases)
+				logging.debug(aliases)
 				cog = cmd.cog_name
-				logging.info(cog)
+				logging.debug(cog)
 				commandsdict[str(cog)][str(qname)] = {"description": description, "usage": usage, "parent": parent, "aliases": aliases}
-				logging.info("loop finished")
-		logging.info("loop finished") #FIXME WHY WON'T YOU WORK YOU STUPID CODE
+				logging.debug("loop finished")
+		logging.debug("loop finished (4 real)")
 		with open('commands.json', 'w') as file:
-			json.dump(commandsdict, file, indent=2)
-		logging.info("dumping to json finished")
-		logging.info(commandsdict)
-
-
-		"""
-		cogdict=self.bot.cogs
-		logging.info("got cogs")
-		commandlist=[cog.get_commands() for cog in cogdict.values()]
-		logging.info("got commands")
-		commandnames = [command.name for command in commandlist]
-		logging.info("got command names")
-		#delim = ", "
-		#coglist = delim.join(list(map(str, cogs)))
-		await ctx.reply(commandnames)
-"""
+			json.dump(commandsdict, file, indent=4)
+		logging.debug("dumping to json finished")
+		embed = discord.Embed(color=embedcolor, title="Help")
+		cogdata = ''
+		pages = []
+		for cog in commandsdict.keys():
+			logging.debug(f"Starting cog loop for {cog}")
+			
+			#cogdata += str(f'\n\n**{cog}**\n')
+			for command in commandsdict[cog].keys():
+				logging.debug(f"Starting command loop for {cog}")
+				if commandsdict[cog][command]["description"] != '':
+					description = f': {commandsdict[cog][command]["description"]}'
+				else:
+					description = ''
+				cogdata += f'\n`{command}`{description}'	
+			if not cogdata == '':
+				if (cog == "Owner" or cog == "Testing"):
+					if ctx.author.id == 545463550802395146:
+						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))	
+				elif cog == "MDSP":
+					if ctx.guild.id == 764981968579461130:
+						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
+				else:
+					pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
+			cogdata = ''
+			
+		paginator = BotEmbedPaginator(ctx, pages)
+		await paginator.run()
+		
 
 	@commands.command()
 	async def commandlistold(self, ctx):

@@ -11,8 +11,6 @@ with open('config.json', 'r') as file:
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
-prefix = configjson["prefix"]
 #endregion
 
 

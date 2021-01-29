@@ -11,8 +11,6 @@ with open('config.json', 'r') as file:
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
-prefix = configjson["prefix"]
 
 statuses={
 	0: "Playing",
@@ -53,7 +51,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Restarting...")
 		embed.set_footer(text=f"lasted for {uptime}")
 		await ctx.send(embed=embed)
-		logging.info('Bot restarted by '+str(ctx.author))
 		os.system("pm2 restart SachiBot")
 		await self.bot.logout()
 
@@ -64,19 +61,17 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Stopping...")
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.send(embed=embed)
-		logging.info('Bot stopped by '+str(ctx.author))
 		os.system("pm2 stop SachiBot")
 		await self.bot.logout()
 
 	@commands.command()
 	@commands.is_owner()
 	@commands.guild_only()
-	async def export(self, ctx, channel):
+	async def export(self, ctx, channel:int):
 		embed = discord.Embed(color=embedcolor)
 		embed.add_field(name="Channel", value=f'{channel}')
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
-		logging.info('Exported by '+str(ctx.author))
 
 	@commands.group()
 	@commands.is_owner()
@@ -124,7 +119,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	
 	@status.group()
 	async def activity(self, ctx):
-		logging.info()
+		logging.info('activity called')
 
 	@activity.command()
 	async def playing(self, ctx, *, status:str):
@@ -153,5 +148,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		subcommands = [f'**{cmd.name}:** \n{delim2.join(list(map(str, cmd.aliases)))}' for cmd in ctx.command.parent.commands]
 		embed = discord.Embed(color=embedcolor, title="Status Subcommands:", description=f'**Status:** {delim.join(list(map(str, subcommands)))}')
 		await ctx.reply(embed=embed)
+		
 def setup(bot):
     bot.add_cog(OwnerCog(bot))
+

@@ -3,7 +3,7 @@ from discord.ext import commands
 import json
 import time
 import sqlite3 as sl
-
+import logging as logger
 
 
 #region Variable Stuff
@@ -71,6 +71,7 @@ class LoggerCog(commands.Cog, name="Logging"):
 	
 	@commands.Cog.listener("on_message")
 	async def logcommands(self, message):
+		
 		content = message.content
 		if (content.startswith(prefix)):
 			try:
@@ -83,6 +84,7 @@ class LoggerCog(commands.Cog, name="Logging"):
 				channelname = message.author.name
 				guild = 0
 				guildname = "DM"
+			logger.info(f'{guildname} - {channelname} - {message.author.name} ({message.author.id}) just executed \'{message.content}\'')
 			sql = 'INSERT into Commands (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 			sqldata = [
 					int(time.time()), 
