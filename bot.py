@@ -142,8 +142,8 @@ async def on_command_error(ctx, error):
 		traceback_text = traceback_text.replace(configjson["pathtohide"], '')
 		apiurl = "https://api.github.com/gists"
 		gisttoedit = f'{apiurl}/{configjson["githubgist"]}'
-		githubtoken = keyring.get_password('SachiBotPY', 'github')
-	#print headers,parameters,payload
+		githubtoken = keyring.get_password('SachiBotPY', 'githubtoken')
+	
 		headers={'Authorization':'token %s'%githubtoken}
 		params={'scope':'gist'}
 		content = f'Error - {error} \n\n\n {traceback_text}'

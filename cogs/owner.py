@@ -2,8 +2,13 @@ import discord
 from discord.ext import commands
 import json
 import time, datetime
-import os, sys, logging
+import os, sys, logging, asyncio
 from discord import Status
+BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_PATH)
+from customfunctions import confirmation as ConfirmationCheck
+from io import BytesIO
+from PIL import Image
 #region Variable Stuff
 
 with open('config.json', 'r') as file:
@@ -73,6 +78,48 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
 
+	@commands.command()
+	@commands.is_owner()
+	async def embedcolor(self, ctx, color:str):
+		colorint = f"0x{color}"
+		oldembedcolor = configjson["embedcolor"]
+		try:
+			newembedcolor = int(colorint, 16)
+		except ValueError:
+			await ctx.reply("Invalid Color!")
+			return
+		embed = discord.Embed(color=embedcolor, title="Embed Color", description = f"Old color: #{oldembedcolor}\nNew color: #{color}")
+		
+		#Generate image with specified hex
+		hexcolor = f"#{color}"
+		image = Image.new("RGB", (100,100), hexcolor)
+		buffer = BytesIO()
+		image.save(buffer, "png") 
+		buffer.seek(0)
+		#Attach image and set thumbnail
+		file = discord.File(fp=buffer, filename="colorimage.png")
+		embed.set_thumbnail(url='attachment://colorimage.png')
+		
+		msg = await ctx.reply(embed=embed, file=file)
+		confirmation = await ConfirmationCheck.confirm(self, ctx, msg)
+		if confirmation:
+			embed = discord.Embed(color=newembedcolor, title="Embed Color Set!", description = f"Old color: #{oldembedcolor}\nNew color: #{color}")
+			embed.set_thumbnail(url='attachment://colorimage.png')
+			await msg.edit(embed=embed)
+			#Update the config file
+			configjson["embedcolor"] = colorint
+			with open('config.json', 'w') as file:
+				json.dump(configjson, file, indent=4)
+			#Reload cogs
+			for cog in ctx.bot.coglist:
+				self.bot.reload_extension(cog)
+		elif confirmation == False:
+			embed = discord.Embed(color=embedcolor, title="Embed Color", description = f"Embed color unchanged")
+			await msg.edit(embed=embed)
+		elif confirmation == None:
+			await ctx.reply("Confirmation timed out")
+			return
+
 	@commands.group()
 	@commands.is_owner()
 	async def status(self,ctx):
@@ -102,6 +149,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	async def online(self, ctx):
 		await changestatus(self, ctx, Status.online)
 		await ctx.message.add_reaction(str('🟢'))
+	
 	@status.command(aliases=['yellow', 'okay', 'ok', 'decent', 'afk'])
 	async def idle(self, ctx):
 		await changestatus(self, ctx, Status.idle)
