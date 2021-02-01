@@ -14,7 +14,7 @@ import urllib, urllib.parse
 import datetime
 import keyring
 
-import customfunctions.checks as customchecks
+from customfunctions import CustomChecks
 #endregion
 
 #region Variable Stuff
@@ -123,52 +123,59 @@ async def on_command_error(ctx, error):
 	elif isinstance(error, NoPrivateMessage):
 		await ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>'))
 		return
-	elif isinstance(error, customchecks.IncorrectGuild):
+	elif isinstance(error, CustomChecks.IncorrectGuild):
 		await ctx.reply(content="This command does not work in this server.", delete_after=10)
 		return
-	elif isinstance(error, CommandError):
+	else:
+		#Send user a message
 		await ctx.message.add_reaction('<:CommandError:804193351758381086>')
 		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed", delete_after=60)		
+
+		#Get traceback info
 		exc = error
 		etype = type(exc)
 		trace = exc.__traceback__
 
 		lines = traceback.format_exception(etype, exc, trace)
 		traceback_text = ''.join(lines)
-		with open('config.json', 'r') as file:
-			configjson = json.loads(file.read())
 		
+		#Github gist configuration
+		with open('config.json', 'r') as file:
+			configjson = json.loads(file.read())		
 		configjson["errornum"] = int(configjson["errornum"])+1
 		traceback_text = traceback_text.replace(configjson["pathtohide"], '')
 		apiurl = "https://api.github.com/gists"
 		gisttoedit = f'{apiurl}/{configjson["githubgist"]}'
 		githubtoken = keyring.get_password('SachiBotPY', 'githubtoken')
-	
+		
 		headers={'Authorization':'token %s'%githubtoken}
 		params={'scope':'gist'}
 		content = f'Error - {error} \n\n\n {traceback_text}'
 		leadzeroerrornum = f'{configjson["errornum"]:02d}'
 		payload={"description":"SachiBot Errors - A gist full of errors for my bot" ,"public":False,"files":{"SachiBotPyError %s.log"%leadzeroerrornum:{"content": content}}}
-
-		errornum = configjson["errornum"]	
+		#Upload to github gist
 		res=requests.patch(gisttoedit,headers=headers,params=params,data=json.dumps(payload))
 		j=json.loads(res.text)
 
-		channel = bot.get_channel(errorchannel)
+		
+		#dump configjson to update error numberr
 		with open('config.json', 'w') as file:
 			json.dump(configjson, file, indent=4)
 
+		#Build and send embed for error channel
+		channel = bot.get_channel(errorchannel)
 		embed1 = discord.Embed(title=f"Error {leadzeroerrornum}", color=embedcolor)
 		embed1.add_field(name="Message Url:", value=ctx.message.jump_url, inline='false')
 		embed1.add_field(name="Message:", value=ctx.message.clean_content, inline='true')
 		embed1.add_field(name="Author:", value=ctx.message.author.mention, inline='true')
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
+		#Check if it was in a guild
 		try:
 			guildname = ctx.guild.name
 			channelname = ctx.channel.name
 		except:
 			guildname = "DM"
-			channelname = "DM"
+			channelname = ctx.author.id
 		embed1.add_field(name="Guild:", value=guildname, inline='true')
 		embed1.add_field(name="Channel:", value=channelname, inline='true')
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
