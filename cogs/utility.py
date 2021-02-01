@@ -3,6 +3,7 @@ from discord.ext import commands
 import json, logging
 import time, datetime
 from string import ascii_letters, punctuation, whitespace
+from disputils import BotEmbedPaginator
 #region Variable Stuff
 
 with open('config.json', 'r') as file:
@@ -22,15 +23,54 @@ class UtilityCog(commands.Cog, name="Utility"):
 	def __init__(self, bot):
 		self.bot = bot
 
-	@commands.command(aliases=['commands'])
+	@commands.command()
 	async def help(self, ctx):
-		embed = discord.Embed(color=embedcolor, title="Commands")
-		embed.add_field(name="__Utilities__", value=ctx.bot.helputility, inline='true')
-		embed.add_field(name="__Fun__", value=ctx.bot.helpfun, inline='true')
-		if ctx.message.author.id == 545463550802395146:
-			embed.add_field(name="__Owner__", value=ctx.bot.helpadmin, inline='false')
-		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-		await ctx.reply(embed=embed)
+		commandsdict = {}
+		for cog in self.bot.cogs.keys():
+			commandsdict[str(cog)] = {}
+		commands = self.bot.walk_commands()
+		
+		for cmd in commands:
+			if (not cmd.hidden) and cmd.enabled:
+				
+				qname =	cmd.qualified_name
+				cog = cmd.cog_name				
+				commandsdict[str(cog)][str(qname)] = {
+					"description": cmd.description,
+					"usage": cmd.usage, 
+					"parent": cmd.parent,
+					"aliases": cmd.aliases,
+					"cog": cmd.cog_name,
+					"signature": cmd.signature
+					}
+		logging.debug("dumping to json finished")
+		embed = discord.Embed(color=embedcolor, title="Help")
+		cogdata = ''
+		pages = []
+		for cog in commandsdict.keys():
+			logging.debug(f"Starting cog loop for {cog}")
+			
+			for command in commandsdict[cog].keys():
+				logging.debug(f"Starting command loop for {cog}")
+				signature = f'{commandsdict[cog][command]["signature"]}'
+				if commandsdict[cog][command]["description"] != '':
+					description = f': {commandsdict[cog][command]["description"]}'
+				else:
+					description = ''
+				cogdata += f'\n`{command} {signature}`{description}'	
+			if not cogdata == '':
+				if (cog == "Owner" or cog == "Testing"):
+					if ctx.author.id == 545463550802395146:
+						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))	
+				elif cog == "MDSP":
+					if ctx.guild.id == 764981968579461130:
+						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
+				else:
+					pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
+			cogdata = ''
+			
+		paginator = BotEmbedPaginator(ctx, pages)
+		await paginator.run()
 
 	@commands.command(aliases=['uptime'])
 	async def ping(self, ctx):
