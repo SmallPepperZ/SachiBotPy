@@ -3,7 +3,8 @@ from discord.ext import commands
 import json
 import time
 import sqlite3 as sl
-import logging as logger
+import logging as logger, logging
+
 
 
 #region Variable Stuff
@@ -75,15 +76,15 @@ class LoggerCog(commands.Cog, name="Logging"):
 		content = message.content
 		if (content.startswith(prefix)):
 			try:
-				channel = message.channel.id
+				channel     = message.channel.id
 				channelname = message.channel.name
-				guild = message.guild.id
-				guildname = message.guild.name
-			except AttributeError:
-				channel = message.author.id
+				guild       = message.guild.id
+				guildname   = message.guild.name
+			except AttributeError: 
+				channel     = message.author.id
 				channelname = message.author.name
-				guild = 0
-				guildname = "DM"
+				guild       = 0
+				guildname   = "DM"
 			logger.info(f'{guildname} - {channelname} - {message.author.name} ({message.author.id}) just executed \'{message.content}\'')
 			sql = 'INSERT into Commands (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 			sqldata = [
@@ -100,6 +101,15 @@ class LoggerCog(commands.Cog, name="Logging"):
 					   ]
 			with dbcon:
 				dbcon.execute(sql, sqldata)
+			
+	# @commands.Cog.listener("on_message")
+	# async def spellcheck(self, message):
+	# 	if message.channel.id == 806234519258529803 and not message.author.bot:
+	# 		corrections = SpellChecker.correct_spelling(message.content)
+	# 		if corrections is not None:
+	# 			embed = discord.Embed(color=embedcolor, description=f'**Did you mean:**\n{corrections}')
+	# 			await message.reply(embed=embed)
+				
 				
 #TODO Add command that admins can use to ignore their server or channel	
 
