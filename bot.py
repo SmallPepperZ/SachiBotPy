@@ -19,7 +19,7 @@ from customfunctions import CustomChecks
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configjson = json.loads(file.read())
 
 embedcolor = int(configjson["embedcolor"], 16)
@@ -140,7 +140,7 @@ async def on_command_error(ctx, error):
 		traceback_text = ''.join(lines)
 		
 		#Github gist configuration
-		with open('config.json', 'r') as file:
+		with open('storage/config.json', 'r') as file:
 			configjson = json.loads(file.read())		
 		configjson["errornum"] = int(configjson["errornum"])+1
 		traceback_text = traceback_text.replace(configjson["pathtohide"], '')
@@ -159,7 +159,7 @@ async def on_command_error(ctx, error):
 
 		
 		#dump configjson to update error numberr
-		with open('config.json', 'w') as file:
+		with open('storage/config.json', 'w') as file:
 			json.dump(configjson, file, indent=4)
 
 		#Build and send embed for error channel
