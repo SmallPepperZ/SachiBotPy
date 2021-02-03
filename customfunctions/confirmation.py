@@ -2,8 +2,8 @@ import asyncio
 import discord
 emojis = {"✅": True, "❎": False}
 
-async def confirm(self:discord.ext.commands.Cog, ctx:discord.ext.commands.Context, msg:discord.Message, *, timeout:int=20) -> bool or None:
-	"""[summary]
+async def confirm(self:discord.ext.commands.Cog, ctx:discord.ext.commands.Context, msg:discord.Message, *args, timeout:int=20) -> bool or None:
+	"""Waits for confirmation via reaction from the user before continuing
 
 	Parameters
 	----------

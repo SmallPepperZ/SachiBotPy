@@ -81,7 +81,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.command()
 	@commands.is_owner()
 	async def embedcolor(self, ctx, color:str):
-		colorint = f"0x{color}"
+		colorint      = f"0x{color}"
 		oldembedcolor = configjson["embedcolor"]
 		try:
 			newembedcolor = int(colorint, 16)
@@ -92,8 +92,8 @@ class OwnerCog(commands.Cog,name="Owner"):
 		
 		#Generate image with specified hex
 		hexcolor = f"#{color}"
-		image = Image.new("RGB", (100,100), hexcolor)
-		buffer = BytesIO()
+		image    = Image.new("RGB", (100,100), hexcolor)
+		buffer   = BytesIO()
 		image.save(buffer, "png") 
 		buffer.seek(0)
 		#Attach image and set thumbnail
