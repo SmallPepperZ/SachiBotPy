@@ -41,12 +41,6 @@ bot.start_time = start_time_local
 logging.basicConfig(level=logging.DEBUG)
 bot.remove_command('help')
 
-with open('help-pages/utility.txt', 'r') as file:
-	bot.helputility = file.read()
-with open('help-pages/admin.txt', 'r') as file:
-	bot.helpadmin = file.read()
-with open('help-pages/fun.txt', 'r') as file:
-	bot.helpfun = file.read()
 
 #endregion
 
