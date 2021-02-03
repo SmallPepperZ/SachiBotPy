@@ -23,17 +23,17 @@ with open('config.json', 'r') as file:
 	configjson = json.loads(file.read())
 
 embedcolor = int(configjson["embedcolor"], 16)
-token = keyring.get_password('SachiBotPY', 'discordtoken')
+token      = keyring.get_password('SachiBotPY', 'discordtoken')
 
 errorlogdir = 'logs/errors/'
 
 
-prefix = configjson["prefix"]
+prefix           = configjson["prefix"]
 start_time_local = time.time()
 
-intents = discord.Intents.all()
+intents        = discord.Intents.all()
 intents.typing = False
-bot = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
+bot            = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
 
 errorchannel = int(configjson["errorchannel"])
 
@@ -53,7 +53,7 @@ with open('help-pages/fun.txt', 'r') as file:
 #region Cogs
 bot.coglist = ['cogs.owner',
 			   'cogs.fun',
-		 	   'cogs.utility',
+			   'cogs.utility',
 	 	 	   'cogs.admin',
 			   'cogs.cogs',
 			   'cogs.logging',
