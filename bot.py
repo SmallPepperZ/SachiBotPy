@@ -25,7 +25,6 @@ with open('storage/config.json', 'r') as file:
 embedcolor = int(configjson["embedcolor"], 16)
 token      = keyring.get_password('SachiBotPY', 'discordtoken')
 
-errorlogdir = 'logs/errors/'
 
 
 prefix           = configjson["prefix"]
