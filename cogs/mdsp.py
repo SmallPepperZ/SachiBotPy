@@ -20,7 +20,7 @@ from customfunctions import CustomChecks, Mee6Api
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)
@@ -110,7 +110,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 	word2 = terms[action]["word2"]
 	word3 = terms[action]["word3"]
 	color = terms[action]["color"]
-	with open('invitees.json', 'r') as file:
+	with open('storage/invitees.json', 'r') as file:
 		inviteesjson = json.loads(file.read())
 	try:
 		messageid = inviteesjson["active"][str(userid)]
@@ -165,7 +165,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 		await infomsg.edit(content=f"{user.name} successfully {word3}")	
 	except:			 
 		await infomsg.edit(content=f"{user.name} not found")	
-	with open('invitees.json', 'w') as file:
+	with open('storage/invitees.json', 'w') as file:
 		json.dump(inviteesjson, file, indent=4)
 
 
@@ -198,7 +198,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				userid = int("".join([x for x in userid  if x.isdigit()]))
 			except ValueError:
 				await ctx.reply("Invalid User ID")
-		with open('invitees.json', 'r') as file:
+		with open('storage/invitees.json', 'r') as file:
 			inviteesjson = json.loads(file.read())
 		user = await self.bot.fetch_user(int(userid))
 		invitechannel = self.bot.get_channel(invitechannelid)
@@ -223,7 +223,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 		#	await message.add_reaction('<:upvote:771082566752665681>')
 		#	await message.add_reaction('<:downvote:771082566651609089>')
 			inviteesjson["active"][userid] = message.id
-			with open('invitees.json', 'w') as file:
+			with open('storage/invitees.json', 'w') as file:
 				json.dump(inviteesjson, file, indent=4)
 		elif ctx.guild.get_member(userid) is not None:
 			await ctx.reply(f'{user.name} is offended that you didn\'t know they were here')
@@ -236,7 +236,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 		invitechannel = self.bot.get_channel(invitechannelid)
 		invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid) 
 		infomsg = await ctx.reply(f"Updating {invitechannel.mention}")
-		with open('invitees.json', 'r') as file:
+		with open('storage/invitees.json', 'r') as file:
 			inviteesjson = json.loads(file.read())
 		inviteemessages =  [item for item in inviteesjson["active"].values()]
 		messages = [await invitechannel.fetch_message(message) for message in inviteesjson["active"].values()]
@@ -303,7 +303,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 			else:
 				logger.debug("User message updated too recently")
 
-		with open('invitees.json', 'w') as file:
+		with open('storage/invitees.json', 'w') as file:
 			json.dump(inviteesjson, file, indent=4)
 		await infomsg.edit(content=f"Updating {invitechannel.mention}:\nCompleted")		
 		
