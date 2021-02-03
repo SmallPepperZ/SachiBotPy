@@ -1,3 +1,4 @@
+from customfunctions.mee6api import PlayerNotFound
 import logging as logger, traceback
 import discord
 from discord.ext import commands
@@ -9,30 +10,38 @@ from mee6_py_api import API
 from datetime import datetime, timedelta, timezone
 from tzlocal import get_localzone
 import pytz
+import requests
 
-BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_PATH)
+#BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#sys.path.append(BASE_PATH)
 
-from customfunctions import checks as customchecks
+from customfunctions import CustomChecks, Mee6Api
 
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
 
-mee6API = API(302094807046684672)
 
 invitechannelid = 796109386715758652
 invitediscussionchannelid = 792558439863681046
 invitechannellimit = 10
-prefix = configjson["prefix"]
 #endregion
 
 fields={}
+colors = {
+	"approve": 0x17820e,
+	"deny": 0xa01116,
+	"pause": 0x444444,
+	"none": 0xFFFF00,
+	"accept": 0x1bc912,
+	"decline": 0xd81d1a
+}
+
 
 def addfield(embed, key:str, value:str):
 	embed.__setattr__("description", f'{embed.description}\n**{key}:** {value}')
@@ -46,7 +55,8 @@ def listlines(messagecontents):
 	l4 = splitmessage[3]
 	l5 = splitmessage[4]
 	l6 = splitmessage[5]
-	return l1, l2, l3, l4, l5, l6
+	l7 = splitmessage[6]
+	return l1, l2, l3, l4, l5, l6, l7
 def getidfrommessage(dictionary:dict, messageid:str):
 	for key, value in dictionary.items():
 		if messageid == value:
@@ -57,7 +67,6 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 	invitechannel = self.bot.get_channel(invitechannelid)
 	user = await self.bot.fetch_user(int(userid))		
 	infomsg = await ctx.reply(f"Searching for {user.name} in {invitechannel.mention}...")
-	
 	terms = {
 		"approve":{
 			"word1": "Approving",
@@ -95,12 +104,13 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 			"word3": "changed status to declined",
 			"color": 0xd81d1a
 		}
-	}
+		}
+
 	word1 = terms[action]["word1"]
 	word2 = terms[action]["word2"]
 	word3 = terms[action]["word3"]
 	color = terms[action]["color"]
-	with open('invitees.json', 'r') as file:
+	with open('storage/invitees.json', 'r') as file:
 		inviteesjson = json.loads(file.read())
 	try:
 		messageid = inviteesjson["active"][str(userid)]
@@ -114,6 +124,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 		l4 = splitmessage[3]
 		l5 = splitmessage[4]
 		l6 = splitmessage[5]
+		l7 = splitmessage[6]
 		roles = [str(role.id) for role in ctx.author.roles]
 		if not "None" in l6 and (force == False or not str(796124089294782524) in roles):
 			if (action == "accept" or action == "decline"):
@@ -137,6 +148,8 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 		addrow(embed, l3)
 		addrow(embed, l4)
 		addrow(embed, l5)
+		footer = messagecontents.footer
+		embed.set_footer(text=footer.text, icon_url=footer.icon_url)
 		
 		addfield(embed, "Invite Status", word2)
 		embed.set_thumbnail(url=messagecontents.thumbnail.url)
@@ -147,11 +160,12 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 			inviteesjson["active"].pop(str(userid))
 			inviteesjson["archive"]["approved"][userid] = newmsg.id
 		else:
+			addrow(embed, l7)
 			await message.edit(embed=embed)	
 		await infomsg.edit(content=f"{user.name} successfully {word3}")	
 	except:			 
 		await infomsg.edit(content=f"{user.name} not found")	
-	with open('invitees.json', 'w') as file:
+	with open('storage/invitees.json', 'w') as file:
 		json.dump(inviteesjson, file, indent=4)
 
 
@@ -160,14 +174,10 @@ class MdspCog(commands.Cog, name="MDSP"):
 	def __init__(self, bot):
 		self.bot = bot
 
-	def MDSPOnly():
-		def predicate(ctx):
-			logger.debug("hi")# a function that takes ctx as it's only arg, that returns a truethy or falsey value, or raises an exception
-		return commands.check(predicate)	
 
 	
 	@commands.group(aliases=['invitee', 'invitees'])
-	@customchecks.limit_to_guild(764981968579461130)
+	@CustomChecks.limit_to_guild(764981968579461130)
 	async def invite(self,ctx):
 		if ctx.invoked_subcommand is None:
 			delim="\n\n"
@@ -175,6 +185,8 @@ class MdspCog(commands.Cog, name="MDSP"):
 			subcommands = [f'**{cmd.name}:** {cmd.description}' for cmd in ctx.command.commands]
 			embed = discord.Embed(color=embedcolor, title="Invite Subcommands:", description=delim.join(list(map(str, subcommands))))
 			await ctx.reply(embed=embed)
+
+
 
 	@invite.command(description="*Cooldown: 2 minutes*\nAdds a user to #potential-invitees")
 	#@commands.cooldown(rate=1, per=120, type=BucketType.user)
@@ -186,17 +198,15 @@ class MdspCog(commands.Cog, name="MDSP"):
 				userid = int("".join([x for x in userid  if x.isdigit()]))
 			except ValueError:
 				await ctx.reply("Invalid User ID")
-		with open('invitees.json', 'r') as file:
+		with open('storage/invitees.json', 'r') as file:
 			inviteesjson = json.loads(file.read())
 		user = await self.bot.fetch_user(int(userid))
 		invitechannel = self.bot.get_channel(invitechannelid)
 		if (inviteesjson["active"].get(str(userid)) is None) and ctx.guild.get_member(userid) is None:	
 			infomsg = await ctx.reply(f'Adding "{user.name}" to {invitechannel.mention}...')
 			try:
-				details = await mee6API.levels.get_user_details(userid)
-				mclevel = details["level"]
-				mcmessages = details["message_count"]
-			except TypeError:
+				mclevel, mcmessages = Mee6Api.get_user(userid, pages=10, limit=1000)
+			except PlayerNotFound:
 				mclevel = "Not found, too low?"
 				mcmessages = "Not found, too low?"
 
@@ -207,12 +217,13 @@ class MdspCog(commands.Cog, name="MDSP"):
 			addfield(embed, "Mention", user.mention)
 			addfield(embed, "User ID",  f'`{user.id}`')
 			addfield(embed, "Invite Status",  f'None')
+			embed.set_footer(text=f'Suggested by {ctx.author.name}', icon_url= ctx.author.avatar_url)
 			await infomsg.edit(content=f'Added "{user.name}" to {invitechannel.mention}')
 			message = await invitechannel.send(embed=embed)
 		#	await message.add_reaction('<:upvote:771082566752665681>')
 		#	await message.add_reaction('<:downvote:771082566651609089>')
 			inviteesjson["active"][userid] = message.id
-			with open('invitees.json', 'w') as file:
+			with open('storage/invitees.json', 'w') as file:
 				json.dump(inviteesjson, file, indent=4)
 		elif ctx.guild.get_member(userid) is not None:
 			await ctx.reply(f'{user.name} is offended that you didn\'t know they were here')
@@ -225,13 +236,13 @@ class MdspCog(commands.Cog, name="MDSP"):
 		invitechannel = self.bot.get_channel(invitechannelid)
 		invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid) 
 		infomsg = await ctx.reply(f"Updating {invitechannel.mention}")
-		with open('invitees.json', 'r') as file:
+		with open('storage/invitees.json', 'r') as file:
 			inviteesjson = json.loads(file.read())
 		inviteemessages =  [item for item in inviteesjson["active"].values()]
 		messages = [await invitechannel.fetch_message(message) for message in inviteesjson["active"].values()]
 		for message in messages:
 			messagecontents = message.embeds[0]
-			l1, l2, l3, l4, l5, l6 = listlines(messagecontents)
+			l1, l2, l3, l4, l5, l6, l7 = listlines(messagecontents)
 			userid = getidfrommessage(inviteesjson["active"], message.id)
 			user = await self.bot.fetch_user(userid)
 			sevendaysago = datetime.now(pytz.timezone("UTC")) - timedelta(days=7)
@@ -240,10 +251,24 @@ class MdspCog(commands.Cog, name="MDSP"):
 				lastedited = message.edited_at.replace(tzinfo=pytz.timezone("UTC"))
 			except:
 				lastedited = message.created_at.replace(tzinfo=pytz.timezone("UTC"))
+			#Determine status
+			statustype = "none"
+			if "<:Leave:796147707709358100>" in l6:
+				statustype = "decline"
+			elif "<:Joined:796147287486627841>" in l6:
+				statustype = "accept"
+			elif "<:Allowed:786997173845622824>" in l6:
+				statustype = "approve"
+			elif "<:Denied:786997173820588073>" in l6:
+				statustype = "deny"
+			elif "⏸️" in l6:
+				statustype = "pause"
+			elif "None" in l6:
+				statustype = "none"
+			logger.debug(statustype)
 			logger.debug("Times fetched")
 			if (lastedited <= yesterday):
-				logger.debug("first if succeeded")
-				if ("<:Leave:796147707709358100>" in l6 or "<:Denied:786997173820588073>" in l6) and (lastedited <= sevendaysago):				
+				if (statustype == "decline" or statustype == "deny") and (lastedited <= sevendaysago):				
 					logger.debug("if activated")
 					newmsg = await invitediscussionchannel.send(embed=messagecontents)
 					await ctx.reply(f'{user.name} moved out of {invitechannel.mention}')
@@ -252,33 +277,35 @@ class MdspCog(commands.Cog, name="MDSP"):
 					inviteesjson["archive"]["denied"][userid] = newmsg.id
 					logger.debug("if comopleted")
 				else:
-					logger.debug("Else activated")
 					await infomsg.edit(content=f"Updating {invitechannel.mention}:\n{user.name}")
 					logger.debug("infomsg edited")
 					try:
-						details = await mee6API.levels.get_user_details(userid)
-						mclevel = details["level"]
-						mcmessages = details["message_count"]
-					except TypeError:
+						mclevel, mcmessages = Mee6Api.get_user(userid, pages=10, limit=1000)
+					except PlayerNotFound:
 						mclevel = "Not found, too low?"
 						mcmessages = "Not found, too low?"
 					logger.debug("mee6 part done")
-					embed = discord.Embed(color=0xffff00, description=l1)
+					#Remake embed
+					embed = discord.Embed(color=colors[statustype], description=l1)
 					addfield(embed, "Maincord Level", mclevel)
 					addfield(embed, "Maincord Messages", mcmessages)
 					addrow(embed, l4)
 					addrow(embed, l5)
 					addrow(embed, l6)
+					addrow(embed, l7)
 					embed.set_thumbnail(url=messagecontents.thumbnail.url)
+					footer = messagecontents.footer
+					embed.set_footer(text=footer.text, icon_url=footer.icon_url)
 					logger.debug("embed built")
+					#Send embed
 					await message.edit(embed=embed)
 					logger.debug("embed sent")
 			else:
 				logger.debug("User message updated too recently")
 
-			with open('invitees.json', 'w') as file:
-				json.dump(inviteesjson, file, indent=4)
-			await infomsg.edit(content=f"Updating {invitechannel.mention}:\nCompleted")		
+		with open('storage/invitees.json', 'w') as file:
+			json.dump(inviteesjson, file, indent=4)
+		await infomsg.edit(content=f"Updating {invitechannel.mention}:\nCompleted")		
 		
 			
 	@invite.command(description="*Official Helpers Only*\nSets the approved status for a user, and allows `%invite accept` and `%invite decline`")
