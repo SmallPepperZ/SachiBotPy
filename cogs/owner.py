@@ -11,7 +11,7 @@ from io import BytesIO
 from PIL import Image
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)
@@ -108,7 +108,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 			await msg.edit(embed=embed)
 			#Update the config file
 			configjson["embedcolor"] = colorint
-			with open('config.json', 'w') as file:
+			with open('storage/config.json', 'w') as file:
 				json.dump(configjson, file, indent=4)
 			#Reload cogs
 			for cog in ctx.bot.coglist:
