@@ -7,7 +7,7 @@ from customfunctions import EmbedMaker
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)

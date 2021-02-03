@@ -9,7 +9,7 @@ import logging as logger, logging
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)
@@ -19,7 +19,7 @@ dbpath = configjson["logpath"]
 dbcon = sl.connect(str(dbpath))
 #endregion
 
-with open("loggingignore.json", "r") as loggingignore:
+with open("storage/loggingignore.json", "r") as loggingignore:
 	ignorejson = loggingignore.read()
 channelignore = json.loads(ignorejson)["channels"]
 guildignore = json.loads(ignorejson)["guilds"]
