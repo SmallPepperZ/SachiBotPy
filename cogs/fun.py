@@ -6,13 +6,11 @@ import os
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
-prefix = configjson["prefix"]
 #endregion
 
 

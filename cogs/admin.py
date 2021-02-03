@@ -2,15 +2,15 @@ import discord
 from discord.ext import commands
 import json
 from discord.ext.commands import MessageConverter
+import logging
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
 prefix = configjson["prefix"]
 #endregion
 
@@ -48,7 +48,6 @@ class AdminCog(commands.Cog, name="Admin"):
 			await ctx.message.delete()
 			message = await MessageConverter().convert(ctx, messageid)
 			await message.delete()
-			logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}siren\'')
 
 
 

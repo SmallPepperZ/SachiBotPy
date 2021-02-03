@@ -4,16 +4,15 @@ import json
 from discord.ext.commands.errors import ExtensionNotLoaded
 from discord.ext.commands.errors import ExtensionNotFound
 from discord.ext.commands.errors import ExtensionFailed
+import logging
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
-prefix = configjson["prefix"]
 #endregion
 
 
@@ -59,7 +58,6 @@ class CogsCog(commands.Cog, name="Cogs"):
 				embed.add_field(name="Error:", value=f'```{error}```', inline="false")
 				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 				await ctx.reply(embed=embed)
-		logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}reload {cog}\'')
 
 	@commands.command()
 	@commands.is_owner()
@@ -73,7 +71,6 @@ class CogsCog(commands.Cog, name="Cogs"):
 			embed.add_field(name="Cog:", value=f'{cog}')
 			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 			await ctx.reply(embed=embed)
-			logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) just used \'{prefix}unload {cog}\'')
 		except ExtensionNotLoaded as error:
 			try:
 				self.bot.unload_extension(f'cogs.{cog_lower}')
@@ -81,7 +78,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 				embed.add_field(name="Cog:", value=f'{cog}')
 				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 				await ctx.reply(embed=embed)
-				logging.info(f'{ctx.message.author.name} ({ctx.message.author.id}) got handled error "ExtensionNotLoaded" when using \'{prefix}unload {cog}\'')
+			
 			except:
 				embed = discord.Embed(color=embedcolor, title="Cog Not Loaded")
 				embed.add_field(name="Cog", value=cog)

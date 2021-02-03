@@ -1,37 +1,39 @@
 #region Imports
+import requests
 import time
 import discord
 import os, sys, os.path
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 import logging
-from discord.ext.commands.errors import CommandError, MissingPermissions, BotMissingPermissions, CommandNotFound, MissingRole, CommandOnCooldown, BadArgument
+from discord.ext.commands.errors import *
 import json
 from discord import Status
 import traceback
 import urllib, urllib.parse
+import datetime
+import keyring
 
-import customfunctions.checks as customchecks
+from customfunctions import CustomChecks
 #endregion
 
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
-	configfile = file.read()
+with open('storage/config.json', 'r') as file:
+	configjson = json.loads(file.read())
 
-configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
+token      = keyring.get_password('SachiBotPY', 'discordtoken')
 
 errorlogdir = 'logs/errors/'
 
 
-prefix = configjson["prefix"]
+prefix           = configjson["prefix"]
 start_time_local = time.time()
 
-intents = discord.Intents.all()
+intents        = discord.Intents.all()
 intents.typing = False
-bot = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
+bot            = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
 
 errorchannel = int(configjson["errorchannel"])
 
@@ -51,7 +53,7 @@ with open('help-pages/fun.txt', 'r') as file:
 #region Cogs
 bot.coglist = ['cogs.owner',
 			   'cogs.fun',
-		 	   'cogs.utility',
+			   'cogs.utility',
 	 	 	   'cogs.admin',
 			   'cogs.cogs',
 			   'cogs.logging',
@@ -82,15 +84,18 @@ async def on_ready():
 #region Bot Events
 	
 @bot.event
-async def on_command_error(ctx, error):
-	error = getattr(error, "original", error)
+async def on_command_error(ctx, error):	
 	if hasattr(ctx.command, 'on_error'):
+		#await ctx.message.add_reaction('<:CommandError:804193351758381086>')
 		return
-	elif isinstance(error, CommandNotFound):
+	elif isinstance(error, CommandNotFound) or ctx.command.hidden:
 		await ctx.message.add_reaction(str('❔'))
 		return 
-	elif isinstance(error, commands.NotOwner):
+	elif isinstance(error, NotOwner):		
 		await ctx.message.add_reaction(str('🔏'))
+		return
+	elif isinstance(error, DisabledCommand):		
+		await ctx.message.add_reaction(str('<:DisabledCommand:804476191268536320>'))
 		return
 	elif isinstance(error, MissingPermissions):
 		await ctx.message.add_reaction(str('🔐'))
@@ -102,18 +107,31 @@ async def on_command_error(ctx, error):
 		await ctx.message.add_reaction(str('🔐'))
 		return
 	elif isinstance(error, CommandOnCooldown):
-		await ctx.message.add_reaction(str('🕐'))
+		await ctx.message.add_reaction(str('<:Cooldown:804477347780493313>'))
+		if str(error.cooldown.type.name) != "default":
+			cooldowntype = f'per {error.cooldown.type.name}'
+		else:
+			cooldowntype = 'global'
+		await ctx.reply(f"This command is on a {round(error.cooldown.per, 0)}s {cooldowntype} cooldown. Wait {round(error.retry_after, 1)} seconds", delete_after=min(10, error.retry_after))
 		return
-	elif isinstance(error, BadArgument):
-		await ctx.reply("Invalid argument!")
+	elif isinstance(error, MissingRequiredArgument):
+		await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
 		return 
-	elif isinstance(error, commands.NoPrivateMessage):
+	elif isinstance(error, BadArgument):
+		await ctx.reply(f"Invalid argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
+		return 
+	elif isinstance(error, NoPrivateMessage):
 		await ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>'))
 		return
-	elif isinstance(error, customchecks.IncorrectGuild):
+	elif isinstance(error, CustomChecks.IncorrectGuild):
 		await ctx.reply(content="This command does not work in this server.", delete_after=10)
-	elif isinstance(error, CommandError):
-		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed")		
+		return
+	else:
+		#Send user a message
+		await ctx.message.add_reaction('<:CommandError:804193351758381086>')
+		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed", delete_after=60)		
+
+		#Get traceback info
 		exc = error
 		etype = type(exc)
 		trace = exc.__traceback__
@@ -121,44 +139,49 @@ async def on_command_error(ctx, error):
 		lines = traceback.format_exception(etype, exc, trace)
 		traceback_text = ''.join(lines)
 		
-		channel = bot.get_channel(errorchannel)
+		#Github gist configuration
+		with open('storage/config.json', 'r') as file:
+			configjson = json.loads(file.read())		
+		configjson["errornum"] = int(configjson["errornum"])+1
+		traceback_text = traceback_text.replace(configjson["pathtohide"], '')
+		apiurl = "https://api.github.com/gists"
+		gisttoedit = f'{apiurl}/{configjson["githubgist"]}'
+		githubtoken = keyring.get_password('SachiBotPY', 'githubtoken')
 		
-		"""
-			api_dev_key=configjson["pbdevapikey"]
-			api_user_key=configjson["pbuserapikey"]
-			api_paste_code=urllib.parse.quote_plus(traceback_text)
-			api_paste_name=urllib.parse.quote_plus(ctx.message.clean_content)
-			api_option="paste"
-			api_paste_private="1"
-			api_paste_expire_date='1W'
-			url1 = os.popen(f'curl -s -X POST -d api_option={api_option} -d api_paste_code={api_paste_code} -d api_paste_name={api_paste_name} -d api_dev_key={api_dev_key} -d api_paste_private={api_paste_private} -d api_paste_expire_date={api_paste_expire_date} https://pastebin.com/api/api_post.php').read()
-			try:
-				url = url1.split("com",1)[0]+'com/raw'+url1.split("com",1)[1]
-			except:
-				url = url1
-		"""	
-"""
-		errornumber = len([name for name in os.listdir(errorlogdir) if os.path.isfile(os.path.join(errorlogdir, name))])+1
-		with open(f'logs/errors/Error {errornumber}.log', 'x') as f:
-			f.write(traceback_text)
-		embed1 = discord.Embed(title=f"Error {errornumber}", color=embedcolor)
+		headers={'Authorization':'token %s'%githubtoken}
+		params={'scope':'gist'}
+		content = f'Error - {error} \n\n\n {traceback_text}'
+		leadzeroerrornum = f'{configjson["errornum"]:02d}'
+		payload={"description":"SachiBot Errors - A gist full of errors for my bot" ,"public":False,"files":{"SachiBotPyError %s.log"%leadzeroerrornum:{"content": content}}}
+		#Upload to github gist
+		res=requests.patch(gisttoedit,headers=headers,params=params,data=json.dumps(payload))
+		j=json.loads(res.text)
+
+		
+		#dump configjson to update error numberr
+		with open('storage/config.json', 'w') as file:
+			json.dump(configjson, file, indent=4)
+
+		#Build and send embed for error channel
+		channel = bot.get_channel(errorchannel)
+		embed1 = discord.Embed(title=f"Error {leadzeroerrornum}", color=embedcolor)
 		embed1.add_field(name="Message Url:", value=ctx.message.jump_url, inline='false')
 		embed1.add_field(name="Message:", value=ctx.message.clean_content, inline='true')
 		embed1.add_field(name="Author:", value=ctx.message.author.mention, inline='true')
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
+		#Check if it was in a guild
 		try:
 			guildname = ctx.guild.name
 			channelname = ctx.channel.name
 		except:
 			guildname = "DM"
-			channelname = "DM"
+			channelname = ctx.author.id
 		embed1.add_field(name="Guild:", value=guildname, inline='true')
 		embed1.add_field(name="Channel:", value=channelname, inline='true')
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
 		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
-		embed1.add_field(name="Traceback:", value=f'File saved to \'logs/errors/Error {errornumber}.log\'', inline='false')
-"""#		await channel.send(embed=embed1)
-		#FIXME fix this error handling
+		embed1.add_field(name="Traceback:", value=f'Traceback Gist - [SachiBotPyError {leadzeroerrornum}.log](https://gist.github.com/SmallPepperZ/{configjson["githubgist"]}#file-sachibotpyerror-{leadzeroerrornum}-log \"Github Gist #{leadzeroerrornum}\") ', inline='false')
+		await channel.send(embed=embed1)
 
 
 

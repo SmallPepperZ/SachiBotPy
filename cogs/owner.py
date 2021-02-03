@@ -2,17 +2,20 @@ import discord
 from discord.ext import commands
 import json
 import time, datetime
-import os, sys, logging
+import os, sys, logging, asyncio
 from discord import Status
+BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_PATH)
+from customfunctions import confirmation as ConfirmationCheck
+from io import BytesIO
+from PIL import Image
 #region Variable Stuff
 
-with open('config.json', 'r') as file:
+with open('storage/config.json', 'r') as file:
 	configfile = file.read()
 
 configjson = json.loads(configfile)
 embedcolor = int(configjson["embedcolor"], 16)
-token = configjson["token"]
-prefix = configjson["prefix"]
 
 statuses={
 	0: "Playing",
@@ -53,7 +56,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Restarting...")
 		embed.set_footer(text=f"lasted for {uptime}")
 		await ctx.send(embed=embed)
-		logging.info('Bot restarted by '+str(ctx.author))
 		os.system("pm2 restart SachiBot")
 		await self.bot.logout()
 
@@ -64,19 +66,59 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Stopping...")
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.send(embed=embed)
-		logging.info('Bot stopped by '+str(ctx.author))
 		os.system("pm2 stop SachiBot")
 		await self.bot.logout()
 
 	@commands.command()
 	@commands.is_owner()
 	@commands.guild_only()
-	async def export(self, ctx, channel):
+	async def export(self, ctx, channel:int):
 		embed = discord.Embed(color=embedcolor)
 		embed.add_field(name="Channel", value=f'{channel}')
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
-		logging.info('Exported by '+str(ctx.author))
+
+	@commands.command()
+	@commands.is_owner()
+	async def embedcolor(self, ctx, color:str):
+		colorint      = f"0x{color}"
+		oldembedcolor = configjson["embedcolor"]
+		try:
+			newembedcolor = int(colorint, 16)
+		except ValueError:
+			await ctx.reply("Invalid Color!")
+			return
+		embed = discord.Embed(color=embedcolor, title="Embed Color", description = f"Old color: #{oldembedcolor}\nNew color: #{color}")
+		
+		#Generate image with specified hex
+		hexcolor = f"#{color}"
+		image    = Image.new("RGB", (100,100), hexcolor)
+		buffer   = BytesIO()
+		image.save(buffer, "png") 
+		buffer.seek(0)
+		#Attach image and set thumbnail
+		file = discord.File(fp=buffer, filename="colorimage.png")
+		embed.set_thumbnail(url='attachment://colorimage.png')
+		
+		msg = await ctx.reply(embed=embed, file=file)
+		confirmation = await ConfirmationCheck.confirm(self, ctx, msg)
+		if confirmation:
+			embed = discord.Embed(color=newembedcolor, title="Embed Color Set!", description = f"Old color: #{oldembedcolor}\nNew color: #{color}")
+			embed.set_thumbnail(url='attachment://colorimage.png')
+			await msg.edit(embed=embed)
+			#Update the config file
+			configjson["embedcolor"] = colorint
+			with open('storage/config.json', 'w') as file:
+				json.dump(configjson, file, indent=4)
+			#Reload cogs
+			for cog in ctx.bot.coglist:
+				self.bot.reload_extension(cog)
+		elif confirmation == False:
+			embed = discord.Embed(color=embedcolor, title="Embed Color", description = f"Embed color unchanged")
+			await msg.edit(embed=embed)
+		elif confirmation == None:
+			await ctx.reply("Confirmation timed out")
+			return
 
 	@commands.group()
 	@commands.is_owner()
@@ -107,6 +149,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	async def online(self, ctx):
 		await changestatus(self, ctx, Status.online)
 		await ctx.message.add_reaction(str('🟢'))
+	
 	@status.command(aliases=['yellow', 'okay', 'ok', 'decent', 'afk'])
 	async def idle(self, ctx):
 		await changestatus(self, ctx, Status.idle)
@@ -124,7 +167,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	
 	@status.group()
 	async def activity(self, ctx):
-		logging.info()
+		logging.info('activity called')
 
 	@activity.command()
 	async def playing(self, ctx, *, status:str):
@@ -153,5 +196,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		subcommands = [f'**{cmd.name}:** \n{delim2.join(list(map(str, cmd.aliases)))}' for cmd in ctx.command.parent.commands]
 		embed = discord.Embed(color=embedcolor, title="Status Subcommands:", description=f'**Status:** {delim.join(list(map(str, subcommands)))}')
 		await ctx.reply(embed=embed)
+		
 def setup(bot):
     bot.add_cog(OwnerCog(bot))
+
