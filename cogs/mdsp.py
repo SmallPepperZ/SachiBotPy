@@ -4,9 +4,8 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import BadArgument
 import json
-import os, sys
 from discord.ext.commands import BucketType
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from tzlocal import get_localzone
 import pytz
 import keyring

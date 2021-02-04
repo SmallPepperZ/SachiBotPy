@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-import json
 from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionNotFound, ExtensionFailed
 import keyring
 
