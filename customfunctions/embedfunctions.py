@@ -1,4 +1,3 @@
-from typing import Tuple
 import discord
 from discord import Embed
 from datetime import datetime

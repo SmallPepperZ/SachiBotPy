@@ -4,7 +4,7 @@ import os
 import requests, json
 from requests.exceptions import Timeout
 from discord.ext import commands
-import datetime, pytz
+import datetime
 from datetime import timedelta, datetime
 import sqlite3
 
