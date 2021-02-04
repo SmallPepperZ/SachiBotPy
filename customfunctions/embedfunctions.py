@@ -1,7 +1,6 @@
 from typing import Tuple
 import discord
 from discord import Embed
-import logging
 from datetime import datetime
 class EmbedMaker:
 	def AddDescriptionField(embed:discord.Embed, key:str, value:str, *, boldkey:bool=True):

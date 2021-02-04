@@ -1,5 +1,5 @@
 from customfunctions.mee6api import PlayerNotFound
-import logging as logger, traceback
+import logging, traceback
 import discord
 from discord.ext import commands
 from discord.ext.commands import BadArgument
@@ -16,6 +16,8 @@ from customfunctions import CustomChecks, Mee6Api
 
 
 #region Variable Stuff
+
+logger = logging.getLogger("Discord - MDSPCog")
 
 embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 
@@ -265,7 +267,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 			elif "None" in l6:
 				statustype = "none"
 			logger.debug(statustype)
-			logger.debug("Times fetched")
+			
 	#		if (lastedited <= yesterday):
 			if (statustype == "decline" or statustype == "deny") and (lastedited <= sevendaysago):				
 				logger.debug("if activated")
@@ -277,13 +279,13 @@ class MdspCog(commands.Cog, name="MDSP"):
 				logger.debug("if comopleted")
 			else:
 				await infomsg.edit(content=f"Updating {invitechannel.mention}:\n{user.name}")
-				logger.debug("infomsg edited")
+				
 				try:
 					mclevel, mcmessages = Mee6Api.get_user(userid, pages=10, limit=1000)
 				except PlayerNotFound:
 					mclevel = "Not found, too low?"
 					mcmessages = "Not found, too low?"
-				logger.debug("mee6 part done")
+				logger.debug("Got Mee6 info")
 				#Remake embed
 				embed = discord.Embed(color=colors[statustype], description=l1)
 				addfield(embed, "Maincord Level", mclevel)
@@ -295,13 +297,13 @@ class MdspCog(commands.Cog, name="MDSP"):
 				embed.set_thumbnail(url=messagecontents.thumbnail.url)
 				footer = messagecontents.footer
 				embed.set_footer(text=footer.text, icon_url=footer.icon_url)
-				logger.debug("embed built")
+				
 				#Send embed
 				await message.edit(embed=embed)
-				logger.debug("embed sent")
+				
 	#		else:
 	#			logger.debug("User message updated too recently")
-
+		logger.debug("Update completed")
 		with open('storage/invitees.json', 'w') as file:
 			json.dump(inviteesjson, file, indent=4)
 		await infomsg.edit(content=f"Updating {invitechannel.mention}:\nCompleted")		

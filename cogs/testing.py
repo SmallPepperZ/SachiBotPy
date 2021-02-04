@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 import json
-import os, logging
+import os
 from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
 import keyring
