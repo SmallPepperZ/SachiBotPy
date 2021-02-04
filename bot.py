@@ -37,7 +37,7 @@ bot            = commands.Bot(command_prefix=prefix, intents = intents, case_ins
 errorchannel = int(keyring.get_password("SachiBotPY", "errorchannel"))
 
 bot.start_time = start_time_local
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 bot.remove_command('help')
 
 
@@ -59,18 +59,15 @@ if __name__ == '__main__':
 #endregion
 
 #region Logger Stuff
-logger = logging.getLogger("discord")
-logger.setLevel(logging.INFO) # Do not allow DEBUG messages through
-handler = logging.FileHandler(filename="bot.log", encoding="utf-8", mode="w")
-handler.setFormatter(logging.Formatter("{asctime}: {levelname}: {name}: {message}", style="{"))
-logger.addHandler(handler)
+logger = logging.getLogger("Discord - Main")
+logger.setLevel(logging.INFO)
 
 
 #endregion
 
 @bot.event
 async def on_ready():
-	logging.info("Bot initialized")
+	logger.info("Bot initialized")
 	#await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"), status=Status.online)
 
 

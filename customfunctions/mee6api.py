@@ -11,6 +11,8 @@ import sqlite3
 dbpath = "storage/mee6.db"
 dbcon = sqlite3.connect(str(dbpath))
 dbcur = dbcon.cursor()
+logger = logging.getLogger("Discord - Mee6 Api")
+logger.setLevel(logging.DEBUG)
 
 class PlayerNotFound(commands.CommandError):
 	pass
@@ -62,7 +64,13 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guildid:int=302094807046
 	player = info.fetchone()
 	#if cache is a day old or player not found in existing cache, remake it
 	if cachedate < yesterday or player == None or nocache:
-		print("Player not in cache, or cache outdated")
+		if cachedate < yesterday:
+			logger.debug("Cache outdated, remaking")
+		elif player == None:
+			logger.debug("Player not found in cache")
+		elif nocache:
+			logger.debug("No caching forced")
+		
 		people = []
 		for page in range(pages):
 			
@@ -74,7 +82,7 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guildid:int=302094807046
 					response = requests.get(f'{api}{guildid}?page={page}&limit={limit}', timeout=20)
 				except Timeout:
 					raise
-			print(page)
+			logger.debug(f'Page: {page}')
 			pagejson = json.loads(response.text)
 			players  = pagejson["players"]
 			player   = None
@@ -98,6 +106,6 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guildid:int=302094807046
 		if player == None:
 			raise PlayerNotFound("User could not be found")
 	else:
-		print("Player in cache")
+		logger.debug("Player in cache")
 	return player[2], player[1]
 	

@@ -4,7 +4,7 @@ import json
 import time
 import sqlite3 as sl
 import keyring
-import logging as logger
+import logging
 
 
 
@@ -15,6 +15,7 @@ embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 prefix = keyring.get_password("SachiBotPY", "prefix")
 dbpath = keyring.get_password("SachiBotPY", "logpath")
 dbcon = sl.connect(str(dbpath))
+logger = logging.getLogger("Discord - Logging")
 #endregion
 
 with open("storage/loggingignore.json", "r") as loggingignore:

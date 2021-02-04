@@ -10,7 +10,8 @@ import keyring
 
 #region Variable Stuff
 
-
+logger = logging.getLogger("Discord - UtilityCog")
+logger.setLevel(logging.INFO)
 embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 
 
@@ -44,15 +45,15 @@ class UtilityCog(commands.Cog, name="Utility"):
 					"cog"        : cmd.cog_name,
 					"signature"  : cmd.signature
 					}
-		logging.debug("dumping to json finished")
+		logger.debug("dumping to json finished")
 		embed   = discord.Embed(color=embedcolor, title="Help")
 		cogdata = ''
 		pages   = []
 		for cog in commandsdict.keys():
-			logging.debug(f"Starting cog loop for {cog}")
+			logger.debug(f"Starting cog loop for {cog}")
 			
 			for command in commandsdict[cog].keys():
-				logging.debug(f"Starting command loop for {cog}")
+				logger.debug(f"Starting command loop for {cog}")
 				signature = f'{commandsdict[cog][command]["signature"]}'
 				if commandsdict[cog][command]["description"] != '':
 					description = f': {commandsdict[cog][command]["description"]}'
@@ -112,7 +113,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 				"offline": "⚫"
 				
 			} 
-			logging.debug(status)
+			logger.debug(status)
 			if user.is_on_mobile():
 				ismobile  = '📱 - '
 			elif str(status) != "offline":
