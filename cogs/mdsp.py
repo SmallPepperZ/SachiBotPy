@@ -229,8 +229,8 @@ class MdspCog(commands.Cog, name="MDSP"):
 		else:
 			await ctx.reply(f'{user.name} already exists in {invitechannel.mention}')
 
-	@invite.command(description="*Cooldown: 5 minutes*\nUpdates maincord message counts, and moves declined/denied users when appropriate")
-	@commands.cooldown(rate=1, per=300, type=BucketType.default)
+	@invite.command(description="*Cooldown: 1 hour*\nUpdates maincord message counts, and moves declined/denied users when appropriate")
+	@commands.cooldown(rate=1, per=3600, type=BucketType.default)
 	async def update(self, ctx):
 		invitechannel = self.bot.get_channel(invitechannelid)
 		invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid) 
@@ -266,41 +266,41 @@ class MdspCog(commands.Cog, name="MDSP"):
 				statustype = "none"
 			logger.debug(statustype)
 			logger.debug("Times fetched")
-			if (lastedited <= yesterday):
-				if (statustype == "decline" or statustype == "deny") and (lastedited <= sevendaysago):				
-					logger.debug("if activated")
-					newmsg = await invitediscussionchannel.send(embed=messagecontents)
-					await ctx.reply(f'{user.name} moved out of {invitechannel.mention}')
-					await message.delete()
-					inviteesjson["active"].pop(str(userid))
-					inviteesjson["archive"]["denied"][userid] = newmsg.id
-					logger.debug("if comopleted")
-				else:
-					await infomsg.edit(content=f"Updating {invitechannel.mention}:\n{user.name}")
-					logger.debug("infomsg edited")
-					try:
-						mclevel, mcmessages = Mee6Api.get_user(userid, pages=10, limit=1000)
-					except PlayerNotFound:
-						mclevel = "Not found, too low?"
-						mcmessages = "Not found, too low?"
-					logger.debug("mee6 part done")
-					#Remake embed
-					embed = discord.Embed(color=colors[statustype], description=l1)
-					addfield(embed, "Maincord Level", mclevel)
-					addfield(embed, "Maincord Messages", mcmessages)
-					addrow(embed, l4)
-					addrow(embed, l5)
-					addrow(embed, l6)
-					addrow(embed, l7)
-					embed.set_thumbnail(url=messagecontents.thumbnail.url)
-					footer = messagecontents.footer
-					embed.set_footer(text=footer.text, icon_url=footer.icon_url)
-					logger.debug("embed built")
-					#Send embed
-					await message.edit(embed=embed)
-					logger.debug("embed sent")
+	#		if (lastedited <= yesterday):
+			if (statustype == "decline" or statustype == "deny") and (lastedited <= sevendaysago):				
+				logger.debug("if activated")
+				newmsg = await invitediscussionchannel.send(embed=messagecontents)
+				await ctx.reply(f'{user.name} moved out of {invitechannel.mention}')
+				await message.delete()
+				inviteesjson["active"].pop(str(userid))
+				inviteesjson["archive"]["denied"][userid] = newmsg.id
+				logger.debug("if comopleted")
 			else:
-				logger.debug("User message updated too recently")
+				await infomsg.edit(content=f"Updating {invitechannel.mention}:\n{user.name}")
+				logger.debug("infomsg edited")
+				try:
+					mclevel, mcmessages = Mee6Api.get_user(userid, pages=10, limit=1000)
+				except PlayerNotFound:
+					mclevel = "Not found, too low?"
+					mcmessages = "Not found, too low?"
+				logger.debug("mee6 part done")
+				#Remake embed
+				embed = discord.Embed(color=colors[statustype], description=l1)
+				addfield(embed, "Maincord Level", mclevel)
+				addfield(embed, "Maincord Messages", mcmessages)
+				addrow(embed, l4)
+				addrow(embed, l5)
+				addrow(embed, l6)
+				addrow(embed, l7)
+				embed.set_thumbnail(url=messagecontents.thumbnail.url)
+				footer = messagecontents.footer
+				embed.set_footer(text=footer.text, icon_url=footer.icon_url)
+				logger.debug("embed built")
+				#Send embed
+				await message.edit(embed=embed)
+				logger.debug("embed sent")
+	#		else:
+	#			logger.debug("User message updated too recently")
 
 		with open('storage/invitees.json', 'w') as file:
 			json.dump(inviteesjson, file, indent=4)
