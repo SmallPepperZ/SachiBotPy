@@ -206,25 +206,33 @@ class MdspCog(commands.Cog, name="MDSP"):
 			infomsg = await ctx.reply(f'Adding "{user.name}" to {invitechannel.mention}...')
 			try:
 				mclevel, mcmessages = Mee6Api.get_user(userid, pages=10, limit=1000)
+				if mclevel >= 10:
+					ironminer = True
+				else:
+					ironminer = False
 			except PlayerNotFound:
 				mclevel = "Not found, too low?"
 				mcmessages = "Not found, too low?"
-
-			embed = discord.Embed(color=0xffff00, description=f'__**{user.name}#{user.discriminator}**__')
-			embed.set_thumbnail(url=user.avatar_url)
-			addfield(embed, "Maincord Level", mclevel)
-			addfield(embed, "Maincord Messages", mcmessages)
-			addfield(embed, "Mention", user.mention)
-			addfield(embed, "User ID",  f'`{user.id}`')
-			addfield(embed, "Invite Status",  f'None')
-			embed.set_footer(text=f'Suggested by {ctx.author.name}', icon_url= ctx.author.avatar_url)
-			await infomsg.edit(content=f'Added "{user.name}" to {invitechannel.mention}')
-			message = await invitechannel.send(embed=embed)
-		#	await message.add_reaction('<:upvote:771082566752665681>')
-		#	await message.add_reaction('<:downvote:771082566651609089>')
-			inviteesjson["active"][userid] = message.id
-			with open('storage/invitees.json', 'w') as file:
-				json.dump(inviteesjson, file, indent=4)
+				ironminer = False
+				
+			if ironminer:
+				embed = discord.Embed(color=0xffff00, description=f'__**{user.name}#{user.discriminator}**__')
+				embed.set_thumbnail(url=user.avatar_url)
+				addfield(embed, "Maincord Level", mclevel)
+				addfield(embed, "Maincord Messages", mcmessages)
+				addfield(embed, "Mention", user.mention)
+				addfield(embed, "User ID",  f'`{user.id}`')
+				addfield(embed, "Invite Status",  f'None')
+				embed.set_footer(text=f'Suggested by {ctx.author.name}', icon_url= ctx.author.avatar_url)
+				await infomsg.edit(content=f'Added "{user.name}" to {invitechannel.mention}')
+				message = await invitechannel.send(embed=embed)
+			#	await message.add_reaction('<:upvote:771082566752665681>')
+			#	await message.add_reaction('<:downvote:771082566651609089>')
+				inviteesjson["active"][userid] = message.id
+				with open('storage/invitees.json', 'w') as file:
+					json.dump(inviteesjson, file, indent=4)
+			else:
+				await infomsg.edit(f'''{user.name} is not yet an iron miner, try to add them again when they are ||(or maybe the api isn't working)||''')
 		elif ctx.guild.get_member(userid) is not None:
 			await ctx.reply(f'{user.name} is offended that you didn\'t know they were here')
 		else:
@@ -267,7 +275,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				statustype = "none"
 			logger.debug(statustype)
 			
-	#		if (lastedited <= yesterday):
+	
 			if (statustype == "decline" or statustype == "deny") and (lastedited <= sevendaysago):				
 				logger.debug("if activated")
 				newmsg = await invitediscussionchannel.send(embed=messagecontents)
@@ -299,9 +307,6 @@ class MdspCog(commands.Cog, name="MDSP"):
 				
 				#Send embed
 				await message.edit(embed=embed)
-				
-	#		else:
-	#			logger.debug("User message updated too recently")
 		logger.debug("Update completed")
 		with open('storage/invitees.json', 'w') as file:
 			json.dump(inviteesjson, file, indent=4)
