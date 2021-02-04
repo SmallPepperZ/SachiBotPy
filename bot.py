@@ -19,22 +19,22 @@ from customfunctions import CustomChecks
 
 #region Variable Stuff
 
-with open('storage/config.json', 'r') as file:
-	configjson = json.loads(file.read())
 
-embedcolor = int(configjson["embedcolor"], 16)
+embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 token      = keyring.get_password('SachiBotPY', 'discordtoken')
+errornum   = keyring.get_password("SachiBotPY", "errornum")
+pathtohide = keyring.get_password("SachiBotPY", "pathtohide")
 
 
 
-prefix           = configjson["prefix"]
+prefix           = keyring.get_password("SachiBotPY", "prefix")
 start_time_local = time.time()
 
 intents        = discord.Intents.all()
 intents.typing = False
 bot            = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
 
-errorchannel = int(configjson["errorchannel"])
+errorchannel = int(keyring.get_password("SachiBotPY", "errorchannel"))
 
 bot.start_time = start_time_local
 logging.basicConfig(level=logging.DEBUG)
@@ -79,7 +79,6 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):	
 	if hasattr(ctx.command, 'on_error'):
-		#await ctx.message.add_reaction('<:CommandError:804193351758381086>')
 		return
 	elif isinstance(error, CommandNotFound) or ctx.command.hidden:
 		await ctx.message.add_reaction(str('❔'))
@@ -133,27 +132,26 @@ async def on_command_error(ctx, error):
 		traceback_text = ''.join(lines)
 		
 		#Github gist configuration
-		with open('storage/config.json', 'r') as file:
-			configjson = json.loads(file.read())		
-		configjson["errornum"] = int(configjson["errornum"])+1
-		traceback_text = traceback_text.replace(configjson["pathtohide"], '')
+		errornum = keyring.get_password("SachiBotPY", "errornum")		
+		errornum = int(errornum)+1
+		keyring.set_password("SachiBotPY", "errornum", str(errornum))
+
+		traceback_text = traceback_text.replace(pathtohide, '')
+
 		apiurl = "https://api.github.com/gists"
-		gisttoedit = f'{apiurl}/{configjson["githubgist"]}'
+		gistid = keyring.get_password("SachiBotPY", "githubgist")	
+		gisttoedit = f'{apiurl}/{gistid}'
 		githubtoken = keyring.get_password('SachiBotPY', 'githubtoken')
 		
 		headers={'Authorization':'token %s'%githubtoken}
 		params={'scope':'gist'}
 		content = f'Error - {error} \n\n\n {traceback_text}'
-		leadzeroerrornum = f'{configjson["errornum"]:02d}'
+		leadzeroerrornum = f'{errornum:02d}'
 		payload={"description":"SachiBot Errors - A gist full of errors for my bot" ,"public":False,"files":{"SachiBotPyError %s.log"%leadzeroerrornum:{"content": content}}}
 		#Upload to github gist
-		res=requests.patch(gisttoedit,headers=headers,params=params,data=json.dumps(payload))
-		j=json.loads(res.text)
+		requests.patch(gisttoedit,headers=headers,params=params,data=json.dumps(payload))
 
 		
-		#dump configjson to update error numberr
-		with open('storage/config.json', 'w') as file:
-			json.dump(configjson, file, indent=4)
 
 		#Build and send embed for error channel
 		channel = bot.get_channel(errorchannel)
@@ -173,7 +171,7 @@ async def on_command_error(ctx, error):
 		embed1.add_field(name="Channel:", value=channelname, inline='true')
 		embed1.add_field(name="\u200B", value='\u200B', inline='true')
 		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
-		embed1.add_field(name="Traceback:", value=f'Traceback Gist - [SachiBotPyError {leadzeroerrornum}.log](https://gist.github.com/SmallPepperZ/{configjson["githubgist"]}#file-sachibotpyerror-{leadzeroerrornum}-log \"Github Gist #{leadzeroerrornum}\") ', inline='false')
+		embed1.add_field(name="Traceback:", value=f'Traceback Gist - [SachiBotPyError {leadzeroerrornum}.log](https://gist.github.com/SmallPepperZ/{gistid}#file-sachibotpyerror-{leadzeroerrornum}-log \"Github Gist #{leadzeroerrornum}\") ', inline='false')
 		await channel.send(embed=embed1)
 
 

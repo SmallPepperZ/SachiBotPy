@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import json
 import time, datetime
-import os, sys, logging, asyncio
+import os, sys, logging, asyncio, keyring
 from discord import Status
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
@@ -11,11 +11,8 @@ from io import BytesIO
 from PIL import Image
 #region Variable Stuff
 
-with open('storage/config.json', 'r') as file:
-	configfile = file.read()
 
-configjson = json.loads(configfile)
-embedcolor = int(configjson["embedcolor"], 16)
+embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 
 statuses={
 	0: "Playing",
@@ -82,7 +79,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.is_owner()
 	async def embedcolor(self, ctx, color:str):
 		colorint      = f"0x{color}"
-		oldembedcolor = configjson["embedcolor"]
+		oldembedcolor = keyring.get_password("SachiBotPY", "embedcolor")
 		try:
 			newembedcolor = int(colorint, 16)
 		except ValueError:
@@ -107,9 +104,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 			embed.set_thumbnail(url='attachment://colorimage.png')
 			await msg.edit(embed=embed)
 			#Update the config file
-			configjson["embedcolor"] = colorint
-			with open('storage/config.json', 'w') as file:
-				json.dump(configjson, file, indent=4)
+			keyring.set_password("SachiBotPY", "embedcolor", colorint)
 			#Reload cogs
 			for cog in ctx.bot.coglist:
 				self.bot.reload_extension(cog)

@@ -99,5 +99,5 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guildid:int=302094807046
 			raise PlayerNotFound("User could not be found")
 	else:
 		print("Player in cache")
-	return player[1], player[2]
+	return player[2], player[1]
 	
