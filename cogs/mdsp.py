@@ -6,25 +6,18 @@ from discord.ext.commands import BadArgument
 import json
 import os, sys
 from discord.ext.commands import BucketType
-from mee6_py_api import API
 from datetime import datetime, timedelta, timezone
 from tzlocal import get_localzone
 import pytz
-import requests
+import keyring
 
-#BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-#sys.path.append(BASE_PATH)
 
 from customfunctions import CustomChecks, Mee6Api
 
 
 #region Variable Stuff
 
-with open('storage/config.json', 'r') as file:
-	configfile = file.read()
-
-configjson = json.loads(configfile)
-embedcolor = int(configjson["embedcolor"], 16)
+embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 
 
 invitechannelid = 796109386715758652
@@ -55,7 +48,10 @@ def listlines(messagecontents):
 	l4 = splitmessage[3]
 	l5 = splitmessage[4]
 	l6 = splitmessage[5]
-	l7 = splitmessage[6]
+	try:
+		l7 = splitmessage[6]
+	except:
+		l7 = ""
 	return l1, l2, l3, l4, l5, l6, l7
 def getidfrommessage(dictionary:dict, messageid:str):
 	for key, value in dictionary.items():
@@ -124,7 +120,10 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 		l4 = splitmessage[3]
 		l5 = splitmessage[4]
 		l6 = splitmessage[5]
-		l7 = splitmessage[6]
+		try:
+			l7 = splitmessage[6]
+		except:
+			l7 = ""
 		roles = [str(role.id) for role in ctx.author.roles]
 		if not "None" in l6 and (force == False or not str(796124089294782524) in roles):
 			if (action == "accept" or action == "decline"):

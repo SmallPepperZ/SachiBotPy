@@ -3,19 +3,17 @@ from discord.ext import commands
 import json
 import time
 import sqlite3 as sl
-import logging as logger, logging
+import keyring
+import logging as logger
 
 
 
 #region Variable Stuff
 
-with open('storage/config.json', 'r') as file:
-	configfile = file.read()
 
-configjson = json.loads(configfile)
-embedcolor = int(configjson["embedcolor"], 16)
-prefix = configjson["prefix"]
-dbpath = configjson["logpath"]
+embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
+prefix = keyring.get_password("SachiBotPY", "prefix")
+dbpath = keyring.get_password("SachiBotPY", "logpath")
 dbcon = sl.connect(str(dbpath))
 #endregion
 

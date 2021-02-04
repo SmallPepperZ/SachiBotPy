@@ -6,14 +6,12 @@ import time, datetime
 from string import ascii_letters, punctuation, whitespace
 from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
+import keyring
 
 #region Variable Stuff
 
-with open('storage/config.json', 'r') as file:
-	configfile = file.read()
 
-configjson = json.loads(configfile)
-embedcolor = int(configjson["embedcolor"], 16)
+embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 
 
 

@@ -2,16 +2,12 @@ import discord
 from discord.ext import commands
 import json
 from discord.ext.commands import MessageConverter
-import logging
+import logging, keyring
 
 #region Variable Stuff
 
-with open('storage/config.json', 'r') as file:
-	configfile = file.read()
 
-configjson = json.loads(configfile)
-embedcolor = int(configjson["embedcolor"], 16)
-prefix = configjson["prefix"]
+embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 #endregion
 
 
