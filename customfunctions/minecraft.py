@@ -7,7 +7,7 @@ class ExpiredMcToken(CommandError):
 class InvalidMcServer(CommandError):
 	pass
 def link_discord_mc(usertoken:int) -> Tuple[str, str]:
-	"""Linkes a minecraft account with a discord user via their usertoken
+	"""Links a minecraft account with a discord user via their usertoken
 
 	Parameters
 	----------
@@ -56,13 +56,13 @@ def query_mc_server(*, ip:str, port:int=25565) -> dict:
 
 		{
 		  "MaxPlayers": int,
-		  "Motd": str,
+		  "MOTD": str,
 		  "Playerlist": list, 
 		  "Players": int, 
 		  "Plugins": list, 
 		  "Software": str, 
 		  "Version": str, 
-		  "status": str
+		  "Status": str
 		}
 
 	Raises

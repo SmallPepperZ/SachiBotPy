@@ -2,7 +2,7 @@ import discord
 from discord import Embed
 from datetime import datetime
 class EmbedMaker:
-	def AddDescriptionField(embed:discord.Embed, key:str, value:str, *, boldkey:bool=True):
+	def add_description_field(embed:discord.Embed, key:str, value:str, *, boldkey:bool=True):
 		"""Adds a one line key: value field to an embed's description on a new line
 
 		Parameters
@@ -29,7 +29,7 @@ class EmbedMaker:
 		else:
 			embed.__setattr__("description", f'{embed.description}\n{boldmarks}{key}:{boldmarks} {value}')
 
-	def AddBlankField(embed:discord.Embed):
+	def add_blank_field(embed:discord.Embed):
 		"""Adds a line break to the description of an embed
 
 		Parameters
@@ -44,7 +44,7 @@ class EmbedMaker:
 		else:
 			embed.__setattr__("description", f'{embed.description}\n')
 	
-	def FooterPresets(embed:discord.Embed, ctx, *presets:str, delimiter:str=" - ", customtext:str=None, customtextloc:str="prepend", customurl:str=None):
+	def footer_presets(embed:discord.Embed, ctx, *presets:str, delimiter:str=" - ", customtext:str=None, customtextloc:str="prepend", customurl:str=None):
 		"""Adds some footer presets to an embed's footer
 
 			Parameters
@@ -59,7 +59,7 @@ class EmbedMaker:
 				What to connect the sections with, by default " - "
 
 			customtext : str, optional
-				Addiotional text to add to the footer, by default None
+				Additional text to add to the footer, by default None
 			
 			customtextloc : "prepend" or "append", optional
 				where to put the custom text, if applicable, by default "prepend"

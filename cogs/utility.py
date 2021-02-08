@@ -123,15 +123,15 @@ class UtilityCog(commands.Cog, name="Utility"):
 			statusicon = statuseemojis[str(status)]
 			
 			def embedsec1(embed):
-				EmbedMaker.AddDescriptionField(embed, "Is the owner?", isowner)
-				EmbedMaker.AddDescriptionField(embed, "Is an admin?", isadmin)
-				EmbedMaker.AddBlankField(embed)
-				EmbedMaker.AddDescriptionField(embed, "Status", f'{ismobile}{statusicon}{statusmsg}')
-				EmbedMaker.AddBlankField(embed)
+				EmbedMaker.add_description_field(embed, "Is the owner?", isowner)
+				EmbedMaker.add_description_field(embed, "Is an admin?", isadmin)
+				EmbedMaker.add_blank_field(embed)
+				EmbedMaker.add_description_field(embed, "Status", f'{ismobile}{statusicon}{statusmsg}')
+				EmbedMaker.add_blank_field(embed)
 			def embedsec2(embed):
-				EmbedMaker.AddDescriptionField(embed, "Join Date", joindate)
+				EmbedMaker.add_description_field(embed, "Join Date", joindate)
 			def embedsec3(embed):
-				EmbedMaker.AddDescriptionField(embed, "Nickname", nickname)
+				EmbedMaker.add_description_field(embed, "Nickname", nickname)
 		else:
 
 			user = await self.bot.fetch_user(int(userid))
@@ -169,17 +169,17 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed       = discord.Embed(color=color,title=username)
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		embed.set_image(url=avatar)
-		EmbedMaker.AddDescriptionField(embed, "Is a bot?", isbot)
+		EmbedMaker.add_description_field(embed, "Is a bot?", isbot)
 		embedsec1(embed)
-		EmbedMaker.AddDescriptionField(embed, "Mention", mention)
+		EmbedMaker.add_description_field(embed, "Mention", mention)
 		embedsec3(embed)
-		EmbedMaker.AddDescriptionField(embed, "User ID", f'`{user.id}`')
-		EmbedMaker.AddBlankField(embed)
-		EmbedMaker.AddDescriptionField(embed, "Account Creation Date", createdate)
+		EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
+		EmbedMaker.add_blank_field(embed)
+		EmbedMaker.add_description_field(embed, "Account Creation Date", createdate)
 		embedsec2(embed)
-		EmbedMaker.AddBlankField(embed)
+		EmbedMaker.add_blank_field(embed)
 		if str(badgeicons) != "[]":	
-			EmbedMaker.AddDescriptionField(embed, "Profile Badges", badgestr)
+			EmbedMaker.add_description_field(embed, "Profile Badges", badgestr)
 		
 		await ctx.send(embed=embed)
 		#ctx.guild.get_member(user)
