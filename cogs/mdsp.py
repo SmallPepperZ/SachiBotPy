@@ -37,11 +37,11 @@ colors = {
 }
 
 
-def addfield(embed, key:str, value:str):
+def add_field(embed, key:str, value:str):
 	embed.__setattr__("description", f'{embed.description}\n**{key}:** {value}')
-def addrow(embed, value:str):
+def add_row(embed, value:str):
 	embed.__setattr__("description", f'{embed.description}\n{value}')
-def listlines(messagecontents):
+def list_lines(messagecontents):
 	splitmessage = messagecontents.description.splitlines()
 	l1 = splitmessage[0]
 	l2 = splitmessage[1]
@@ -54,11 +54,11 @@ def listlines(messagecontents):
 	except:
 		l7 = ""
 	return l1, l2, l3, l4, l5, l6, l7
-def getidfrommessage(dictionary:dict, messageid:str):
+def get_id_from_message(dictionary:dict, messageid:str):
 	for key, value in dictionary.items():
 		if messageid == value:
 			return key
-async def updateinvitestatus(self, ctx, userid, action, force=False):
+async def update_invite_status(self, ctx, userid, action, force=False):
 	if force == "force":
 		force = True
 	invitechannel = self.bot.get_channel(invitechannelid)
@@ -144,14 +144,14 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 				return
 		await infomsg.edit(content=f"{word1} {user.name}...")
 		embed = discord.Embed(color=color, description=l1)
-		addrow(embed, l2)
-		addrow(embed, l3)
-		addrow(embed, l4)
-		addrow(embed, l5)
+		add_row(embed, l2)
+		add_row(embed, l3)
+		add_row(embed, l4)
+		add_row(embed, l5)
 		footer = messagecontents.footer
 		embed.set_footer(text=footer.text, icon_url=footer.icon_url)
 		
-		addfield(embed, "Invite Status", word2)
+		add_field(embed, "Invite Status", word2)
 		embed.set_thumbnail(url=messagecontents.thumbnail.url)
 		if action == "accept":
 			invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid) 
@@ -160,7 +160,7 @@ async def updateinvitestatus(self, ctx, userid, action, force=False):
 			inviteesjson["active"].pop(str(userid))
 			inviteesjson["archive"]["approved"][userid] = newmsg.id
 		else:
-			addrow(embed, l7)
+			add_row(embed, l7)
 			await message.edit(embed=embed)	
 		await infomsg.edit(content=f"{user.name} successfully {word3}")	
 	except:			 
@@ -205,24 +205,24 @@ class MdspCog(commands.Cog, name="MDSP"):
 		if (inviteesjson["active"].get(str(userid)) is None) and ctx.guild.get_member(userid) is None:	
 			infomsg = await ctx.reply(f'Adding "{user.name}" to {invitechannel.mention}...')
 			try:
-				mclevel, mcmessages = Mee6Api.get_user(userid, pages=10, limit=1000)
-				if mclevel >= 10:
+				mc_level, mc_messages = Mee6Api.get_user(userid, pages=10, limit=1000)
+				if mc_level >= 10:
 					ironminer = True
 				else:
 					ironminer = False
 			except PlayerNotFound:
-				mclevel = "Not found, too low?"
-				mcmessages = "Not found, too low?"
+				mc_level = "Not found, too low?"
+				mc_messages = "Not found, too low?"
 				ironminer = False
 				
 			if ironminer:
 				embed = discord.Embed(color=0xffff00, description=f'__**{user.name}#{user.discriminator}**__')
 				embed.set_thumbnail(url=user.avatar_url)
-				addfield(embed, "Maincord Level", mclevel)
-				addfield(embed, "Maincord Messages", mcmessages)
-				addfield(embed, "Mention", user.mention)
-				addfield(embed, "User ID",  f'`{user.id}`')
-				addfield(embed, "Invite Status",  f'None')
+				add_field(embed, "Maincord Level", mc_level)
+				add_field(embed, "Maincord Messages", mc_messages)
+				add_field(embed, "Mention", user.mention)
+				add_field(embed, "User ID",  f'`{user.id}`')
+				add_field(embed, "Invite Status",  f'None')
 				embed.set_footer(text=f'Suggested by {ctx.author.name}', icon_url= ctx.author.avatar_url)
 				await infomsg.edit(content=f'Added "{user.name}" to {invitechannel.mention}')
 				message = await invitechannel.send(embed=embed)
@@ -250,8 +250,8 @@ class MdspCog(commands.Cog, name="MDSP"):
 		messages = [await invitechannel.fetch_message(message) for message in inviteesjson["active"].values()]
 		for message in messages:
 			messagecontents = message.embeds[0]
-			l1, l2, l3, l4, l5, l6, l7 = listlines(messagecontents)
-			userid = getidfrommessage(inviteesjson["active"], message.id)
+			l1, l2, l3, l4, l5, l6, l7 = list_lines(messagecontents)
+			userid = get_id_from_message(inviteesjson["active"], message.id)
 			user = await self.bot.fetch_user(userid)
 			sevendaysago = datetime.now(pytz.timezone("UTC")) - timedelta(days=7)
 			yesterday = datetime.now(pytz.timezone("UTC")) - timedelta(days=1)
@@ -288,19 +288,19 @@ class MdspCog(commands.Cog, name="MDSP"):
 				await infomsg.edit(content=f"Updating {invitechannel.mention}:\n{user.name}")
 				
 				try:
-					mclevel, mcmessages = Mee6Api.get_user(userid, pages=10, limit=1000)
+					mc_level, mc_messages = Mee6Api.get_user(userid, pages=10, limit=1000)
 				except PlayerNotFound:
-					mclevel = "Not found, too low?"
-					mcmessages = "Not found, too low?"
+					mc_level = "Not found, too low?"
+					mc_messages = "Not found, too low?"
 				logger.debug("Got Mee6 info")
 				#Remake embed
 				embed = discord.Embed(color=colors[statustype], description=l1)
-				addfield(embed, "Maincord Level", mclevel)
-				addfield(embed, "Maincord Messages", mcmessages)
-				addrow(embed, l4)
-				addrow(embed, l5)
-				addrow(embed, l6)
-				addrow(embed, l7)
+				add_field(embed, "Maincord Level", mc_level)
+				add_field(embed, "Maincord Messages", mc_messages)
+				add_row(embed, l4)
+				add_row(embed, l5)
+				add_row(embed, l6)
+				add_row(embed, l7)
 				embed.set_thumbnail(url=messagecontents.thumbnail.url)
 				footer = messagecontents.footer
 				embed.set_footer(text=footer.text, icon_url=footer.icon_url)
@@ -316,30 +316,30 @@ class MdspCog(commands.Cog, name="MDSP"):
 	@invite.command(description="*Official Helpers Only*\nSets the approved status for a user, and allows `%invite accept` and `%invite decline`")
 	@commands.has_role(796124089294782524)
 	async def approve(self, ctx, userid:int, force:str=False):		
-		await updateinvitestatus(self, ctx, userid, "approve", force)
+		await update_invite_status(self, ctx, userid, "approve", force)
 
 	@invite.command(description="*Official Helpers Only*\nSets the denied status for a user, and stops other commands from being used on that user, they will be moved to #potential-invitees-discussion after 7ish days")
 	@commands.has_role(796124089294782524)
 	async def deny(self, ctx, userid:int, force:str=False):		
-		await updateinvitestatus(self, ctx, userid, "deny", force)
+		await update_invite_status(self, ctx, userid, "deny", force)
 	
 	@invite.command(aliases=['freeze'], description = "*Official Helpers Only*\nSets the paused status for a user, and prevents user from being approved or denied")
 	@commands.has_role(796124089294782524)
 	async def pause(self, ctx, userid:int, force:str=False):		
-		await updateinvitestatus(self, ctx, userid, "pause", force)
+		await update_invite_status(self, ctx, userid, "pause", force)
 
 	@invite.command(aliases=['unfreeze'], description="*Official Helpers Only*\nResets a user's status from paused")
 	@commands.has_role(796124089294782524)
 	async def unpause(self, ctx, userid:int, force:str=False):		
-		await updateinvitestatus(self, ctx, userid, "unpause", force)
+		await update_invite_status(self, ctx, userid, "unpause", force)
 
 	@invite.command(aliases=['declined', 'leave', 'left'], description="\nUsed by the person who invites a user if they decline the invitation")
 	async def decline(self, ctx, userid:int, force:str=False):		
-		await updateinvitestatus(self, ctx, userid, "decline", force)
+		await update_invite_status(self, ctx, userid, "decline", force)
 
 	@invite.command(aliases=['joined', 'accepted', 'join'], description="\nUsed by the person who invites a user if they accept the invitation (or when they join, coming soon™)")
 	async def accept(self, ctx, userid:int, force:str=False):		
-		await updateinvitestatus(self, ctx, userid, "accept", force)
+		await update_invite_status(self, ctx, userid, "accept", force)
 	
 	@add.error
 	@approve.error
@@ -357,10 +357,10 @@ class MdspCog(commands.Cog, name="MDSP"):
 		else:
 			await ctx.reply(error)
 			exc = error
-			etype = type(exc)
+			error_type = type(exc)
 			trace = exc.__traceback__
 
-			lines = traceback.format_exception(etype, exc, trace)
+			lines = traceback.format_exception(error_type, exc, trace)
 			traceback_text = ''.join(lines)
 			logger.error(str(traceback_text))
 			return

@@ -21,7 +21,7 @@ class TestingCog(commands.Cog, name="Testing"):
 	@commands.command()
 	async def testcommand(self, ctx, *, content):
 		embed = discord.Embed(title="hi")
-		EmbedMaker.AddDescriptionField(embed, "Key", "Value", boldkey=False)
+		EmbedMaker.add_description_field(embed, "Key", "Value", boldkey=False)
 		await ctx.reply(embed=embed)	
 	
 	@commands.command()

@@ -7,29 +7,29 @@ class IncorrectGuild(commands.CommandError):
 def limit_to_guild(guild:int):
 	def predicate(ctx):
 		try:
-			guildid = ctx.guild.id
+			guild_id = ctx.guild.id
 		except AttributeError:
 			raise commands.NoPrivateMessage
-		if guildid == guild:
+		if guild_id == guild:
 			return True
 		else:
 			raise IncorrectGuild	
-			# a function that takes ctx as it's only arg, that returns a truethy or falsey value, or raises an exceptio
+			# a function that takes ctx as it's only arg, that returns a truethy or falsey value, or raises an exception
 	return commands.check(predicate)	
 
 def limit_to_guilds(*guilds:int):
 	def predicate(ctx):
 		output = 0
 		try:
-			guildid = ctx.guild.id
+			guild_id = ctx.guild.id
 		except AttributeError:
 			raise commands.NoPrivateMessage
 		for guild in guilds:
-			if guildid == guild:
+			if guild_id == guild:
 				output += 1
 		if output == 1:
 			return True
 		else:
 			raise IncorrectGuild
-			# a function that takes ctx as it's only arg, that returns a truethy or falsey value, or raises an exceptio
+			# a function that takes ctx as it's only arg, that returns a truethy or falsey value, or raises an exception
 	return commands.check(predicate)	

@@ -8,8 +8,8 @@ import datetime
 from datetime import timedelta, datetime
 import sqlite3
 
-dbpath = "storage/mee6.db"
-dbcon = sqlite3.connect(str(dbpath))
+db_path = "storage/mee6.db"
+dbcon = sqlite3.connect(str(db_path))
 dbcur = dbcon.cursor()
 logger = logging.getLogger("Discord - Mee6 Api")
 logger.setLevel(logging.DEBUG)
@@ -19,7 +19,7 @@ class PlayerNotFound(commands.CommandError):
 
 
 
-def get_user(userid:int, *, pages:int=3, limit:int=500, guildid:int=302094807046684672, nocache:bool=False) -> Tuple[int, int]:
+def get_user(userid:int, *, pages:int=3, limit:int=500, guild_id:int=302094807046684672, nocache:bool=False) -> Tuple[int, int]:
 	"""Gets a user's mee6 information for a guild
 
 		Parameters
@@ -33,8 +33,8 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guildid:int=302094807046
 		limit = 500: int, optional
 			Number of users per page, by default 500
 
-		guildid = 302094807046684672: int, optional
-			Guildid to search, by default 302094807046684672
+		guild_id = 302094807046684672: int, optional
+			Guild id to search, by default 302094807046684672
 		
 		nocache = False: bool, optional
 			Whether to ignore the mee6 cache, by default False
@@ -76,10 +76,10 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guildid:int=302094807046
 			
 			#Make request, timeout in case it gets stuck
 			try:
-				response = requests.get(f'{api}{guildid}?page={page}&limit={limit}', timeout=20)
+				response = requests.get(f'{api}{guild_id}?page={page}&limit={limit}', timeout=20)
 			except Timeout:
 				try:
-					response = requests.get(f'{api}{guildid}?page={page}&limit={limit}', timeout=20)
+					response = requests.get(f'{api}{guild_id}?page={page}&limit={limit}', timeout=20)
 				except Timeout:
 					raise
 			logger.debug(f'Page: {page}')
@@ -88,13 +88,13 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guildid:int=302094807046
 			player   = None
 			#get player with id
 			for playerdict in players:
-				playerid = playerdict["id"]
+				player_id = playerdict["id"]
 				messages = playerdict["message_count"]
 				level = playerdict["level"]
-				tuple = (playerid, messages, level)
+				tuple = (player_id, messages, level)
 				people.append(tuple)
-				if playerid == str(userid):
-					player = (playerid, messages, level)
+				if player_id == str(userid):
+					player = (player_id, messages, level)
 					break
 			if player != None:
 				break
