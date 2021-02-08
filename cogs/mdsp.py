@@ -232,7 +232,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				with open('storage/invitees.json', 'w') as file:
 					json.dump(inviteesjson, file, indent=4)
 			else:
-				await infomsg.edit(f'''{user.name} is not yet an iron miner, try to add them again when they are ||(or maybe the api isn't working)||''')
+				await infomsg.edit(content=f'''{user.name} is not yet an iron miner, try to add them again when they are ||(or maybe the api isn't working)||''')
 		elif ctx.guild.get_member(userid) is not None:
 			await ctx.reply(f'{user.name} is offended that you didn\'t know they were here')
 		else:
