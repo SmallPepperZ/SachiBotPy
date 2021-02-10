@@ -1,8 +1,10 @@
 import discord
+from discord.errors import Forbidden
 from discord.ext import commands
 import json
 import time, datetime
 import os, sys, logging, asyncio, keyring
+from discord.ext.commands.core import guild_only, is_owner
 from discord import Status
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
@@ -11,8 +13,9 @@ from io import BytesIO
 from PIL import Image
 #region Variable Stuff
 
-
-embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
+bot_talk_channel = None
+bot_talk_channel_obj = None
+embedcolor       = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 
 statuses={
 	0: "Playing",
@@ -192,6 +195,38 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Status Subcommands:", description=f'**Status:** {delim.join(list(map(str, subcommands)))}')
 		await ctx.reply(embed=embed)
 		
+	@commands.command()
+	@commands.check(is_owner())
+	#commands.check(guild_only)
+	async def bottalk(self, ctx):
+		global bot_talk_channel, bot_talk_channel_obj, dm_channel
+		
+		if bot_talk_channel == None:
+			dm_channel = await self.bot.fetch_user(ctx.author.id)
+			try:
+				await ctx.message.delete()
+			except Forbidden:
+				return
+			await dm_channel.send("Bot talk started, type `stoptalk` to end")
+			bot_talk_channel = ctx.channel.id
+			bot_talk_channel_obj = self.bot.get_channel(bot_talk_channel)
+			dm_channel = await self.bot.fetch_user(ctx.author.id)
+
+	@commands.Cog.listener("on_message")
+	async def speak_as_bot(self, msg): 
+		global bot_talk_channel, bot_talk_channel_obj
+		if (bot_talk_channel != None):
+			if (isinstance(msg.channel, discord.channel.DMChannel)) and (msg.author.id == 545463550802395146):
+				if not(msg.content == "stoptalk"):
+					await bot_talk_channel_obj.send(msg.content)
+				else:
+					bot_talk_channel = None
+					await msg.reply("Bot talk stopped")
+			elif msg.channel.id == bot_talk_channel and not (msg.author.id) == 796509133985153025:
+				await dm_channel.send(f'**{msg.author}:** {msg.content}')	
+			
+		
+
 def setup(bot):
     bot.add_cog(OwnerCog(bot))
 
