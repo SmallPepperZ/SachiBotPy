@@ -13,7 +13,7 @@ import keyring
 
 from customfunctions import CustomChecks, Mee6Api
 
-
+#TODO store info in db instead of scraping msg
 #region Variable Stuff
 
 logger = logging.getLogger("Discord - MDSPCog")
