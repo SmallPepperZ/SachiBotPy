@@ -171,6 +171,9 @@ async def on_command_error(ctx, error):
 		embed1.add_field(name="Traceback:", value=f'Traceback Gist - [SachiBotPyError {leadzeroerrornum}.log](https://gist.github.com/SmallPepperZ/{gistid}#file-sachibotpyerror-{leadzeroerrornum}-log \"Github Gist #{leadzeroerrornum}\") ', inline='false')
 		await channel.send(embed=embed1)
 
+		ghost_ping = await channel.send('<@!545463550802395146>')
+		await ghost_ping.delete()
+
 
 
 
