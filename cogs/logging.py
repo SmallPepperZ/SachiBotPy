@@ -1,4 +1,4 @@
-from discord.ext import commands
+import discord; from discord.ext import commands
 import json
 import time
 import sqlite3 as sl
@@ -6,27 +6,26 @@ import keyring
 import logging
 
 
-
 #region Variable Stuff
 
 
 embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 prefix = keyring.get_password("SachiBotPY", "prefix")
-dbpath = keyring.get_password("SachiBotPY", "logpath")
-dbcon = sl.connect(str(dbpath))
+db_path = keyring.get_password("SachiBotPY", "logpath")
+dbcon = sl.connect(str(db_path))
 logger = logging.getLogger("Discord - Logging")
 #endregion
 
 with open("storage/loggingignore.json", "r") as loggingignore:
-	ignorejson = loggingignore.read()
-channelignore = json.loads(ignorejson)["channels"]
-guildignore = json.loads(ignorejson)["guilds"]
+	ignore_json = loggingignore.read()
+channelignore = json.loads(ignore_json)["channels"]
+guildignore   = json.loads(ignore_json)["guilds"]
 
 
 class LoggerCog(commands.Cog, name="Logging"):
 	def __init__(self, bot):
 		self.bot = bot
-
+		
 #	@commands.Cog.listener("on_message")
 #	async def logmessages(self, message):
 #		await self.bot.process_commands(message)
@@ -100,13 +99,6 @@ class LoggerCog(commands.Cog, name="Logging"):
 			with dbcon:
 				dbcon.execute(sql, sqldata)
 			
-	# @commands.Cog.listener("on_message")
-	# async def spellcheck(self, message):
-	# 	if message.channel.id == 806234519258529803 and not message.author.bot:
-	# 		corrections = SpellChecker.correct_spelling(message.content)
-	# 		if corrections is not None:
-	# 			embed = discord.Embed(color=embedcolor, description=f'**Did you mean:**\n{corrections}')
-	# 			await message.reply(embed=embed)
 				
 				
 #TODO Add command that admins can use to ignore their server or channel	
