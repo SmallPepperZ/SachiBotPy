@@ -314,22 +314,22 @@ class MdspCog(commands.Cog, name="MDSP"):
 		
 			
 	@invite.command(description="*Official Helpers Only*\nSets the approved status for a user, and allows `%invite accept` and `%invite decline`")
-	@commands.has_role(796124089294782524)
+	@commands.has_any_role(776953964003852309, 765809794732261417)
 	async def approve(self, ctx, userid:int, force:str=False):		
 		await update_invite_status(self, ctx, userid, "approve", force)
 
 	@invite.command(description="*Official Helpers Only*\nSets the denied status for a user, and stops other commands from being used on that user, they will be moved to #potential-invitees-discussion after 7ish days")
-	@commands.has_role(796124089294782524)
+	@commands.has_any_role(776953964003852309, 765809794732261417)
 	async def deny(self, ctx, userid:int, force:str=False):		
 		await update_invite_status(self, ctx, userid, "deny", force)
 	
 	@invite.command(aliases=['freeze'], description = "*Official Helpers Only*\nSets the paused status for a user, and prevents user from being approved or denied")
-	@commands.has_role(796124089294782524)
+	@commands.has_any_role(776953964003852309, 765809794732261417)
 	async def pause(self, ctx, userid:int, force:str=False):		
 		await update_invite_status(self, ctx, userid, "pause", force)
 
 	@invite.command(aliases=['unfreeze'], description="*Official Helpers Only*\nResets a user's status from paused")
-	@commands.has_role(796124089294782524)
+	@commands.has_any_role(776953964003852309, 765809794732261417)
 	async def unpause(self, ctx, userid:int, force:str=False):		
 		await update_invite_status(self, ctx, userid, "unpause", force)
 
