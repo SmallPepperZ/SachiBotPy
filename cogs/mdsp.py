@@ -107,19 +107,6 @@ def add_field(embed, key:str, value:str):
 	embed.__setattr__("description", f'{embed.description}\n**{key}:** {value}')
 def add_row(embed, value:str):
 	embed.__setattr__("description", f'{embed.description}\n{value}')
-def list_lines(messagecontents):
-	splitmessage = messagecontents.description.splitlines()
-	l1 = splitmessage[0]
-	l2 = splitmessage[1]
-	l3 = splitmessage[2]
-	l4 = splitmessage[3]
-	l5 = splitmessage[4]
-	l6 = splitmessage[5]
-	try:
-		l7 = splitmessage[6]
-	except:
-		l7 = ""
-	return l1, l2, l3, l4, l5, l6, l7
 def get_id_from_message(dictionary:dict, messageid:str):
 	for key, value in dictionary.items():
 		if messageid == value:
@@ -137,101 +124,98 @@ async def update_invite_status(self, ctx, userid, action, force=False):
 	word2         = eval(terms[action]["word2"])
 	word3         = terms[action]["word3"]
 	color         = terms[action]["color"]
-	try:
-		user_info            = dbcon.execute(f"""select * from invitees where user_id = {userid}""").fetchone()
-		
-		user_id              = user_info[0]
-		invite_message_id    = user_info[1]
-		invite_activity_type = user_info[2]
-		field_status         = user_info[3]
-		field_status_editor  = user_info[4]
-		field_username       = user_info[5]
-		field_level          = user_info[6]
-		field_messages       = user_info[7]
-		field_mention        = user_info[8]
-		field_info           = user_info[9]
-		field_inviter_id     = user_info[10]
+	#try:
+	user_info            = dbcon.execute(f"""select * from invitees where user_id = {userid}""").fetchone()
+	
+	user_id              = user_info[0]
+	invite_message_id    = user_info[1]
+	invite_activity_type = user_info[2]
+	field_status         = user_info[3]
+	field_status_editor  = user_info[4]
+	field_username       = user_info[5]
+	field_level          = user_info[6]
+	field_messages       = user_info[7]
+	field_mention        = user_info[8]
+	field_info           = user_info[9]
+	field_inviter_id     = user_info[10]
 
-		messageid:int        = invite_message_id
-		logger.debug(messageid)
-		message = await self.bot.get_channel(invitechannelid).fetch_message(messageid)
-		messagecontents = message.embeds[0]
-		# splitmessage = messagecontents.description.splitlines()
-		# l1 = splitmessage[0]
-		# l2 = splitmessage[1]
-		# l3 = splitmessage[2]
-		# l4 = splitmessage[3]
-		# l5 = splitmessage[4]
-		# l6 = splitmessage[5]
-		# try:
-		# 	l7 = splitmessage[6]
-		# except:
-		# 	l7 = ""
-		
+	messageid:int        = invite_message_id
+	logger.debug(messageid)
+	message = await self.bot.get_channel(invitechannelid).fetch_message(messageid)
+	messagecontents = message.embeds[0]
+	# splitmessage = messagecontents.description.splitlines()
+	# l1 = splitmessage[0]
+	# l2 = splitmessage[1]
+	# l3 = splitmessage[2]
+	# l4 = splitmessage[3]
+	# l5 = splitmessage[4]
+	# l6 = splitmessage[5]
+	# try:
+	# 	l7 = splitmessage[6]
+	# except:
+	# 	l7 = ""
+	
 
-		roles = [str(role.id) for role in ctx.author.roles]
-		if action == 'reset' and not (str(765809794732261417) in roles or str(776953964003852309) in roles):
-			await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires you to be an official helper"))
-			return
-		if (field_status != 'none') and (force == False or not (str(765809794732261417) in roles or str(776953964003852309) in roles)):
-			if (action == "accept" or action == "decline"):
-				if not (field_status == "approve"):
-					await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires the user to be approved first"))
-					return
-			elif action == "unpause":
-				if not (field_status == "pause"):
-					await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires the user to be paused"))
-					return
-			else:
-				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"User already has an invite status. Append 'force' to your command if you want to force the status change"))
+	roles = [str(role.id) for role in ctx.author.roles]
+	if (field_status != 'none') and (force == False or not (str(765809794732261417) in roles or str(776953964003852309) in roles)):
+		if (action == "accept" or action == "decline"):
+			if not (field_status == "approve"):
+				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires the user to be approved first"))
 				return
-		
-		field_status = eval(terms[action]['name'])
-		await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{word1} {user.name}..."))
-		embed = discord.Embed(color=color, description=f'__**{field_username}**__')
-		add_field(embed, "Maincord Level", field_level)
-		add_field(embed, "Maincord Messages", field_messages)
-		add_field(embed, "Mention", user.mention)
-		add_field(embed, "User ID",  f'`{user.id}`')
-		add_field(embed, "Invite Status", f'{eval(terms[field_status]["word2"])}')
-		add_field(embed, "Info", field_info)
-		embed.set_thumbnail(url=user.avatar_url)
-		footer = messagecontents.footer
-		embed.set_footer(text=footer.text, icon_url=footer.icon_url)
-		db_data_dict = {
-			'user_id'             : user.id,
-			'invite_message_id'   : message.id,
-			'invite_activity_type': invite_activity_type,
-			'field_status'        : field_status,
-			'field_status_editor' : field_status_editor,
-			'field_username'      : f'{user.name}#{user.discriminator}',
-			'field_level'         : field_level,
-			'field_messages'      : field_messages,
-			'field_mention'       : field_mention,
-			'field_info'          : field_info,   
-			'field_inviter_id'    : field_inviter_id,
-		}
-		
-		values = tuple(db_data_dict.values())
-		footer = messagecontents.footer
-		embed.set_footer(text=footer.text, icon_url=footer.icon_url)
-		sql = DatabaseFromDict.make_placeholder('invitees', db_data_dict)
-		dbcon.executemany(sql, values)
-		dbcon.commit()
-		add_field(embed, "Invite Status", word2)
-		embed.set_thumbnail(url=messagecontents.thumbnail.url)
-		if action == "accept":
-			invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid)
-			newmsg = await invitediscussionchannel.send(embed=embed)
-			await message.delete()
-			sql = f"""update invitees set invite_activity_type = 'approved', invite_message_id = {newmsg.id} where user_id = {userid}"""
-			dbcon.execute(sql)
-			dbcon.commit()
+		elif action == "unpause":
+			if not (field_status == "pause"):
+				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires the user to be paused"))
+				return
 		else:
-			await message.edit(embed=embed)
-		await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} successfully {word3}"))
-	except:
-		await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} not found")	)
+			await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"User already has an invite status. Append 'force' to your command if you want to force the status change"))
+			return
+	
+	field_status = terms[action]['name']
+	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{word1} {user.name}..."))
+	embed = discord.Embed(color=color, description=f'__**{field_username}**__')
+	add_field(embed, "Maincord Level", field_level)
+	add_field(embed, "Maincord Messages", field_messages)
+	add_field(embed, "Mention", user.mention)
+	add_field(embed, "User ID",  f'`{user.id}`')
+	add_field(embed, "Invite Status", f'{eval(terms[field_status]["word2"])}')
+	add_field(embed, "Info", field_info)
+	embed.set_thumbnail(url=user.avatar_url)
+	footer = messagecontents.footer
+	embed.set_footer(text=footer.text, icon_url=footer.icon_url)
+	db_data_dict = {
+		'user_id'             : user.id,
+		'invite_message_id'   : message.id,
+		'invite_activity_type': invite_activity_type,
+		'field_status'        : field_status,
+		'field_status_editor' : status_editor,
+		'field_username'      : f'{user.name}#{user.discriminator}',
+		'field_level'         : field_level,
+		'field_messages'      : field_messages,
+		'field_mention'       : field_mention,
+		'field_info'          : field_info,   
+		'field_inviter_id'    : field_inviter_id,
+	}
+	
+	values = tuple(db_data_dict.values())
+	footer = messagecontents.footer
+	embed.set_footer(text=footer.text, icon_url=footer.icon_url)
+	sql = DatabaseFromDict.make_placeholder('invitees', db_data_dict)
+	dbcon.execute(sql, values)
+	dbcon.commit()
+	add_field(embed, "Invite Status", word2)
+	embed.set_thumbnail(url=messagecontents.thumbnail.url)
+	if action == "accept":
+		invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid)
+		newmsg = await invitediscussionchannel.send(embed=embed)
+		await message.delete()
+		sql = f"""update invitees set invite_activity_type = 'approved', invite_message_id = {newmsg.id} where user_id = {userid}"""
+		dbcon.execute(sql)
+		dbcon.commit()
+	else:
+		await message.edit(embed=embed)
+	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} successfully {word3}"))
+	#except:
+	#	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} not found")	)
 
 
 
@@ -423,22 +407,22 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 
 	@invite.command(description="*Official Helpers Only*\nSets the approved status for a user, and allows `%invite accept` and `%invite decline`")
-	@commands.has_any_role(776953964003852309, 765809794732261417)
+	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def approve(self, ctx, userid:int, force:str=False):
 		await update_invite_status(self, ctx, userid, "approve", force)
 
 	@invite.command(description="*Official Helpers Only*\nSets the denied status for a user, and stops other commands from being used on that user, they will be moved to #potential-invitees-discussion after 7ish days")
-	@commands.has_any_role(776953964003852309, 765809794732261417)
+	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def deny(self, ctx, userid:int, force:str=False):
 		await update_invite_status(self, ctx, userid, "deny", force)
 
 	@invite.command(aliases=['freeze'], description = "*Official Helpers Only*\nSets the paused status for a user, and prevents user from being approved or denied")
-	@commands.has_any_role(776953964003852309, 765809794732261417)
+	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def pause(self, ctx, userid:int, force:str=False):
 		await update_invite_status(self, ctx, userid, "pause", force)
 
 	@invite.command(aliases=['unfreeze'], description="*Official Helpers Only*\nResets a user's status from paused")
-	@commands.has_any_role(776953964003852309, 765809794732261417)
+	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def unpause(self, ctx, userid:int, force:str=False):
 		await update_invite_status(self, ctx, userid, "unpause", force)
 
@@ -452,9 +436,9 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 
 	@invite.command(aliases=['unset'], description="*Official Helpers Only*\nResets a user's status")
-	@commands.has_any_role(776953964003852309, 765809794732261417)
-	async def reset(self, ctx, userid:int, force:str=False):
-		await update_invite_status(self, ctx, userid, "unpause", force)
+	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
+	async def reset(self, ctx, userid:int):
+		await update_invite_status(self, ctx, userid, "unpause", True)
 
 	@add.error
 	@approve.error
