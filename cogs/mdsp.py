@@ -126,6 +126,9 @@ async def update_invite_status(self, ctx, userid, action, force=False):
 	color         = terms[action]["color"]
 	#try:
 	user_info            = dbcon.execute(f"""select * from invitees where user_id = {userid}""").fetchone()
+	if user_info == None:
+		await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} not found in {invitechannel.mention}"))
+		return
 	
 	user_id              = user_info[0]
 	invite_message_id    = user_info[1]
