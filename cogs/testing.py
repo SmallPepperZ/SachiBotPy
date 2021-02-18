@@ -61,8 +61,8 @@ class TestingCog(commands.Cog, name="Testing"):
 		commands = [cmd.name for cmd in self.get_commands()]
 		
 		delim = ", "
-		cmdlist = delim.join(list(map(str, commands)))
-		await ctx.reply(cmdlist)
+		command_list = delim.join(list(map(str, commands)))
+		await ctx.reply(command_list)
 		
 
 		
@@ -78,8 +78,8 @@ class TestingCog(commands.Cog, name="Testing"):
 		await ctx.send(f'Exporting channel {channelid}...')
 
 	@newexport.command()
-	async def guild(self, ctx, guildid: str):
-		await ctx.send(f'Exporting Guild {guildid}...')
+	async def guild(self, ctx, guild_id: str):
+		await ctx.send(f'Exporting Guild {guild_id}...')
 
 	@commands.command()
 	@commands.check(commands.is_owner())
