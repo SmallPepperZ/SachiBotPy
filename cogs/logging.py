@@ -95,7 +95,7 @@ class LoggerCog(commands.Cog, name="Logging"):
 					str(message.author),
 					str(message.content),
 					str(message.jump_url)
-					   ]
+					]
 			with dbcon:
 				dbcon.execute(sql, sqldata)
 			
