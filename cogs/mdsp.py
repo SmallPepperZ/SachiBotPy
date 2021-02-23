@@ -1,3 +1,4 @@
+from discord.errors import NotFound
 from customfunctions.mee6api import PlayerNotFound
 from customfunctions import EmbedMaker, DatabaseFromDict
 import logging, traceback
@@ -443,6 +444,11 @@ class MdspCog(commands.Cog, name="MDSP"):
 	async def reset(self, ctx, userid:int):
 		await update_invite_status(self, ctx, userid, "unpause", True)
 
+	@invite.command()
+	@commands.is_owner()
+	async def errorme(self, ctx):
+		await ctx.reply(0/0)
+
 	@add.error
 	@approve.error
 	@deny.error
@@ -452,20 +458,15 @@ class MdspCog(commands.Cog, name="MDSP"):
 	@decline.error
 	@invite.error
 	@update.error
+	@errorme.error
 	async def invite_cog_error_handler(self, ctx, error):
 		if isinstance(error, BadArgument):
 			await ctx.reply(f"Invalid UserID!")
 			return
-		else:
-			await ctx.reply(error)
-			exc = error
-			error_type = type(exc)
-			trace = exc.__traceback__
-
-			lines = traceback.format_exception(error_type, exc, trace)
-			traceback_text = ''.join(lines)
-			logger.error(str(traceback_text))
-			return
+		elif isinstance(error, NotFound):
+			await ctx.reply(f'User could not be found')
+			
+			
 
 
 def setup(bot):
