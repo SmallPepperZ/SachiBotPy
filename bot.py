@@ -135,16 +135,16 @@ async def on_command_error(ctx, error):
 
 		traceback_text = traceback_text.replace(personal_info, '')
 
-		apiurl = "https://api.github.com/gists"
-		gist_id = keyring.get_password("SachiBotPY", "githubgist")	
-		gisttoedit = f'{apiurl}/{gist_id}'
-		githubtoken = keyring.get_password('SachiBotPY', 'githubtoken')
+		apiurl        = "https://api.github.com/gists"
+		gist_id       = keyring.get_password("SachiBotPY", "githubgist")
+		gisttoedit    = f'{apiurl}/{gist_id}'
+		githubtoken   = keyring.get_password('SachiBotPY', 'githubtoken')
 		
-		headers={'Authorization':'token %s'%githubtoken}
-		params={'scope':'gist'}
-		content = f'Error - {error} \n\n\n {traceback_text}'
-		formatted_error_number = f'{errornum:02d}'
-		payload={"description":"SachiBot Errors - A gist full of errors for my bot" ,"public":False,"files":{"SachiBotPyError %s.log"%formatted_error_number:{"content": content}}}
+		headers                   = {'Authorization':'token %s'%githubtoken}
+		params                    = {'scope':'gist'}
+		content                   = f'Error - {error} \n\n\n {traceback_text}'
+		formatted_error_number    = f'{errornum:02d}'
+		payload                   = {"description":"SachiBot Errors - A gist full of errors for my bot" ,"public":False,"files":{"SachiBotPyError %s.log"%formatted_error_number:{"content": content}}}
 		#Upload to github gist
 		requests.patch(gisttoedit,headers=headers,params=params,data=json.dumps(payload))
 
@@ -153,10 +153,10 @@ async def on_command_error(ctx, error):
 		#Build and send embed for error channel
 		channel = bot.get_channel(errorchannel)
 		embed1 = discord.Embed(title=f"Error {formatted_error_number}", color=embedcolor)
-		embed1.add_field(name="Message Url:", value=ctx.message.jump_url, inline='false')
-		embed1.add_field(name="Message:", value=ctx.message.clean_content, inline='true')
-		embed1.add_field(name="Author:", value=ctx.message.author.mention, inline='true')
-		embed1.add_field(name="\u200B", value='\u200B', inline='true')
+		embed1.add_field(name   = "Message Url:", value=ctx.message.jump_url, inline='false')
+		embed1.add_field(name   = "Message:", value=ctx.message.clean_content, inline='true')
+		embed1.add_field(name   = "Author:", value=ctx.message.author.mention, inline='true')
+		embed1.add_field(name   = "\u200B", value='\u200B', inline='true')
 		#Check if it was in a guild
 		try:
 			guildname = ctx.guild.name
@@ -164,11 +164,11 @@ async def on_command_error(ctx, error):
 		except:
 			guildname = "DM"
 			channelname = ctx.author.id
-		embed1.add_field(name="Guild:", value=guildname, inline='true')
-		embed1.add_field(name="Channel:", value=channelname, inline='true')
-		embed1.add_field(name="\u200B", value='\u200B', inline='true')
-		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
-		embed1.add_field(name="Traceback:", value=f'Traceback Gist - [SachiBotPyError {formatted_error_number}.log](https://gist.github.com/SmallPepperZ/{gist_id}#file-sachibotpyerror-{formatted_error_number}-log \"Github Gist #{formatted_error_number}\") ', inline='false')
+		embed1.add_field(name   = "Guild:", value=guildname, inline='true')
+		embed1.add_field(name   = "Channel:", value=channelname, inline='true')
+		embed1.add_field(name   = "\u200B", value='\u200B', inline='true')
+		embed1.add_field(name   = "Error:", value=f'```{error}```', inline='false')
+		embed1.add_field(name   = "Traceback:", value=f'Traceback Gist - [SachiBotPyError {formatted_error_number}.log](https://gist.github.com/SmallPepperZ/{gist_id}#file-sachibotpyerror-{formatted_error_number}-log \"Github Gist #{formatted_error_number}\") ', inline='false')
 		await channel.send(embed=embed1)
 
 		ghost_ping = await channel.send('<@!545463550802395146>')
