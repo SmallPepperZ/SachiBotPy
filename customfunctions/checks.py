@@ -8,9 +8,10 @@ def limit_to_guild(guild:int):
 	def predicate(ctx):
 		try:
 			guild_id = ctx.guild.id
+			channel_id = ctx.channel.id
 		except AttributeError:
 			raise commands.NoPrivateMessage
-		if guild_id == guild:
+		if guild_id == guild or channel_id == 814213585939988527:
 			return True
 		else:
 			raise IncorrectGuild	
@@ -22,12 +23,13 @@ def limit_to_guilds(*guilds:int):
 		output = 0
 		try:
 			guild_id = ctx.guild.id
+			channel_id = ctx.channel.id
 		except AttributeError:
 			raise commands.NoPrivateMessage
 		for guild in guilds:
 			if guild_id == guild:
 				output += 1
-		if output == 1:
+		if output == 1 or channel_id == 814213585939988527:
 			return True
 		else:
 			raise IncorrectGuild
