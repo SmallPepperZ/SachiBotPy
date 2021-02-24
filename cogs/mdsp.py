@@ -1,6 +1,7 @@
+from customfunctions.checks import IncorrectGuild
 from discord.errors import NotFound
 from customfunctions.mee6api import PlayerNotFound
-from customfunctions import EmbedMaker, DatabaseFromDict
+from customfunctions import EmbedMaker, DatabaseFromDict, CustomUtilities
 import logging, traceback
 import discord
 from discord.ext import commands
@@ -243,7 +244,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 	@invite.command(description="*Cooldown: 2 minutes*\nAdds a user to #potential-invitees")
 	#@commands.cooldown(rate=1, per=120, type=BucketType.user)
-	async def add(self, ctx, userid:int, info:str=None):
+	async def add(self, ctx, userid:int, *, info:str=None):	
 		try:
 			userid = int(userid)
 		except ValueError:
@@ -251,6 +252,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				userid = int("".join([x for x in userid  if x.isdigit()]))
 			except ValueError:
 				await ctx.reply("Invalid User ID")
+		
 		user = await self.bot.fetch_user(int(userid))
 		invitechannel = self.bot.get_channel(invitechannelid)
 		not_in_db = dbcon.execute(f'''select * from invitees where user_id = {userid}''').fetchone() == None
@@ -412,30 +414,72 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 	@invite.command(description="*Official Helpers Only*\nSets the approved status for a user, and allows `%invite accept` and `%invite decline`")
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
-	async def approve(self, ctx, userid:int, force:str=False):
+	async def approve(self, ctx, *args):
+		flags = ['-f', '--force']
+		force = False
+		usedflags, args = CustomUtilities.find_flags(flags, args)
+		userid = int(args[0])
+		for flag in flags:
+			if flag in usedflags:
+				force = True
 		await update_invite_status(self, ctx, userid, "approve", force)
 
 	@invite.command(description="*Official Helpers Only*\nSets the denied status for a user, and stops other commands from being used on that user, they will be moved to #potential-invitees-discussion after 7ish days")
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
-	async def deny(self, ctx, userid:int, force:str=False):
+	async def deny(self, ctx, *args):
+		flags = ['-f', '--force']
+		force = False
+		usedflags, args = CustomUtilities.find_flags(flags, args)
+		userid = int(args[0])
+		for flag in flags:
+			if flag in usedflags:
+				force = True
 		await update_invite_status(self, ctx, userid, "deny", force)
 
 	@invite.command(aliases=['freeze'], description = "*Official Helpers Only*\nSets the paused status for a user, and prevents user from being approved or denied")
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
-	async def pause(self, ctx, userid:int, force:str=False):
+	async def pause(self, ctx, *args):
+		flags = ['-f', '--force']
+		force = False
+		usedflags, args = CustomUtilities.find_flags(flags, args)
+		userid = int(args[0])
+		for flag in flags:
+			if flag in usedflags:
+				force = True
 		await update_invite_status(self, ctx, userid, "pause", force)
 
 	@invite.command(aliases=['unfreeze'], description="*Official Helpers Only*\nResets a user's status from paused")
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
-	async def unpause(self, ctx, userid:int, force:str=False):
+	async def unpause(self, ctx, *args):
+		flags = ['-f', '--force']
+		force = False
+		usedflags, args = CustomUtilities.find_flags(flags, args)
+		userid = int(args[0])
+		for flag in flags:
+			if flag in usedflags:
+				force = True
 		await update_invite_status(self, ctx, userid, "unpause", force)
 
 	@invite.command(aliases=['declined', 'leave', 'left'], description="\nUsed by the person who invites a user if they decline the invitation")
-	async def decline(self, ctx, userid:int, force:str=False):
+	async def decline(self, ctx, *args):
+		flags = ['-f', '--force']
+		force = False
+		usedflags, args = CustomUtilities.find_flags(flags, args)
+		userid = int(args[0])
+		for flag in flags:
+			if flag in usedflags:
+				force = True
 		await update_invite_status(self, ctx, userid, "decline", force)
 
 	@invite.command(aliases=['joined', 'accepted', 'join'], description="\nUsed by the person who invites a user if they accept the invitation (or when they join, coming soon™)")
-	async def accept(self, ctx, userid:int, force:str=False):
+	async def accept(self, ctx, *args):
+		flags = ['-f', '--force']
+		force = False
+		usedflags, args = CustomUtilities.find_flags(flags, args)
+		userid = int(args[0])
+		for flag in flags:
+			if flag in usedflags:
+				force = True
 		await update_invite_status(self, ctx, userid, "accept", force)
 
 
@@ -465,7 +509,19 @@ class MdspCog(commands.Cog, name="MDSP"):
 			return
 		elif isinstance(error, NotFound):
 			await ctx.reply(f'User could not be found')
-			
+			return
+		elif isinstance(error, IncorrectGuild):
+			await ctx.reply('This command is limited to a different guild')
+		else:
+			exc = error
+			error_type = type(exc)
+			trace = exc.__traceback__
+
+			lines = traceback.format_exception(error_type, exc, trace)
+			traceback_text = ''.join(lines)
+			await ctx.reply(f'Error:  \n```{error}```')
+			logger.error(str(traceback_text))
+			return
 			
 
 
