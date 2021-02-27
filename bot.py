@@ -25,7 +25,7 @@ token      = keyring.get_password('SachiBotPY', 'discordtoken')
 errornum   = keyring.get_password("SachiBotPY", "errornum")
 personal_info = keyring.get_password("SachiBotPY", "pathtohide")
 
-
+keyring.set_password("PyTest", "testuser", "testpass")
 
 prefix           = keyring.get_password("SachiBotPY", "prefix")
 start_time_local = time.time()
@@ -37,7 +37,16 @@ bot            = commands.Bot(command_prefix=prefix, intents = intents, case_ins
 errorchannel = int(keyring.get_password("SachiBotPY", "errorchannel"))
 
 bot.start_time = start_time_local
-logging.basicConfig(level=logging.INFO)
+logger_debug = logging.getLogger("bot")
+logger_debug.setLevel(logging.DEBUG)
+logger_debug.addHandler(logging.FileHandler("storage/bot.log"))
+logger_debug.addHandler(logging.StreamHandler(sys.stdout))
+
+logger_error = logging.getLogger("bot")
+logger_error.setLevel(logging.ERROR)
+logger_error.addHandler(logging.FileHandler("storage/bot.error.log"))
+logger_error.addHandler(logging.StreamHandler(sys.stderr))
+
 bot.remove_command('help')
 
 
@@ -59,15 +68,15 @@ if __name__ == '__main__':
 #endregion
 
 #region Logger Stuff
-logger = logging.getLogger("Discord - Main")
-logger.setLevel(logging.INFO)
+logger_error = logging.getLogger("Discord - Main")
+logger_error.setLevel(logging.INFO)
 
 
 #endregion
 
 @bot.event
 async def on_ready():
-	logger.info("Bot initialized")
+	logger_error.info("Bot initialized")
 	#await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"), status=Status.online)
 
 

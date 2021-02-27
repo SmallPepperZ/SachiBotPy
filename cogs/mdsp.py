@@ -30,7 +30,7 @@ from customfunctions import CustomChecks, Mee6Api
 #TODO store info in db instead of scraping msg
 
 
-logger = logging.getLogger("Discord - MDSPCog")
+logger = logging.getLogger("bot.mdsp")
 
 embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 
@@ -113,14 +113,12 @@ def get_id_from_message(dictionary:dict, messageid:str):
 	for key, value in dictionary.items():
 		if messageid == value:
 			return key
-async def update_invite_status(self, ctx, userid, action, force=False):
-	if force == "force":
-		force = True
+async def update_invite_status(self, ctx:commands.Context, userid:int, action:str, force:bool=False):
 	invitechannel = self.bot.get_channel(invitechannelid)
 	user = await self.bot.fetch_user(int(userid))
 	infomsg = await ctx.reply(embed=discord.Embed(color=embedcolor, description=f"Searching for {user.name} in {invitechannel.mention}..."))
 
-
+	
 	status_editor = ctx.author.id
 	word1         = terms[action]["word1"]
 	word2         = eval(terms[action]["word2"])
@@ -228,7 +226,18 @@ class MdspCog(commands.Cog, name="MDSP"):
 	def __init__(self, bot):
 		self.bot = bot
 
-
+	@commands.Cog.listener("on_message")
+	async def auto_delete(self, message:discord.Message):
+		try:
+			guild_id = message.guild.id
+		except:
+			guild_id = None
+		if guild_id == 764981968579461130 and '@everyone' in message.content and not '`@everyone' in message.content and not message.mention_everyone:
+			await message.delete()
+			embed = discord.Embed(description=f'{message.author.display_name} just used `@ everyone`')
+			logchannel = self.bot.get_channel(807379254303653939)
+			await logchannel.send(embed=embed)
+			
 
 	@commands.group(aliases=['invitee', 'invitees'])
 	@CustomChecks.limit_to_guild(764981968579461130)
