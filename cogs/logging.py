@@ -13,7 +13,7 @@ embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 prefix = keyring.get_password("SachiBotPY", "prefix")
 db_path = keyring.get_password("SachiBotPY", "logpath")
 dbcon = sl.connect(str(db_path))
-logger = logging.getLogger("Discord - Logging")
+logger = logging.getLogger("bot.logging")
 #endregion
 
 with open("storage/loggingignore.json", "r") as loggingignore:
@@ -36,7 +36,7 @@ class LoggerCog(commands.Cog, name="Logging"):
 #				file_object.write(sentmsg+"\n")
 
 	@commands.Cog.listener("on_message")
-	async def logmessages(self, message):
+	async def logmessages(self, message:discord.Message):
 		try:
 			channel = message.channel.id
 			channelname = message.channel.name

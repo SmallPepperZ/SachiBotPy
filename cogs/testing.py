@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import json
 import os
+from discord.ext.commands.core import is_owner
 from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
 import keyring
@@ -21,11 +22,6 @@ class TestingCog(commands.Cog, name="Testing"):
 	def __init__(self, bot):
 		self.bot = bot
 
-	@commands.command()
-	async def testcommand(self, ctx, *, content):
-		embed = discord.Embed(title="hi")
-		EmbedMaker.add_description_field(embed, "Key", "Value", boldkey=False)
-		await ctx.reply(embed=embed)	
 	
 	@commands.command()
 	@commands.cooldown(rate=1, per=300)
@@ -35,6 +31,7 @@ class TestingCog(commands.Cog, name="Testing"):
 		message = await channel.fetch_message(804147923285573633)
 		embed=discord.Embed(color=embedcolor, description=contents)
 		await message.edit(embed=embed)
+		await ctx.message.add_reaction('✅')
 		
 
 

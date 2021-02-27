@@ -8,16 +8,11 @@ from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
 import keyring
 
-#region Variable Stuff
-
-logger = logging.getLogger("Discord - UtilityCog")
+logger = logging.getLogger("bot.utility")
 logger.setLevel(logging.INFO)
 embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
 
 
-
-
-#endregion
 
 
 
@@ -183,6 +178,15 @@ class UtilityCog(commands.Cog, name="Utility"):
 		
 		await ctx.send(embed=embed)
 		#ctx.guild.get_member(user)
+
+	@commands.command()
+	async def suggest(self, ctx, *, suggestion):
+		suggestion_channel = self.bot.get_channel(801576966952058910)
+		embed = discord.Embed(title='', description=suggestion)
+		embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+		await suggestion_channel.send(embed=embed)
+		await ctx.reply("Suggestion added")
+		
 
 	@commands.command(aliases=["online", "areyouthere"])
 	async def didyoudie(self, ctx):
