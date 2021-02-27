@@ -1,12 +1,12 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import MessageConverter
-import keyring
+from customfunctions import config
 
 #region Variable Stuff
 
 
-embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
+embedcolor = int(config("embedcolor"), 16)
 #endregion
 
 

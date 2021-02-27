@@ -10,7 +10,7 @@ from discord.ext.commands import BucketType
 from datetime import datetime, timedelta
 from tzlocal import get_localzone
 import pytz
-import keyring
+from customfunctions import config
 import sqlite3
 """
 'user_id': , 
@@ -32,7 +32,7 @@ from customfunctions import CustomChecks, Mee6Api
 
 logger = logging.getLogger("bot.mdsp")
 
-embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
+embedcolor = int(config("embedcolor"), 16)
 
 
 invitechannelid = 796109386715758652
