@@ -12,7 +12,7 @@ from discord import Status
 import traceback
 import urllib, urllib.parse
 import datetime
-import keyring
+from customfunctions import config
 
 from customfunctions import CustomChecks
 #endregion
@@ -20,32 +20,25 @@ from customfunctions import CustomChecks
 #region Variable Stuff
 
 
-embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
-token      = keyring.get_password('SachiBotPY', 'discordtoken')
-errornum   = keyring.get_password("SachiBotPY", "errornum")
-personal_info = keyring.get_password("SachiBotPY", "pathtohide")
+embedcolor = int(config("embedcolor"), 16)
+token      = config('discordtoken')
+errornum   = config("errornum")
+personal_info = config("pathtohide")
 
-keyring.set_password("PyTest", "testuser", "testpass")
 
-prefix           = keyring.get_password("SachiBotPY", "prefix")
+
+prefix           = config("prefix")
 start_time_local = time.time()
 
 intents        = discord.Intents.all()
 intents.typing = False
 bot            = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
 
-errorchannel = int(keyring.get_password("SachiBotPY", "errorchannel"))
+errorchannel = int(config("errorchannel"))
 
 bot.start_time = start_time_local
-logger_debug = logging.getLogger("bot")
-logger_debug.setLevel(logging.DEBUG)
-logger_debug.addHandler(logging.FileHandler("storage/bot.log"))
-logger_debug.addHandler(logging.StreamHandler(sys.stdout))
+logging.basicConfig(level=logging.INFO)
 
-logger_error = logging.getLogger("bot")
-logger_error.setLevel(logging.ERROR)
-logger_error.addHandler(logging.FileHandler("storage/bot.error.log"))
-logger_error.addHandler(logging.StreamHandler(sys.stderr))
 
 bot.remove_command('help')
 
@@ -138,14 +131,14 @@ async def on_command_error(ctx, error):
 		traceback_text = ''.join(lines)
 		
 		#Github gist configuration
-		errornum = keyring.get_password("SachiBotPY", "errornum")		
+		errornum = config("errornum")		
 		errornum = int(errornum)+1
 		keyring.set_password("SachiBotPY", "errornum", str(errornum))
 
 		traceback_text = traceback_text.replace(personal_info, '')
 
 		apiurl        = "https://api.github.com/gists"
-		gist_id       = keyring.get_password("SachiBotPY", "githubgist")
+		gist_id       = config("githubgist")
 		gisttoedit    = f'{apiurl}/{gist_id}'
 		githubtoken   = keyring.get_password('SachiBotPY', 'githubtoken')
 		

@@ -1,10 +1,10 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionNotFound, ExtensionFailed
-import keyring
+from customfunctions import config
 
 
-embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
+embedcolor = int(config("embedcolor"), 16)
 
 
 

@@ -11,11 +11,12 @@ sys.path.append(BASE_PATH)
 from customfunctions import confirmation as ConfirmationCheck
 from io import BytesIO
 from PIL import Image
+from customfunctions import config
 #region Variable Stuff
 
 bot_talk_channel = None
 bot_talk_channel_obj = None
-embedcolor       = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
+embedcolor       = int(config("embedcolor"), 16)
 
 statuses={
 	0: "Playing",
@@ -82,7 +83,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.is_owner()
 	async def embedcolor(self, ctx, color:str):
 		colorint      = f"0x{color}"
-		oldembedcolor = keyring.get_password("SachiBotPY", "embedcolor")
+		oldembedcolor = config("embedcolor")
 		try:
 			newembedcolor = int(colorint, 16)
 		except ValueError:

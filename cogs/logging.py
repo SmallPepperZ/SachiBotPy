@@ -2,16 +2,16 @@ import discord; from discord.ext import commands
 import json
 import time
 import sqlite3 as sl
-import keyring
+from customfunctions import config
 import logging
 
 
 #region Variable Stuff
 
 
-embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
-prefix = keyring.get_password("SachiBotPY", "prefix")
-db_path = keyring.get_password("SachiBotPY", "logpath")
+embedcolor = int(config("embedcolor"), 16)
+prefix = config("prefix")
+db_path = "storage/DiscordMessages.db"
 dbcon = sl.connect(str(db_path))
 logger = logging.getLogger("bot.logging")
 #endregion

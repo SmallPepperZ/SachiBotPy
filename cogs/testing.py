@@ -5,12 +5,12 @@ import os
 from discord.ext.commands.core import is_owner
 from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
-import keyring
+from customfunctions import config
 
 #region Variable Stuff
 
 
-embedcolor = int(keyring.get_password("SachiBotPY", "embedcolor"), 16)
+embedcolor = int(config("embedcolor"), 16)
 
 #endregion
 import sqlite3
