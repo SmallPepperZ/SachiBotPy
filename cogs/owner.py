@@ -3,7 +3,7 @@ from discord.errors import Forbidden
 from discord.ext import commands
 import json
 import time, datetime
-import os, sys, logging, asyncio, keyring
+import os, sys, logging, asyncio
 from discord.ext.commands.core import guild_only, is_owner
 from discord import Status
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -11,7 +11,7 @@ sys.path.append(BASE_PATH)
 from customfunctions import confirmation as ConfirmationCheck
 from io import BytesIO
 from PIL import Image
-from customfunctions import config
+from customfunctions import config, set_config
 #region Variable Stuff
 
 bot_talk_channel = None
@@ -108,7 +108,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 			embed.set_thumbnail(url='attachment://colorimage.png')
 			await msg.edit(embed=embed)
 			#Update the config file
-			keyring.set_password("SachiBotPY", "embedcolor", colorint)
+			set_config("embedcolor", colorint)
 			#Reload cogs
 			for cog in ctx.bot.coglist:
 				self.bot.reload_extension(cog)
