@@ -12,7 +12,7 @@ from discord import Status
 import traceback
 import urllib, urllib.parse
 import datetime
-from customfunctions import config
+from customfunctions import config, set_config
 
 from customfunctions import CustomChecks
 #endregion
@@ -133,14 +133,14 @@ async def on_command_error(ctx, error):
 		#Github gist configuration
 		errornum = config("errornum")		
 		errornum = int(errornum)+1
-		keyring.set_password("SachiBotPY", "errornum", str(errornum))
+		set_config("errornum", str(errornum))
 
 		traceback_text = traceback_text.replace(personal_info, '')
 
 		apiurl        = "https://api.github.com/gists"
 		gist_id       = config("githubgist")
 		gisttoedit    = f'{apiurl}/{gist_id}'
-		githubtoken   = keyring.get_password('SachiBotPY', 'githubtoken')
+		githubtoken   = config('githubtoken')
 		
 		headers                   = {'Authorization':'token %s'%githubtoken}
 		params                    = {'scope':'gist'}
