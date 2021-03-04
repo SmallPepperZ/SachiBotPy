@@ -3,6 +3,7 @@ from discord.ext import commands
 import json
 import random
 import os
+import requests
 from customfunctions import config
 
 #region Variable Stuff
@@ -78,11 +79,10 @@ class FunCog(commands.Cog, name="Fun"):
 		await ctx.reply(embed=embed)
 
 	
-	@commands.command()
+	@commands.command(aliases=['quote', 'quotes'])
 	async def advice(self, ctx):
 
-		api = os.popen('curl -sX GET https://api.adviceslip.com/advice').read()
-		apijson = json.loads(api)
+		apijson = requests.get('https://api.adviceslip.com/advice').json()
 		advice = apijson["slip"]["advice"]
 		embed = discord.Embed(title="Advice", color=embedcolor, description=advice)
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
@@ -90,8 +90,7 @@ class FunCog(commands.Cog, name="Fun"):
 		
 	@commands.command(aliases=['kitty', 'kitten'])
 	async def cat(self, ctx):
-		catapi = os.popen('curl -s https://api.thecatapi.com/v1/images/search').read()
-		catjson = json.loads(catapi)
+		catjson = requests.get('https://api.thecatapi.com/v1/images/search').json()
 		caturl = catjson[0]["url"]
 		embed = discord.Embed(title="Dog", color=embedcolor)
 		embed.set_image(url=caturl)
@@ -100,8 +99,7 @@ class FunCog(commands.Cog, name="Fun"):
 
 	@commands.command(aliases=['doggo', 'puppy'])
 	async def dog(self, ctx):
-		dogapi = os.popen('curl -s https://api.thedogapi.com/v1/images/search').read()
-		dogjson = json.loads(dogapi)
+		dogjson = requests.get('https://api.thedogapi.com/v1/images/search://api.adviceslip.com/advice').json()
 		dogurl = dogjson[0]["url"]
 		embed = discord.Embed(title="Cat", color=embedcolor)
 		embed.set_image(url=dogurl)
