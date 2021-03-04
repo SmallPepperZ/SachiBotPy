@@ -78,8 +78,18 @@ class FunCog(commands.Cog, name="Fun"):
 
 		await ctx.reply(embed=embed)
 
+	@commands.command(aliases=['quotes'])
+	async def quote(self, ctx):
+		response = requests.get('https://api.quotable.io/random').json()
+		text = response['content']
+		author = response["author"]
+		embed = discord.Embed(color=embedcolor, description=f'>>> {text}')
+		embed.set_author(name=author)
+		await ctx.reply(embed=embed)
+		
+
 	
-	@commands.command(aliases=['quote', 'quotes'])
+	@commands.command()
 	async def advice(self, ctx):
 
 		apijson = requests.get('https://api.adviceslip.com/advice').json()
