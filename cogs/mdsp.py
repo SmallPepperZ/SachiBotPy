@@ -34,7 +34,7 @@ logger = logging.getLogger("bot.mdsp")
 
 embedcolor = int(config("embedcolor"), 16)
 
-
+invitelogchannelid = 807379254303653939
 invitechannelid = 796109386715758652
 invitediscussionchannelid = 792558439863681046
 invitechannellimit = 10
@@ -205,18 +205,28 @@ async def update_invite_status(self, ctx:commands.Context, userid:int, action:st
 	sql = DatabaseFromDict.make_placeholder('invitees', db_data_dict)
 	dbcon.execute(sql, values)
 	dbcon.commit()
-	add_field(embed, "Invite Status", word2)
-	embed.set_thumbnail(url=messagecontents.thumbnail.url)
+
+	logembed = discord.Embed(color=embedcolor,      title="Invitee edited", description="")
+	logembed.set_author(     name =ctx.author.name, url  =ctx.message.jump_url, icon_url=ctx.author.avatar_url)
+	logembed.set_thumbnail(url=user.avatar_url)
+
+	embed.set_thumbnail(url=user.avatar_url)
 	if action == "accept":
 		invitediscussionchannel = self.bot.get_channel(invitediscussionchannelid)
 		newmsg = await invitediscussionchannel.send(embed=embed)
+		add_field(logembed, "User edited", f'[{user.name}]({newmsg.jump_url})')
 		await message.delete()
 		sql = f"""update invitees set invite_activity_type = 'approved', invite_message_id = {newmsg.id} where user_id = {userid}"""
 		dbcon.execute(sql)
 		dbcon.commit()
 	else:
 		await message.edit(embed=embed)
+		add_field(logembed, "User edited", f'[{user.name}]({message.jump_url})')
 	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} successfully {word3}"))
+	
+	
+	
+	await self.bot.get_channel(invitelogchannelid).send(embed=logembed)
 	#except:
 	#	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} not found")	)
 
@@ -253,7 +263,19 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 	@invite.command(description="*Cooldown: 2 minutes*\nAdds a user to #potential-invitees")
 	#@commands.cooldown(rate=1, per=120, type=BucketType.user)
-	async def add(self, ctx, userid:int, *, info:str=None):	
+	async def add(self, ctx, *args):	
+		flags = ['-f', '--force']
+		force = False
+		usedflags, args = CustomUtilities.find_flags(flags, args)
+		userid = int(args[0])
+		for flag in flags:
+			if flag in usedflags:
+				force = True
+		if len(args) > 1:
+			info = args[1:]
+		else:
+			info = ''
+		
 		try:
 			userid = int(userid)
 		except ValueError:
@@ -269,7 +291,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 			infomsg = await ctx.reply(embed=discord.Embed(color=embedcolor, description=f'Adding "{user.name}" to {invitechannel.mention}...'))
 			try:
 				mc_level, mc_messages = Mee6Api.get_user(userid, pages=10, limit=1000)
-				if mc_level >= 10:
+				if mc_level >= 10 or force:
 					ironminer = True
 				else:
 					ironminer = False
@@ -286,6 +308,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				add_field(embed, "Mention", user.mention)
 				add_field(embed, "User ID",  f'`{user.id}`')
 				add_field(embed, "Invite Status",  f'None')
+				add_field(embed, "Info",  info)
 				embed.set_footer(text=f'Suggested by {ctx.author.name}', icon_url= ctx.author.avatar_url)
 				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f'Added "{user.name}" to {invitechannel.mention}'))
 				message = await invitechannel.send(embed=embed)
@@ -309,6 +332,12 @@ class MdspCog(commands.Cog, name="MDSP"):
 				sql = DatabaseFromDict.make_placeholder('invitees', db_data_dict)
 				dbcur.execute(sql, values)
 				dbcon.commit()
+				logembed = discord.Embed(color=embedcolor,      title="Invitee added")
+				logembed.set_author(     name =ctx.author.name, url  =ctx.message.jump_url, icon_url=ctx.author.avatar_url)
+				add_field(logembed, "User added", f'[{user.name}]({message.jump_url})')
+				logembed.set_thumbnail(url=user.avatar_url)
+				await self.bot.get_channel(invitelogchannelid).send(embed=logembed)
+				
 				
 			else:
 				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f'''{user.name} is not yet an iron miner, try to add them again when they are ||(or maybe the api isn't working)||'''))
