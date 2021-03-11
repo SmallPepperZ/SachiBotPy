@@ -25,7 +25,7 @@ class TestingCog(commands.Cog, name="Testing"):
 	
 	@commands.command()
 	@commands.cooldown(rate=1, per=300)
-	@commands.check(commands.is_owner())
+	@commands.is_owner()
 	async def changeinvitehelp(self, ctx, *, contents):
 		channel = self.bot.get_channel(792558439863681046)
 		message = await channel.fetch_message(804147923285573633)
@@ -36,11 +36,12 @@ class TestingCog(commands.Cog, name="Testing"):
 
 
 	@commands.command()
-	@commands.check(commands.is_owner())
+	@commands.is_owner()
 	async def errorme(self, ctx):
 		await ctx.reply(1/0)
 
 	@commands.command(aliases=['tos'])
+	@commands.is_owner()
 	async def siren(self, ctx, *, content:str=None):
 		if not content:
 			await ctx.reply("Give me something to say!")
@@ -78,47 +79,6 @@ class TestingCog(commands.Cog, name="Testing"):
 	async def guild(self, ctx, guild_id: str):
 		await ctx.send(f'Exporting Guild {guild_id}...')
 
-	@commands.command()
-	@commands.check(commands.is_owner())
-	async def convertinvitees(self, ctx):
-		inviteesdict = {
-				"archive": {
-					"denied": {
-						"337267679465570305": 811078965753413682,
-						"560551797760983055": 811078968508809250,
-						"549770240532152320": 811078972405317632,
-						"316508111240429568": 811078977854504992
-					},
-					"approved": {
-						"592377749457469444": 804146859739971594,
-						"287372868814372885": 805541148541976626,
-						"778102342750437408": 806638169227001886,
-						"485500438964076546": 808495238518800484
-					}
-				},
-				"active": {
-					"640730699544002571": 804057883964342302,
-					"769710557904240721": 804058738780536872,
-					"716522494378508368": 804059095275143169,
-					"596502366740807702": 804059169862713414,
-					"97797564866236416": 804059259415429145,
-					"636698104594169856": 804059341027803198,
-					"720812649348071554": 804060048015097927,
-					"685302220362743849": 804060151807737906,
-					"764534820843421737": 804060207495250004,
-					"638706588722528256": 806596397314867200,
-					"554728508790931477": 806944313342820373,
-					"643269075396591626": 806961960896954400,
-					"349852668812066817": 807260966445121597,
-					"718461587236716584": 808394833508827157,
-					"530361907283099650": 809809568829407262
-				},
-				"testing": {
-					"685302220362743849": 804060151807737906
-				}
-			}
-		for userid in inviteesdict["active"].keys():
-			messageid = inviteesdict["active"][userid]
 
 
 
