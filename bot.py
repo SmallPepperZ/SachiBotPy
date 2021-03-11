@@ -109,7 +109,7 @@ async def on_command_error(ctx, error):
 		await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
 		return 
 	elif isinstance(error, BadArgument):
-		await ctx.reply(f"Invalid argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
+		await ctx.reply(f"Invalid argument!\nUsage: `{ctx.command.signature}`", delete_after=30)
 		return 
 	elif isinstance(error, NoPrivateMessage):
 		await ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>'))
