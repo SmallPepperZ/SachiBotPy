@@ -85,6 +85,7 @@ class FunCog(commands.Cog, name="Fun"):
 		author = response["author"]
 		embed = discord.Embed(color=embedcolor, description=f'>>> {text}')
 		embed.set_author(name=author)
+		embed.set_footer(text=f"Request by {ctx.author} | api: api.quotable.io/random", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
 		
 
@@ -95,7 +96,7 @@ class FunCog(commands.Cog, name="Fun"):
 		apijson = requests.get('https://api.adviceslip.com/advice').json()
 		advice = apijson["slip"]["advice"]
 		embed = discord.Embed(title="Advice", color=embedcolor, description=advice)
-		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+		embed.set_footer(text=f"Request by {ctx.author} | api: api.adviceslip.com/advice", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
 		
 	@commands.command(aliases=['kitty', 'kitten'])
@@ -109,7 +110,7 @@ class FunCog(commands.Cog, name="Fun"):
 
 	@commands.command(aliases=['doggo', 'puppy'])
 	async def dog(self, ctx):
-		dogjson = requests.get('https://api.thedogapi.com/v1/images/search://api.adviceslip.com/advice').json()
+		dogjson = requests.get('https://api.thedogapi.com/v1/images/search').json()
 		dogurl = dogjson[0]["url"]
 		embed = discord.Embed(title="Cat", color=embedcolor)
 		embed.set_image(url=dogurl)
