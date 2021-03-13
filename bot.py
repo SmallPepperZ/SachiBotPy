@@ -35,6 +35,7 @@ intents.typing = False
 bot = commands.Bot(command_prefix=prefix,
 				   intents=intents,
 				   case_insensitive=True)
+
 slash = SlashCommand(bot, override_type=True, sync_commands=True)
 
 errorchannel = int(config("errorchannel"))
@@ -54,10 +55,11 @@ bot.coglist = [	'cogs.owner',
 				'cogs.utility',
 				'cogs.admin',
 				'cogs.cogs',
-				'cogs.logging',
+				'cogs.listeners',
 				'cogs.testing',
 				'cogs.mdsp',
-				'cogs.slash-commands']
+				'cogs.slash-commands'
+				]
 
 if __name__ == '__main__':
 	for extension in bot.coglist:
@@ -197,14 +199,6 @@ async def on_command_error(ctx, error):
 async def on_member_join(member: discord.Member):
 	channel = bot.get_channel(member.guild.system_channel)
 	await channel.send("Hello, "+member.display_name)
-# @bot.event
-# async def on_message(message):
-#	if bot.user.mentioned_in(message):
-#		embed = discord.Embed(color=embedcolor)
-#		embed.add_field(name="Prefix", value="`%`", inline='true')
-#		embed.add_field(name="Help", value="`%help`", inline='true')
-#		embed.set_footer(text=f"Request by {message.author}", icon_url= message.author.avatar_url)
-#		await message.reply(embed=embed)
 
 # endregion
 

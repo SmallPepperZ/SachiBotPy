@@ -1,4 +1,3 @@
-from customfunctions.config_info import get_config
 import json
 import time
 import sqlite3 as sl
