@@ -1,38 +1,41 @@
-#region Imports
-import requests
+# region Imports
+
 import time
-import discord
-import os, sys, os.path
-from discord.ext import commands
-from discord.ext.commands import CommandNotFound
-import logging
-from discord.ext.commands.errors import *
 import json
-from discord import Status
+import logging
 import traceback
-import urllib, urllib.parse
-import datetime
+import discord
+
+import requests
+
+from discord.enums import Status
+from discord.ext import commands
+from discord.ext.commands import CommandNotFound, errors
+from discord_slash import SlashCommand
+
+
 from customfunctions import config, set_config
-
 from customfunctions import CustomChecks
-#endregion
+# endregion
 
-#region Variable Stuff
+# region Variable Stuff
 
 
 embedcolor = int(config("embedcolor"), 16)
-token      = config('discordtoken')
-errornum   = config("errornum")
+token = config('discordtoken')
+
 personal_info = config("pathtohide")
 
 
-
-prefix           = config("prefix")
+prefix = config("prefix")
 start_time_local = time.time()
 
-intents        = discord.Intents.all()
+intents = discord.Intents.all()
 intents.typing = False
-bot            = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
+bot = commands.Bot(command_prefix=prefix,
+				   intents=intents,
+				   case_insensitive=True)
+slash = SlashCommand(bot, override_type=True, sync_commands=True)
 
 errorchannel = int(config("errorchannel"))
 
@@ -43,148 +46,159 @@ logging.basicConfig(level=logging.INFO)
 bot.remove_command('help')
 
 
-#endregion
+# endregion
 
-#region Cogs
-bot.coglist = ['cogs.owner',
-			   'cogs.fun',
-			   'cogs.utility',
-	 	 	   'cogs.admin',
-			   'cogs.cogs',
-			   'cogs.logging',
-			   'cogs.testing',
-			   'cogs.mdsp']
+# region Cogs
+bot.coglist = [	'cogs.owner',
+				'cogs.fun',
+				'cogs.utility',
+				'cogs.admin',
+				'cogs.cogs',
+				'cogs.logging',
+				'cogs.testing',
+				'cogs.mdsp',
+				'cogs.slash-commands']
 
 if __name__ == '__main__':
-    for extension in bot.coglist:
-        bot.load_extension(extension)
-#endregion
+	for extension in bot.coglist:
+		bot.load_extension(extension)
+# endregion
 
-#region Logger Stuff
+# region Logger Stuff
 logger_error = logging.getLogger("Discord - Main")
 logger_error.setLevel(logging.INFO)
 
 
-#endregion
+# endregion
 
 @bot.event
 async def on_ready():
 	logger_error.info("Bot initialized")
-	#await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="for a % | %help"), status=Status.online)
+	await bot.change_presence(	activity=discord.Activity(	type=discord.ActivityType.watching,
+														  name="for a % | %help"),
+							   status=Status.online)
 
 
-#region Bot Events
-	
+# region Bot Events
+
 @bot.event
-async def on_command_error(ctx, error):	
+async def on_command_error(ctx, error):
 	if hasattr(ctx.command, 'on_error'):
 		return
 	elif isinstance(error, CommandNotFound) or ctx.command.hidden:
 		await ctx.message.add_reaction(str('❔'))
-		return 
-	elif isinstance(error, NotOwner):		
+		return
+	elif isinstance(error, errors.NotOwner):
 		await ctx.message.add_reaction(str('🔏'))
 		return
-	elif isinstance(error, DisabledCommand):		
+	elif isinstance(error, errors.DisabledCommand):
 		await ctx.message.add_reaction(str('<:DisabledCommand:804476191268536320>'))
 		return
-	elif isinstance(error, MissingPermissions):
+	elif isinstance(error, errors.MissingPermissions):
 		await ctx.message.add_reaction(str('🔐'))
 		return
-	elif isinstance(error, BotMissingPermissions):
+	elif isinstance(error, errors.BotMissingPermissions):
 		await ctx.reply("I do not have the requisite permissions")
 		return
-	elif isinstance(error, MissingRole):
+	elif isinstance(error, errors.MissingRole):
 		await ctx.message.add_reaction(str('🔐'))
 		return
-	elif isinstance(error, CommandOnCooldown):
+	elif isinstance(error, errors.CommandOnCooldown):
 		await ctx.message.add_reaction(str('<:Cooldown:804477347780493313>'))
 		if str(error.cooldown.type.name) != "default":
 			cooldowntype = f'per {error.cooldown.type.name}'
 		else:
 			cooldowntype = 'global'
-		await ctx.reply(f"This command is on a {round(error.cooldown.per, 0)}s {cooldowntype} cooldown. Wait {round(error.retry_after, 1)} seconds", delete_after=min(10, error.retry_after))
+			await ctx.reply(f"This command is on a {round(error.cooldown.per, 0)}s {cooldowntype} cooldown. "
+							f"Wait {round(error.retry_after, 1)} seconds",
+							delete_after=min(10, error.retry_after))
 		return
-	elif isinstance(error, MissingRequiredArgument):
+	elif isinstance(error, errors.MissingRequiredArgument):
 		await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
-		return 
-	elif isinstance(error, BadArgument):
+		return
+	elif isinstance(error, errors.BadArgument):
 		await ctx.reply(f"Invalid argument!\nUsage: `{ctx.command.signature}`", delete_after=30)
-		return 
-	elif isinstance(error, NoPrivateMessage):
+		return
+	elif isinstance(error, errors.NoPrivateMessage):
 		await ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>'))
 		return
 	elif isinstance(error, CustomChecks.IncorrectGuild):
 		await ctx.reply(content="This command does not work in this server.", delete_after=10)
 		return
 	else:
-		#Send user a message
+		# Send user a message
 		await ctx.message.add_reaction('<:CommandError:804193351758381086>')
-		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed", delete_after=60)		
+		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed", delete_after=60)
 
-		#Get traceback info
+		# Get traceback info
 		exc = error
 		error_type = type(exc)
 		trace = exc.__traceback__
 
 		lines = traceback.format_exception(error_type, exc, trace)
 		traceback_text = ''.join(lines)
-		
-		#Github gist configuration
-		errornum = config("errornum")		
+
+		# Github gist configuration
+		errornum = config("errornum")
 		errornum = int(errornum)+1
 		set_config("errornum", str(errornum))
 
 		traceback_text = traceback_text.replace(personal_info, '')
 
-		apiurl        = "https://api.github.com/gists"
-		gist_id       = config("githubgist")
-		gisttoedit    = f'{apiurl}/{gist_id}'
-		githubtoken   = config('githubtoken')
-		
-		headers                   = {'Authorization':'token %s'%githubtoken}
-		params                    = {'scope':'gist'}
-		content                   = f'Error - {error} \n\n\n {traceback_text}'
-		formatted_error_number    = f'{errornum:02d}'
-		payload                   = {"description":"SachiBot Errors - A gist full of errors for my bot" ,"public":False,"files":{"SachiBotPyError %s.log"%formatted_error_number:{"content": content}}}
-		#Upload to github gist
-		requests.patch(gisttoedit,headers=headers,params=params,data=json.dumps(payload))
+		apiurl = "https://api.github.com/gists"
+		gist_id = config("githubgist")
+		gisttoedit = f'{apiurl}/{gist_id}'
+		githubtoken = config('githubtoken')
 
-		
-
-		#Build and send embed for error channel
+		headers = {'Authorization': 'token %s' % githubtoken}
+		params = {'scope': 'gist'}
+		content = f'Error - {error} \n\n\n {traceback_text}'
+		formatted_error_number = f'{errornum:02d}'
+		payload = {"description": "SachiBot Errors - A gist full of errors for my bot", "public": False,
+				   "files": {"SachiBotPyError %s.log" % formatted_error_number: {"content": content}}}
+		# Upload to github gist
+		requests.patch(gisttoedit,
+					   headers=headers,
+					   params=params,
+					   data=json.dumps(payload))
+		# Build and send embed for error channel
 		channel = bot.get_channel(errorchannel)
-		embed1 = discord.Embed(title=f"Error {formatted_error_number}", color=embedcolor)
-		embed1.add_field(name   = "Message Url:", value=ctx.message.jump_url, inline='false')
-		embed1.add_field(name   = "Message:", value=ctx.message.clean_content, inline='true')
-		embed1.add_field(name   = "Author:", value=ctx.message.author.mention, inline='true')
-		embed1.add_field(name   = "\u200B", value='\u200B', inline='true')
-		#Check if it was in a guild
+		embed1 = discord.Embed(
+			title=f"Error {formatted_error_number}", color=embedcolor)
+		embed1.add_field(name="Message Url:",
+						 value=ctx.message.jump_url, inline='false')
+		embed1.add_field(
+			name="Message:", value=ctx.message.clean_content, inline='true')
+		embed1.add_field(
+			name="Author:", value=ctx.message.author.mention, inline='true')
+		embed1.add_field(name="\u200B", value='\u200B', inline='true')
+		# Check if it was in a guild
 		try:
 			guildname = ctx.guild.name
 			channelname = ctx.channel.name
 		except:
 			guildname = "DM"
 			channelname = ctx.author.id
-		embed1.add_field(name   = "Guild:", value=guildname, inline='true')
-		embed1.add_field(name   = "Channel:", value=channelname, inline='true')
-		embed1.add_field(name   = "\u200B", value='\u200B', inline='true')
-		embed1.add_field(name   = "Error:", value=f'```{error}```', inline='false')
-		embed1.add_field(name   = "Traceback:", value=f'Traceback Gist - [SachiBotPyError {formatted_error_number}.log](https://gist.github.com/SmallPepperZ/{gist_id}#file-sachibotpyerror-{formatted_error_number}-log \"Github Gist #{formatted_error_number}\") ', inline='false')
+		embed1.add_field(name="Guild:", value=guildname, inline='true')
+		embed1.add_field(name="Channel:", value=channelname, inline='true')
+		embed1.add_field(name="\u200B", value='\u200B', inline='true')
+		embed1.add_field(name="Error:", value=f'```{error}```', inline='false')
+		embed1.add_field(
+			name="Traceback:", value=f'Traceback Gist - '
+									 f'[SachiBotPyError {formatted_error_number}.log](https://gist.github.com/SmallPepperZ/{gist_id}#file-sachibotpyerror-{formatted_error_number}-log'
+									 f' \"Github Gist #{formatted_error_number}\") ', inline='false')
 		await channel.send(embed=embed1)
 
 		ghost_ping = await channel.send('<@!545463550802395146>')
 		await ghost_ping.delete()
 
 
-
-
 @bot.event
-async def on_member_join(member:discord.Member):	
+async def on_member_join(member: discord.Member):
 	channel = bot.get_channel(member.guild.system_channel)
-	await channel.send("Hello, "+member.name)
-#@bot.event
-#async def on_message(message):
+	await channel.send("Hello, "+member.display_name)
+# @bot.event
+# async def on_message(message):
 #	if bot.user.mentioned_in(message):
 #		embed = discord.Embed(color=embedcolor)
 #		embed.add_field(name="Prefix", value="`%`", inline='true')
@@ -192,7 +206,7 @@ async def on_member_join(member:discord.Member):
 #		embed.set_footer(text=f"Request by {message.author}", icon_url= message.author.avatar_url)
 #		await message.reply(embed=embed)
 
-#endregion
+# endregion
 
 
 bot.run(token)

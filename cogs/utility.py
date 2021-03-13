@@ -1,9 +1,9 @@
-import discord
-from discord.embeds import Embed
-from discord.ext import commands
-import json, logging
+import logging
 import time, datetime
-from string import ascii_letters, punctuation, whitespace
+
+import discord
+from discord.ext import commands
+
 from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
 from customfunctions import config
@@ -25,13 +25,12 @@ class UtilityCog(commands.Cog, name="Utility"):
 		commandsdict = {}
 		for cog in self.bot.cogs.keys():
 			commandsdict[str(cog)] = {}
-		commands = self.bot.walk_commands()
-		
-		for cmd in commands:
+		command_list = self.bot.walk_commands()
+		for cmd in command_list:
 			if (not cmd.hidden) and cmd.enabled:
-				
+
 				qname =	cmd.qualified_name
-				cog = cmd.cog_name				
+				cog = cmd.cog_name
 				commandsdict[str(cog)][str(qname)] = {
 					"description": cmd.description,
 					"usage"      : cmd.usage,
@@ -46,7 +45,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		pages   = []
 		for cog in commandsdict.keys():
 			logger.debug(f"Starting cog loop for {cog}")
-			
+
 			for command in commandsdict[cog].keys():
 				logger.debug(f"Starting command loop for {cog}")
 				signature = f'{commandsdict[cog][command]["signature"]}'
@@ -54,18 +53,18 @@ class UtilityCog(commands.Cog, name="Utility"):
 					description = f': {commandsdict[cog][command]["description"]}'
 				else:
 					description = ''
-				cogdata += f'\n`{command} {signature}`{description}'	
-			if not cogdata == '':
-				if (cog == "Owner" or cog == "Testing"):
+				cogdata += f'\n`{command} {signature}`{description}'
+			if cogdata != '':
+				if cog in ("Owner", "Testing"):
 					if ctx.author.id == 545463550802395146:
-						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))	
+						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
 				elif cog == "MDSP":
 					if ctx.guild.id == 764981968579461130:
 						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
 				else:
 					pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
 			cogdata = ''
-			
+
 		paginator = BotEmbedPaginator(ctx, pages)
 		await paginator.run()
 
@@ -80,7 +79,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.reply(embed=embed)
 
-	
+
 	@commands.command(aliases=['userinfo'])
 	async def whois(self,ctx, userid):
 		try:
@@ -106,8 +105,8 @@ class UtilityCog(commands.Cog, name="Utility"):
 				"idle"   : "🟡",
 				"dnd"    : "🔴",
 				"offline": "⚫"
-				
-			} 
+
+			}
 			logger.debug(status)
 			if user.is_on_mobile():
 				ismobile  = '📱 - '
@@ -116,7 +115,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 			else:
 				ismobile = ""
 			statusicon = statuseemojis[str(status)]
-			
+
 			def embedsec1(embed):
 				EmbedMaker.add_description_field(embed, "Is the owner?", isowner)
 				EmbedMaker.add_description_field(embed, "Is an admin?", isadmin)
@@ -152,7 +151,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		flagnames = [flag.name for flag in flags]
 		badgeicons = [badgelist[badge] for badge in badgelist if badge in flagnames]
 		badgestr   = " ".join(list(map(str, badgeicons)))
-		
+
 		isbot      = user.bot
 		avatar     = user.avatar_url
 		createdate = user.created_at
@@ -173,9 +172,9 @@ class UtilityCog(commands.Cog, name="Utility"):
 		EmbedMaker.add_description_field(embed, "Account Creation Date", createdate)
 		embedsec2(embed)
 		EmbedMaker.add_blank_field(embed)
-		if str(badgeicons) != "[]":	
+		if str(badgeicons) != "[]":
 			EmbedMaker.add_description_field(embed, "Profile Badges", badgestr)
-		
+
 		await ctx.send(embed=embed)
 		#ctx.guild.get_member(user)
 
@@ -186,11 +185,11 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
 		await suggestion_channel.send(embed=embed)
 		await ctx.reply("Suggestion added")
-		
+
 
 	@commands.command(aliases=["online", "areyouthere"])
 	async def didyoudie(self, ctx):
 		await ctx.reply("I am very much alive", delete_after=20)
 
 def setup(bot):
-    bot.add_cog(UtilityCog(bot))
+	bot.add_cog(UtilityCog(bot))

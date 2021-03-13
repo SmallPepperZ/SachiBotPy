@@ -22,20 +22,20 @@ class AdminCog(commands.Cog, name="Admin"):
 		if args[1]:
 			try:
 				amount = int(args[1])
-				await ctx.message.delete()				
+				await ctx.message.delete()
 				await ctx.channel.purge(limit=amount)
 				embed = discord.Embed(color=embedcolor)
 				embed.add_field(name="Clear", value="cleared " + args[1] + " messages")
 				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 				await ctx.send(embed=embed)
-			except:
+			except ValueError:
 				await ctx.reply("Error, most likely not a number")
 
 	@commands.command()
 	@commands.has_guild_permissions(manage_messages=True)
 	async def delete(self, ctx, messageid):
 		message:discord.Message = await MessageConverter().convert(ctx, messageid)
-		if message.guild.id == ctx.guild.id:	
+		if message.guild.id == ctx.guild.id:
 			await ctx.message.delete()
 			await message.delete()
 
@@ -55,4 +55,4 @@ class AdminCog(commands.Cog, name="Admin"):
 
 
 def setup(bot):
-    bot.add_cog(AdminCog(bot))
+	bot.add_cog(AdminCog(bot))
