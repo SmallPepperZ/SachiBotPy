@@ -1,10 +1,13 @@
-import discord; from discord.ext import commands
+from customfunctions.config_info import get_config
 import json
 import time
 import sqlite3 as sl
-from customfunctions import config
 import logging
 
+import discord
+from discord.ext import commands
+
+from customfunctions import config
 
 #region Variable Stuff
 
@@ -22,18 +25,10 @@ channelignore = json.loads(ignore_json)["channels"]
 guildignore   = json.loads(ignore_json)["guilds"]
 
 
-class LoggerCog(commands.Cog, name="Logging"):
+class ListenerCog(commands.Cog, name="Logging"):
 	def __init__(self, bot):
 		self.bot = bot
-		
-#	@commands.Cog.listener("on_message")
-#	async def logmessages(self, message):
-#		await self.bot.process_commands(message)
-#		if (message.guild.id == 764981968579461130) and (message.channel.id != 789195444957609994) and (message.channel.id != 789607866780745748):
-#			sentmsg = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+", "+str(message.channel.id)+", "+str(message.channel.name)+", "+str(message.author)+", "+str(message.content)
-#			logging.info(f"Message: {sentmsg}")
-#			with open("logs/test.csv", 'a') as file_object:
-#				file_object.write(sentmsg+"\n")
+
 
 	@commands.Cog.listener("on_message")
 	async def logmessages(self, message:discord.Message):
@@ -50,7 +45,7 @@ class LoggerCog(commands.Cog, name="Logging"):
 		if (not channel in channelignore) and (not guild in guildignore):
 			sql = 'INSERT into Messages (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url, attachments) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 			sqldata = [
-					int(time.time()), 
+					int(time.time()),
 					int(message.id),
 					int(guild),
 					int(channel),
@@ -66,18 +61,18 @@ class LoggerCog(commands.Cog, name="Logging"):
 				dbcon.execute(sql, sqldata)
 		else:
 			return
-	
+
 	@commands.Cog.listener("on_message")
 	async def logcommands(self, message):
-		
+
 		content = message.content
-		if (content.startswith(prefix)):
+		if content.startswith(prefix):
 			try:
 				channel     = message.channel.id
 				channelname = message.channel.name
 				guild       = message.guild.id
 				guildname   = message.guild.name
-			except AttributeError: 
+			except AttributeError:
 				channel     = message.author.id
 				channelname = message.author.name
 				guild       = 0
@@ -85,7 +80,7 @@ class LoggerCog(commands.Cog, name="Logging"):
 			logger.info(f'{guildname} - {channelname} - {message.author.name} ({message.author.id}) just executed \'{message.content}\'')
 			sql = 'INSERT into Commands (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 			sqldata = [
-					int(time.time()), 
+					int(time.time()),
 					int(message.id),
 					int(guild),
 					int(channel),
@@ -98,10 +93,20 @@ class LoggerCog(commands.Cog, name="Logging"):
 					]
 			with dbcon:
 				dbcon.execute(sql, sqldata)
-			
-				
-				
-#TODO Add command that admins can use to ignore their server or channel	
+
+	@commands.Cog.listener("on_message")
+	async def respond_to_pings(self, message:discord.Message):
+		pinged        = self.bot.user.mentioned_in(message)
+		replied_to    = not("<@796509133985153025>" in message.content or "<@!796509133985153025>" in message.content)
+		message_length = len(message.content.split(' '))
+		if pinged and not replied_to:
+			await message.add_reaction('<:PING:796424651374985266>')
+			if message_length == 1:
+				await message.reply(f"My prefix is `{prefix}`")
+
+
+
+#TODO Add command that admins can use to ignore their server or channel
 
 def setup(bot):
-    bot.add_cog(LoggerCog(bot))
+	bot.add_cog(ListenerCog(bot))
