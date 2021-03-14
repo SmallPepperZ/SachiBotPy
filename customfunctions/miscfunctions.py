@@ -1,3 +1,6 @@
+import json
+
+
 def find_flags(flags:list, args):
 	"""Returns a list of flags and a list of arguments from an invocation
 
@@ -22,3 +25,41 @@ def find_flags(flags:list, args):
 			args.pop(args.index(flag))
 			used_flags.append(flag)
 	return used_flags, args
+
+
+def write_file(filepath:str, data:dict, indent:int=4) -> None:
+	"""Writes a dictionary to a file
+
+	Parameters
+	----------
+
+	filepath : str
+		The path of the file to write to
+
+	data : dict
+		The dictionary to dump as json
+
+	indent : int, optional
+		The indent to use when dumping, by default 4
+	"""
+	with open(filepath, "w") as file:
+		json.dump(data, file, indent=indent)
+
+def read_file(filepath:str) -> dict:
+	"""Gets the contents of a JSON file as a dictionary
+
+	Parameters
+	----------
+
+	filepath : str
+		The path of the file to read
+
+	Returns
+	-------
+
+	json : dict
+		The contents of the JSON file as a dictionary
+
+	"""
+	with open(filepath, "r") as file:
+		return json.loads(file.read())

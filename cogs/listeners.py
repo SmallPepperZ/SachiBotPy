@@ -105,7 +105,5 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 
 
-#TODO Add command that admins can use to ignore their server or channel
-
 def setup(bot):
 	bot.add_cog(ListenerCog(bot))
