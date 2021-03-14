@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import MessageConverter
-from customfunctions import config
+from customfunctions import config, miscfunctions
 
 #region Variable Stuff
 
@@ -40,7 +40,7 @@ class AdminCog(commands.Cog, name="Admin"):
 			await message.delete()
 
 
-	@commands.command()
+	@commands.command(enabled=False)
 	@commands.has_guild_permissions(manage_nicknames=True)
 	async def nickname(self, ctx:commands.Context, *args):
 		args = list(args)
@@ -52,6 +52,31 @@ class AdminCog(commands.Cog, name="Admin"):
 			args.pop(args.index(user.id))
 		nick = ' '.join(args)
 		await user.edit(nick=nick)
+
+	@commands.command()
+	@commands.has_guild_permissions(manage_guild=True)
+	async def disable_logging(self, ctx, scope:str="guild"):
+		scope = scope.lower()
+		dictionary = miscfunctions.read_file('storage/loggingignore.json')
+		guild_ignored = bool(ctx.guild.id in dictionary["guilds"])
+		channel_ignored = bool(ctx.channel.id in dictionary["channels"])
+		if scope == "guild" and not guild_ignored:
+			dictionary["guilds"].append(ctx.guild.id)
+			miscfunctions.write_file('storage/loggingignore.json', dictionary)
+			self.bot.reload_extension('cogs.listeners')
+			await ctx.reply("Guild ignored succesfully")
+		elif scope == "channel" and not channel_ignored:
+			dictionary["channels"].append(ctx.channel.id)
+			miscfunctions.write_file('storage/loggingignore.json', dictionary)
+			self.bot.reload_extension('cogs.listeners')
+			await ctx.reply("Channel ignored successfully")
+		elif guild_ignored:
+			await ctx.reply("This guild is already ignored")
+		elif channel_ignored:
+			await ctx.reply("This channel is already ignored")
+		else:
+			await ctx.reply("Valid scopes are `guild` and `channel`")
+		
 
 
 def setup(bot):
