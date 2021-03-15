@@ -102,8 +102,11 @@ class ListenerCog(commands.Cog, name="Logging"):
 			await message.add_reaction('<:PING:796424651374985266>')
 			if message_length == 1:
 				await message.reply(f"My prefix is `{prefix}`")
-
-
+	
+	@commands.Cog.listener("on_resumed")
+	async def on_resume(self):
+		status = config('status')
+		await self.bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
 
 def setup(bot):
 	bot.add_cog(ListenerCog(bot))

@@ -76,9 +76,8 @@ logger.setLevel(logging.INFO)
 @bot.event
 async def on_ready():
 	logger.info("Bot initialized")
-	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-														name="for a % | %help"),
-							  status=Status.online)
+	status = config('status')
+	await bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
 
 
 # region Bot Events

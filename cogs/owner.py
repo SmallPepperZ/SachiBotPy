@@ -1,21 +1,28 @@
+import time
+import datetime
+
+import os
+import sys
+import logging
+
+from io import BytesIO
+from PIL import Image
+
 import discord
 from discord.errors import Forbidden
 from discord.ext import commands
-import json
-import time, datetime
-import os, sys, logging, asyncio
-from discord.ext.commands.core import guild_only, is_owner
+from discord.ext.commands.core import is_owner
 from discord import Status
+
+
+from customfunctions import config, set_config
+from customfunctions import confirmation as ConfirmationCheck
+#region Variable Stuff
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
-from customfunctions import confirmation as ConfirmationCheck
-from io import BytesIO
-from PIL import Image
-from customfunctions import config, set_config
-#region Variable Stuff
 
-bot_talk_channel = None
-bot_talk_channel_obj = None
+BOT_TALK_CHANNEL = None
+BOT_TALK_CHANNEL_OBJ = None
 embedcolor       = int(config("embedcolor"), 16)
 
 statuses={
@@ -29,20 +36,36 @@ statuses={
 }
 
 #endregion
-async def changestatus(self, ctx, type):
-	global botuser
-	botuser = self.bot.get_guild(797308956162392094).me
-	if botuser.activity != None:
-		await self.bot.change_presence(activity=discord.Activity(type=botuser.activity.type, name=botuser.activity.name), status=type)
+def save_status(self):
+	print(type(self.bot_member.status))
+	print(self.bot_member.status)
+	set_config('status', (self.bot_member.activity.type, self.bot_member.activity.name, self.bot_member.status))
+
+async def apply_status(self):
+	status = config('status')
+	await self.bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
+
+async def changestatus(self, ctx, status_type):
+	if self.bot_member.activity is not None:
+		await self.bot.change_presence(activity=discord.Activity(type=self.bot_member.activity.type, name=self.bot_member.activity.name), status=status_type)
 	else:
-		await self.bot.change_presence(status=type)
+		await self.bot.change_presence(status=status_type)
+	save_status(self)
+
 
 
 class OwnerCog(commands.Cog,name="Owner"):
 	def __init__(self, bot):
 		self.bot = bot
-
-
+		
+	@property
+	def bot_member(self):
+		try:
+			return self.bot.guilds[0].me
+		except IndexError:
+			return None
+		
+				
 	@commands.command()
 	@commands.is_owner()
 	async def restart(self, ctx):
@@ -112,20 +135,20 @@ class OwnerCog(commands.Cog,name="Owner"):
 			#Reload cogs
 			for cog in ctx.bot.coglist:
 				self.bot.reload_extension(cog)
-		elif confirmation == False:
-			embed = discord.Embed(color=embedcolor, title="Embed Color", description = f"Embed color unchanged")
+		elif confirmation is False:
+			embed = discord.Embed(color=embedcolor, title="Embed Color", description = "Embed color unchanged")
 			await msg.edit(embed=embed)
-		elif confirmation == None:
+		elif confirmation is None:
 			await ctx.reply("Confirmation timed out")
 			return
 
 	@commands.group()
 	@commands.is_owner()
 	async def status(self,ctx):
-		global botuser
-		botuser = self.bot.get_guild(797308956162392094).me
+
+		
 		if ctx.invoked_subcommand is None:
-			status = botuser.raw_status
+			status = self.bot_member.raw_status
 			if status == "online":
 				statusemoji = '🟢 - '
 				statuscolor = 0x00FF00
@@ -141,52 +164,60 @@ class OwnerCog(commands.Cog,name="Owner"):
 			else:
 				statusemoji = ''
 				statuscolor = embedcolor
-			embed = discord.Embed(color=statuscolor, title="Status:", description=f'**Status:** {statusemoji}{status} - {statuses[botuser.activity.type.value]} {botuser.activity.name}')
+			embed = discord.Embed(color=statuscolor, title="Status:", description=f'**Status:** {statusemoji}{status} - {statuses[self.bot_member.activity.type.value]} {self.bot_member.activity.name}')
 			await ctx.reply(embed=embed)
-	
+			save_status(self)
+
 	@status.command(aliases=['green', 'good'])
 	async def online(self, ctx):
 		await changestatus(self, ctx, Status.online)
 		await ctx.message.add_reaction(str('🟢'))
-	
+		save_status(self)
+
 	@status.command(aliases=['yellow', 'okay', 'ok', 'decent', 'afk'])
 	async def idle(self, ctx):
 		await changestatus(self, ctx, Status.idle)
 		await ctx.message.add_reaction(str('🟡'))
+		save_status(self)
 
 	@status.command(aliases=['red', 'bad', 'broken', 'error', 'donotdisturb'])
 	async def dnd(self, ctx):
 		await changestatus(self, ctx, Status.dnd)
 		await ctx.message.add_reaction(str('🔴'))
+		save_status(self)
 
 	@status.command(aliases=['grey','gray', 'hide', 'offline', 'invis', 'hidden'])
 	async def invisible(self, ctx):
 		await changestatus(self, ctx, Status.invisible)
 		await ctx.message.add_reaction(str('⚫'))
-	
+		save_status(self)
 	@status.group()
 	async def activity(self, ctx):
 		logging.info('activity called')
 
 	@activity.command()
 	async def playing(self, ctx, *, status:str):
-		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=status), status=botuser.status)
+		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=status), status=self.bot_member.status)
 		await ctx.message.add_reaction(str('✅'))
+		save_status(self)
 
 	@activity.command()
 	async def competing(self, ctx, *, status:str):
-		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.competing, name=status), status=botuser.status)
+		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.competing, name=status), status=self.bot_member.status)
 		await ctx.message.add_reaction(str('✅'))
+		save_status(self)
 
 	@activity.command()
 	async def listening(self, ctx, *, status:str):
-		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=status), status=botuser.status)
+		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=status), status=self.bot_member.status)
 		await ctx.message.add_reaction(str('✅'))
+		save_status(self)
 
 	@activity.command()
 	async def watching(self, ctx, *, status:str):
-		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status), status=botuser.status)
+		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status), status=self.bot_member.status)
 		await ctx.message.add_reaction(str('✅'))
+		save_status(self)
 
 	@status.command()
 	async def subcommands(self, ctx):
@@ -195,35 +226,38 @@ class OwnerCog(commands.Cog,name="Owner"):
 		subcommands = [f'**{cmd.name}:** \n{delim2.join(list(map(str, cmd.aliases)))}' for cmd in ctx.command.parent.commands]
 		embed = discord.Embed(color=embedcolor, title="Status Subcommands:", description=f'**Status:** {delim.join(list(map(str, subcommands)))}')
 		await ctx.reply(embed=embed)
-		
+
 	@commands.command()
 	@commands.check(is_owner())
 	#commands.check(guild_only)
 	async def bottalk(self, ctx):
-		global bot_talk_channel, bot_talk_channel_obj, dm_channel
-		
-		if bot_talk_channel == None:
+		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ, dm_channel
+		if BOT_TALK_CHANNEL is None:
 			dm_channel = await self.bot.fetch_user(ctx.author.id)
 			try:
 				await ctx.message.delete()
 			except Forbidden:
 				return
 			await dm_channel.send("Bot talk started, type `stoptalk` to end")
-			bot_talk_channel = ctx.channel.id
-			bot_talk_channel_obj = self.bot.get_channel(bot_talk_channel)
+			BOT_TALK_CHANNEL = ctx.channel.id
+			BOT_TALK_CHANNEL_OBJ = self.bot.get_channel(BOT_TALK_CHANNEL)
 			dm_channel = await self.bot.fetch_user(ctx.author.id)
+
+	@commands.command()
+	async def apply_status_test(self, ctx):
+		await	apply_status(self)
 
 	@commands.Cog.listener("on_message")
 	async def speak_as_bot(self, msg): 
-		global bot_talk_channel, bot_talk_channel_obj
-		if (bot_talk_channel != None):
+		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ
+		if (BOT_TALK_CHANNEL != None):
 			if (isinstance(msg.channel, discord.channel.DMChannel)) and (msg.author.id == 545463550802395146):
 				if not(msg.content == "stoptalk"):
-					await bot_talk_channel_obj.send(msg.content)
+					await BOT_TALK_CHANNEL_OBJ.send(msg.content)
 				else:
-					bot_talk_channel = None
+					BOT_TALK_CHANNEL = None
 					await msg.reply("Bot talk stopped")
-			elif msg.channel.id == bot_talk_channel and not (msg.author.id) == 796509133985153025:
+			elif msg.channel.id == BOT_TALK_CHANNEL and not (msg.author.id) == 796509133985153025:
 				await dm_channel.send(f'**{msg.author}:** {msg.content}')	
 			
 		
