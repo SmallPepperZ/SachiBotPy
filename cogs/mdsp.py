@@ -97,8 +97,9 @@ def add_field(embed, key: str, value: str):
 def add_row(embed, value: str):
 	embed.__setattr__("description", f'{embed.description}\n{value}')
 
-
 async def update_invite_status(self, ctx: commands.Context, userid: int, action: str, force: bool = False):
+	status_editor_name = ctx.author.mention
+	print(status_editor_name)
 	invitechannel = self.bot.get_channel(INVITE_CHANNEL_ID)
 	user = await self.bot.fetch_user(int(userid))
 	infomsg = await ctx.reply(embed=discord.Embed(color=embedcolor, description=f"Searching for {user.name} in {invitechannel.mention}..."))
@@ -131,17 +132,6 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	logger.debug(messageid)
 	message = await self.bot.get_channel(INVITE_CHANNEL_ID).fetch_message(messageid)
 	messagecontents = message.embeds[0]
-	# splitmessage = messagecontents.description.splitlines()
-	# l1 = splitmessage[0]
-	# l2 = splitmessage[1]
-	# l3 = splitmessage[2]
-	# l4 = splitmessage[3]
-	# l5 = splitmessage[4]
-	# l6 = splitmessage[5]
-	# try:
-	# 	l7 = splitmessage[6]
-	# except:
-	# 	l7 = ""
 
 	roles = [str(role.id) for role in ctx.author.roles]
 	if (field_status != 'none') and (force is False or not (str(765809794732261417) in roles or str(776953964003852309) in roles)):
@@ -165,7 +155,7 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	add_field(embed, "Maincord Messages", field_messages)
 	add_field(embed, "Mention", user.mention)
 	add_field(embed, "User ID",  f'`{user.id}`')
-	add_field(embed, "Invite Status", f'{eval(terms[field_status]["word2"])}')
+	add_field(embed, "Invite Status", f'{word2}')
 	add_field(embed, "Info", field_info)
 	embed.set_thumbnail(url=user.avatar_url)
 	footer = messagecontents.footer
@@ -345,7 +335,6 @@ class MdspCog(commands.Cog, name="MDSP"):
 			INVITE_DISCUSSION_CHANNEL_ID)
 		infomsg = await ctx.reply(embed=discord.Embed(color=embedcolor, description=f"Updating {invitechannel.mention}"))
 		invitee_info_list = []
-
 		message_id_query = dbcon.execute(
 			"""select invite_message_id from invitees where invite_activity_type = 'active'""")
 		message_id_tuples = message_id_query.fetchall()
