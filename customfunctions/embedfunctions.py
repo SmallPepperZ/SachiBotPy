@@ -2,7 +2,7 @@ import discord
 from discord import Embed
 from datetime import datetime
 class EmbedMaker:
-	def add_description_field(embed:discord.Embed, key:str, value:str, *, boldkey:bool=True):
+	def add_description_field(self, embed:discord.Embed, key:str, value:str, *, boldkey:bool=True):
 		"""Adds a one line key: value field to an embed's description on a new line
 
 		Parameters
@@ -44,7 +44,7 @@ class EmbedMaker:
 		else:
 			embed.__setattr__("description", f'{embed.description}\n')
 	
-	def footer_presets(embed:discord.Embed, ctx, *presets:str, delimiter:str=" - ", customtext:str=None, customtextloc:str="prepend", customurl:str=None):
+	def footer_presets(self, embed:discord.Embed, ctx, *presets:str, delimiter:str=" - ", customtext:str=None, customtextloc:str="prepend", customurl:str=None):
 		"""Adds some footer presets to an embed's footer
 
 			Parameters
