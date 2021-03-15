@@ -67,18 +67,18 @@ if __name__ == '__main__':
 # endregion
 
 # region Logger Stuff
-logger_error = logging.getLogger("Discord - Main")
-logger_error.setLevel(logging.INFO)
+logger = logging.getLogger("Discord - Main")
+logger.setLevel(logging.INFO)
 
 
 # endregion
 
 @bot.event
 async def on_ready():
-	logger_error.info("Bot initialized")
-	await bot.change_presence(	activity=discord.Activity(	type=discord.ActivityType.watching,
-														  name="for a % | %help"),
-							   status=Status.online)
+	logger.info("Bot initialized")
+	await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
+														name="for a % | %help"),
+							  status=Status.online)
 
 
 # region Bot Events
