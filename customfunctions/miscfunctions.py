@@ -1,5 +1,6 @@
 import json
-
+from discord.ext.commands import Bot
+from discord import User
 
 def find_flags(flags:list, args):
 	"""Returns a list of flags and a list of arguments from an invocation
@@ -63,3 +64,7 @@ def read_file(filepath:str) -> dict:
 	"""
 	with open(filepath, "r") as file:
 		return json.loads(file.read())
+
+async def get_owner(bot:Bot) -> User:
+	app_info = await bot.application_info()
+	return app_info.owner
