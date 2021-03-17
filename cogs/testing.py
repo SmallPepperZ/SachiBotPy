@@ -1,7 +1,7 @@
 import sqlite3
 import discord
 from discord.ext import commands
-from customfunctions import config
+from customfunctions import config, miscfunctions
 
 # region Variable Stuff
 
@@ -34,27 +34,12 @@ class TestingCog(commands.Cog, name="Testing"):
 	async def errorme(self, ctx):
 		await ctx.reply(1/0)
 
-	@commands.command(aliases=['tos'])
-	@commands.is_owner()
-	async def siren(self, ctx, *content):
-		if not content:
-			await ctx.reply("Give me something to say!")
-		else:
-			content = ' '.join(content)
-			await ctx.message.delete()
-			embed = discord.Embed(title="<a:WeeWooRed:771082566874169394>  " +
-								  content+"  <a:WeeWooRed:771082566874169394>", color=0xf21b1b)
-			await ctx.send(embed=embed)
+
 
 	@commands.command()
-	async def commandlistold(self, ctx):
-		# logging.info(self.get_commands())
-
-		cmd_list = [cmd.name for cmd in self.get_commands()]
-
-		delim = ", "
-		command_list = delim.join(list(map(str, cmd_list)))
-		await ctx.reply(command_list)
+	async def testing12(self, ctx):
+		owner = await miscfunctions.get_owner(self.bot)
+		await ctx.reply(owner.mention)
 
 	@commands.group()
 	async def newexport(self, ctx):
