@@ -33,7 +33,7 @@ start_time_local = time.time()
 
 intents        = discord.Intents.all()
 intents.typing = False
-bot            = commands.Bot(command_prefix=prefix, intents = intents, case_insensitive=True)
+bot            = commands.AutoShardedBot(command_prefix=prefix, intents = intents, case_insensitive=True)
 
 errorchannel = int(configjson["errorchannel"])
 
