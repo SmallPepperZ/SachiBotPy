@@ -29,63 +29,68 @@ DB_PATH = "storage/SachiBotStorage.db"
 dbcon = sqlite3.connect(str(DB_PATH))
 dbcur = dbcon.cursor()
 
-
-terms = {
-	"approve": {
-		"word1": "Approving",
-		"word2": 'f"<:Allowed:786997173845622824> - Approved by {status_editor_name}"',
-		"word3": "approved",
-		"color": 0x17820e,
-		"name": 'approve'
-	},
-	"deny": {
-		"word1": "Denying",
-		"word2": 'f"<:Denied:786997173820588073> - Denied by {status_editor_name}"',
-		"word3": "denied",
-		"color": 0xa01116,
-		"name": 'deny'
-	},
-	"pause": {
-		"word1": "Pausing",
-		"word2": 'f"⏸️ - Paused by {status_editor_name}"',
-		"word3": "paused",
-		"color": 0x444444,
-		"name": 'pause'
-	},
-	"unpause": {
-		"word1": "Unpausing",
-		"word2": '"None"',
-		"word3": "unpaused",
-		"color": 0xFFFF00,
-		"name": 'none'
-	},
-	"reset": {
-		"word1": "Resetting",
-		"word2": '"None"',
-		"word3": "reset",
-		"color": 0xFFFF00,
-		"name": 'none'
-	},
-	"accept": {
-		"word1": "Accepting",
-		"word2": '"<:Joined:796147287486627841> - Accepted invite/joined"',
-		"word3": "changed status to accepted",
-		"color": 0x1bc912,
-		"name": 'accept'
-	},
-	"decline": {
-		"word1": "Declining",
-		"word2": '"<:Leave:796147707709358100> - Invited, but declined"',
-		"word3": "changed status to declined",
-		"color": 0xd81d1a,
-		"name": 'decline'
-	},
-	'none': {
-		"word2": '"None"',
-		"color": 0xFFFF00,
-		"name": 'none'
+def get_term(action, word, status_editor_mention='Unknown'):
+	terms = {
+		"approve": {
+			"word1": "Approving",
+			"word2": f"<:Allowed:786997173845622824> - Approved by {status_editor_mention}",
+			"word3": "approved",
+			"color": 0x17820e,
+			"name": 'approve'
+		},
+		"deny": {
+			"word1": "Denying",
+			"word2": f"<:Denied:786997173820588073> - Denied by {status_editor_mention}",
+			"word3": "denied",
+			"color": 0xa01116,
+			"name": 'deny'
+		},
+		"pause": {
+			"word1": "Pausing",
+			"word2": f"⏸️ - Paused by {status_editor_mention}",
+			"word3": "paused",
+			"color": 0x444444,
+			"name": 'pause'
+		},
+		"unpause": {
+			"word1": "Unpausing",
+			"word2": '"None"',
+			"word3": "unpaused",
+			"color": 0xFFFF00,
+			"name": 'none'
+		},
+		"reset": {
+			"word1": "Resetting",
+			"word2": "None",
+			"word3": "reset",
+			"color": 0xFFFF00,
+			"name": 'none'
+		},
+		"accept": {
+			"word1": "Accepting",
+			"word2": "<:Joined:796147287486627841> - Accepted invite/joined",
+			"word3": "changed status to accepted",
+			"color": 0x1bc912,
+			"name": 'accept'
+		},
+		"decline": {
+			"word1": "Declining",
+			"word2": "<:Leave:796147707709358100> - Invited, but declined",
+			"word3": "changed status to declined",
+			"color": 0xd81d1a,
+			"name": 'decline'
+		},
+		'none': {
+			"word2": "None",
+			"color": 0xFFFF00,
+			"name": 'none'
+		}
 	}
-}
+	try:
+		value = terms[action][word]
+	except KeyError as error:
+		raise ValueError("Term does not exist") from error
+	return value
 fields = {}
 
 
@@ -98,17 +103,17 @@ def add_row(embed, value: str):
 	embed.__setattr__("description", f'{embed.description}\n{value}')
 
 async def update_invite_status(self, ctx: commands.Context, userid: int, action: str, force: bool = False):
-	status_editor_name = ctx.author.mention
-	print(status_editor_name)
+	status_editor_mention = ctx.author.mention
+	print(status_editor_mention)
 	invitechannel = self.bot.get_channel(INVITE_CHANNEL_ID)
 	user = await self.bot.fetch_user(int(userid))
 	infomsg = await ctx.reply(embed=discord.Embed(color=embedcolor, description=f"Searching for {user.name} in {invitechannel.mention}..."))
 
 	status_editor = ctx.author.id
-	word1 = terms[action]["word1"]
-	word2 = eval(terms[action]["word2"])
-	word3 = terms[action]["word3"]
-	color = terms[action]["color"]
+	word1 = get_term(action, 'word1')
+	word2 = get_term(action, 'word2', status_editor_mention)
+	word3 = get_term(action, 'word3')
+	color = get_term(action, 'color')
 	# try:
 	user_info = dbcon.execute(
 		f"""select * from invitees where user_id = {userid}""").fetchone()
@@ -147,10 +152,10 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 			await infomsg.edit(embed=discord.Embed(color=embedcolor, description="User already has an invite status. Use the `--force` flag if you want to force the status change"))
 			return
 
-	field_status = terms[action]['name']
+	field_status = get_term(action, 'name')
 	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{word1} {user.name}..."))
 	embed = discord.Embed(color=color, description=f'__**{field_username}**__')
-	status_editor_name = ctx.author.mention
+	status_editor_mention = ctx.author.mention
 	add_field(embed, "Maincord Level", field_level)
 	add_field(embed, "Maincord Messages", field_messages)
 	add_field(embed, "Mention", user.mention)
@@ -270,13 +275,13 @@ class MdspCog(commands.Cog, name="MDSP"):
 			try:
 				mc_level, mc_messages = Mee6Api.get_user(
 					userid, pages=10, limit=1000)
-				ironminer = bool(mc_level >= 10 or force)
+				ironminer = bool(mc_level >= 10)
 			except PlayerNotFound:
 				mc_level = "Not found, too low?"
 				mc_messages = "Not found, too low?"
 				ironminer = False
 
-			if ironminer:
+			if ironminer or force:
 				embed = discord.Embed(
 					color=0xffff00, description=f'__**{user.name}#{user.discriminator}**__')
 				embed.set_thumbnail(url=user.avatar_url)
@@ -391,20 +396,18 @@ class MdspCog(commands.Cog, name="MDSP"):
 					mc_messages = "Not found, too low?"
 				logger.debug("Got Mee6 info")
 				# Remake embed
-				embed = discord.Embed(color=terms[field_status]["color"],
+				embed = discord.Embed(color=get_term(field_status, 'color'),
 									  description=f'__**{field_username}**__')
-				# add_field(embed, "Maincord Level", mc_level)
-				# add_field(embed, "Maincord Messages", mc_messages)
-				# add_row(embed, l4)
-				# add_row(embed, l5)
-				# add_row(embed, l6)
-				# add_row(embed, l7)
-				status_editor_name = ctx.guild.get_member(field_status_editor).display_name
+				try:
+					status_editor_name = ctx.guild.get_member(field_status_editor).mention
+				except AttributeError:
+					status_editor_name = None
+				status_value = get_term(field_status, 'word2', status_editor_name)
 				add_field(embed, "Maincord Level", mc_level)
 				add_field(embed, "Maincord Messages", mc_messages)
 				add_field(embed, "Mention", user.mention)
 				add_field(embed, "User ID",  f'`{user.id}`')
-				add_field(embed, "Invite Status", f'{eval(terms[field_status]["word2"])}')
+				add_field(embed, "Invite Status", f'{status_value}')
 				add_field(embed, "Info", field_info)
 				embed.set_thumbnail(url=user.avatar_url)
 				footer = messagecontents.footer
