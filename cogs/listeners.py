@@ -102,7 +102,22 @@ class ListenerCog(commands.Cog, name="Logging"):
 			await message.add_reaction('<:PING:796424651374985266>')
 			if message_length == 1:
 				await message.reply(f"My prefix is `{prefix}`")
-	
+
+	@commands.Cog.listener('on_message')
+	async def repost_mc(self, message:discord.Message):
+		if message.channel.id == 821778395297349692:
+			channel_id = None
+			if message.content.startswith("**Minecraft: Java Edition"):
+				channel_id = 821778423579410433
+			elif message.content.startswith("**Minecraft: Bedrock Edition"):
+				channel_id = 821778441133097021
+			if channel_id is not None:
+				content = message.content.replace('650159037924769793', '821781958622314576').replace('648530043647033344', '821781958282838069').replace('761566859220221963', '821781958312329237').replace('682276249053429807', '821781958383239188').replace('821162280905211964','821781958425968650')
+				channel = self.bot.get_channel(channel_id)
+				msg:discord.Message = await channel.send(content)
+				await msg.publish()
+
+
 	@commands.Cog.listener("on_resumed")
 	async def on_resume(self):
 		status = config('status')
