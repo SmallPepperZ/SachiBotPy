@@ -91,7 +91,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 				await ctx.message.add_reaction('<:CommandError:804193351758381086>')
 				await ctx.reply("Invalid User ID!", delete_after=10)
 				return
-		isguildmember = ctx.guild.get_member(userid) != None
+		isguildmember = ctx.guild.get_member(userid) is not None
 		if isguildmember:
 			user      = ctx.guild.get_member(userid)
 			isadmin   = user.guild_permissions.administrator
@@ -99,7 +99,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 			joindate  = user.joined_at
 			isowner   = ctx.guild.owner.id == user.id
 			status    = user.status
-			statusmsg = f' | {user.activity.name}' if user.activity != None else ''
+			statusmsg = f' | {user.activity.name}' if user.activity is not None else ''
 			statuseemojis  = {
 				"online" : "🟢",
 				"idle"   : "🟡",
@@ -127,8 +127,11 @@ class UtilityCog(commands.Cog, name="Utility"):
 			def embedsec3(embed):
 				EmbedMaker.add_description_field(embed, "Nickname", nickname)
 		else:
-
-			user = await self.bot.fetch_user(int(userid))
+			try:
+				user = await self.bot.fetch_user(int(userid))
+			except discord.errors.NotFound:
+				await ctx.reply("Invalid User ID!")
+				return
 			def embedsec1(embed):
 				return
 			def embedsec2(embed):
