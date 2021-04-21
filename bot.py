@@ -46,7 +46,11 @@ logging.basicConfig(level=logging.INFO)
 
 bot.remove_command('help')
 
-
+bot.enabled_guilds = [764981968579461130, #MDSP
+					  813992520915615796, #Gapple
+					  797308956162392094, #SachiBotLand
+					  739176312081743934  #Notifications
+					  ]
 # endregion
 
 # region Cogs
@@ -128,10 +132,13 @@ async def on_command_error(ctx, error):
 		return
 	else:
 		# Send user a message
+
+		error_str = str(error).replace(personal_info, '')
 		await ctx.message.add_reaction('<:CommandError:804193351758381086>')
-		await ctx.reply("Error:\n```"+str(error)+"```\nSmallPepperZ will be informed", delete_after=60)
+		await ctx.reply("Error:\n```"+error_str+"```\nSmallPepperZ will be informed", delete_after=60)
 
 		# Get traceback info
+		
 		exc = error
 		error_type = type(exc)
 		trace = exc.__traceback__
