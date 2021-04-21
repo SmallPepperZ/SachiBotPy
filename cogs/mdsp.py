@@ -494,26 +494,12 @@ class MdspCog(commands.Cog, name="MDSP"):
 		await update_invite_status(self, ctx, userid, "unpause", force)
 
 	@invite.command(aliases=['declined', 'leave', 'left'], description="\nUsed by the person who invites a user if they decline the invitation")
-	async def decline(self, ctx, *args):
-		flags = ['-f', '--force']
-		force = False
-		usedflags, args = CustomUtilities.find_flags(flags, args)
-		userid = int(args[0])
-		for flag in flags:
-			if flag in usedflags:
-				force = True
-		await update_invite_status(self, ctx, userid, "decline", force)
+	async def decline(self, ctx, userid:int):
+		await update_invite_status(self, ctx, userid, "decline")
 
 	@invite.command(aliases=['joined', 'accepted', 'join'], description="\nUsed by the person who invites a user if they accept the invitation (or when they join, coming soon™)")
-	async def accept(self, ctx, *args):
-		flags = ['-f', '--force']
-		force = False
-		usedflags, args = CustomUtilities.find_flags(flags, args)
-		userid = int(args[0])
-		for flag in flags:
-			if flag in usedflags:
-				force = True
-		await update_invite_status(self, ctx, userid, "accept", force)
+	async def accept(self, ctx, userid:int):
+		await update_invite_status(self, ctx, userid, "decline")
 
 	@invite.command(aliases=['unset'], description="*Official Helpers Only*\nResets a user's status")
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
