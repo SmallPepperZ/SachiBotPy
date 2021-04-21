@@ -1,8 +1,9 @@
 import json
+from typing import Union
 from discord.ext.commands import Bot
 from discord import User
 
-def find_flags(flags:list, args):
+def find_flags(flags:list, args:Union[list, tuple]) -> "tuple[list, list]":
 	"""Returns a list of flags and a list of arguments from an invocation
 
 	Parameters
