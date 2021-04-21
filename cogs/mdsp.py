@@ -24,6 +24,7 @@ INVITE_LOG_CHANNEL_ID = 807379254303653939
 INVITE_CHANNEL_ID = 796109386715758652
 INVITE_DISCUSSION_CHANNEL_ID = 792558439863681046
 INVITE_CHANNEL_LIMIT = 10
+MANAGER_ROLES = (776953964003852309, 765809794732261417, 770135456724680704)
 
 DB_PATH = "storage/SachiBotStorage.db"
 dbcon = sqlite3.connect(str(DB_PATH))
@@ -218,18 +219,18 @@ class MdspCog(commands.Cog, name="MDSP"):
 	def __init__(self, bot):
 		self.bot = bot
 
-	@commands.Cog.listener("on_message")
-	async def auto_delete(self, message: discord.Message):
-		try:
-			guild_id = message.guild.id
-		except:
-			guild_id = None
-		if guild_id == 764981968579461130 and '@everyone' in message.content and not '`@everyone' in message.content and not message.mention_everyone:
-			await message.delete()
-			embed = discord.Embed(
-				description=f'{message.author.display_name} just used `@ everyone`')
-			logchannel = self.bot.get_channel(807379254303653939)
-			await logchannel.send(embed=embed)
+	# @commands.Cog.listener("on_message")
+	# async def auto_delete(self, message: discord.Message):
+	# 	try:
+	# 		guild_id = message.guild.id
+	# 	except:
+	# 		guild_id = None
+	# 	if guild_id == 764981968579461130 and '@everyone' in message.content and not '`@everyone' in message.content and not message.mention_everyone:
+	# 		await message.delete()
+	# 		embed = discord.Embed(
+	# 			description=f'{message.author.display_name} just used `@ everyone`')
+	# 		logchannel = self.bot.get_channel(807379254303653939)
+	# 		await logchannel.send(embed=embed)
 
 	@commands.group(aliases=['invitee', 'invitees'])
 	@CustomChecks.limit_to_guild(764981968579461130)
@@ -249,10 +250,17 @@ class MdspCog(commands.Cog, name="MDSP"):
 		flags = ['-f', '--force']
 		force = False
 		usedflags, args = CustomUtilities.find_flags(flags, args)
-		userid = int(args[0])
+		try:
+			userid = int(args[0])
+		except:
+			await ctx.reply('Use a userid. There is no reason to have a mention')
+			return
 		for flag in flags:
 			if flag in usedflags:
 				force = True
+		if force:
+			force = any([True for role in MANAGER_ROLES if role in ctx.author.roles])
+
 		if len(args) > 1:
 			info = args[1:]
 		else:
