@@ -2,7 +2,7 @@ from datetime import datetime
 import discord
 from discord import Embed
 
-def add_description_field(embed:discord.Embed, key:str, value:str, *, boldkey:bool=True):
+def add_description_field(embed:discord.Embed, key:str, value:str, *, boldkey:bool=True) -> None:
 	"""Adds a one line key: value field to an embed's description on a new line
 
 	Parameters
@@ -83,3 +83,7 @@ def footer_presets(embed:discord.Embed, ctx, *presets:str, delimiter:str=" - ", 
 		embed
 	else:
 		return text
+
+def simple_embed(text:str, color):
+	embed = discord.Embed(description=text, color=color)
+	return embed
