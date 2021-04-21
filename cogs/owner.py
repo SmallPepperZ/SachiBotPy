@@ -1,5 +1,6 @@
 import time
 import datetime
+import re
 
 import os
 import sys
@@ -13,10 +14,12 @@ from discord.errors import Forbidden
 from discord.ext import commands
 from discord.ext.commands.core import is_owner
 from discord import Status
+from discord.ext.commands.errors import NotOwner
 
 
 from customfunctions import config, set_config
 from customfunctions import confirmation as ConfirmationCheck
+from customfunctions.embedfunctions import simple_embed
 #region Variable Stuff
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
@@ -37,8 +40,6 @@ statuses={
 
 #endregion
 def save_status(self):
-	print(type(self.bot_member.status))
-	print(self.bot_member.status)
 	set_config('status', (self.bot_member.activity.type, self.bot_member.activity.name, self.bot_member.status))
 
 async def apply_status(self):
@@ -57,15 +58,15 @@ async def changestatus(self, ctx, status_type):
 class OwnerCog(commands.Cog,name="Owner"):
 	def __init__(self, bot):
 		self.bot = bot
-		
+
 	@property
 	def bot_member(self):
 		try:
 			return self.bot.guilds[0].me
 		except IndexError:
 			return None
-		
-				
+
+
 	@commands.command()
 	@commands.is_owner()
 	async def restart(self, ctx):
@@ -113,17 +114,17 @@ class OwnerCog(commands.Cog,name="Owner"):
 			await ctx.reply("Invalid Color!")
 			return
 		embed = discord.Embed(color=embedcolor, title="Embed Color", description = f"Old color: #{oldembedcolor}\nNew color: #{color}")
-		
+
 		#Generate image with specified hex
 		hexcolor = f"#{color}"
 		image    = Image.new("RGB", (100,100), hexcolor)
 		buffer   = BytesIO()
-		image.save(buffer, "png") 
+		image.save(buffer, "png")
 		buffer.seek(0)
 		#Attach image and set thumbnail
 		file = discord.File(fp=buffer, filename="colorimage.png")
 		embed.set_thumbnail(url='attachment://colorimage.png')
-		
+
 		msg = await ctx.reply(embed=embed, file=file)
 		confirmation = await ConfirmationCheck.confirm(self, ctx, msg)
 		if confirmation:
@@ -146,7 +147,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.is_owner()
 	async def status(self,ctx):
 
-		
+
 		if ctx.invoked_subcommand is None:
 			status = self.bot_member.raw_status
 			if status == "online":
@@ -191,6 +192,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		await changestatus(self, ctx, Status.invisible)
 		await ctx.message.add_reaction(str('⚫'))
 		save_status(self)
+
 	@status.group()
 	async def activity(self, ctx):
 		logging.info('activity called')
@@ -243,12 +245,8 @@ class OwnerCog(commands.Cog,name="Owner"):
 			BOT_TALK_CHANNEL_OBJ = self.bot.get_channel(BOT_TALK_CHANNEL)
 			dm_channel = await self.bot.fetch_user(ctx.author.id)
 
-	@commands.command()
-	async def apply_status_test(self, ctx):
-		await	apply_status(self)
-
 	@commands.Cog.listener("on_message")
-	async def speak_as_bot(self, msg): 
+	async def speak_as_bot(self, msg):
 		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ
 		if (BOT_TALK_CHANNEL != None):
 			if (isinstance(msg.channel, discord.channel.DMChannel)) and (msg.author.id == 545463550802395146):
@@ -258,10 +256,44 @@ class OwnerCog(commands.Cog,name="Owner"):
 					BOT_TALK_CHANNEL = None
 					await msg.reply("Bot talk stopped")
 			elif msg.channel.id == BOT_TALK_CHANNEL and not (msg.author.id) == 796509133985153025:
-				await dm_channel.send(f'**{msg.author}:** {msg.content}')	
-			
-		
+				await dm_channel.send(f'**{msg.author}:** {msg.content}')
 
+	@commands.command()
+	@commands.check(is_owner())
+	async def enable_guild(self, ctx, guild_id:int):
+		guild_ids = [guild.id for guild in self.bot.guilds]
+		print([guild.name for guild in self.bot.guilds])
+		if guild_id in guild_ids:
+			await ctx.reply(embed=simple_embed("I am in that server", embedcolor))
+
+		else:
+			await ctx.reply(embed=simple_embed("I am not in that server", embedcolor))
+
+	@commands.command()
+	@commands.check(is_owner())
+	async def exec(self, ctx, *, code:str):
+		if int(ctx.author.id) != 545463550802395146:
+			raise NotOwner
+		code = re.findall('```[\S\s]+```', code) #pylint: disable=anomalous-backslash-in-string
+		if len(code) != 0:
+			code = code[0]
+			code = code.replace('```py', '').replace('```', '').strip()
+			code = '\n'.join([f'\t{line}' for line in code.splitlines()])
+			function_code = (
+			 'async def __exec_code(self, ctx):\n'
+			f'{code}')
+			await ctx.message.add_reaction('👍')
+			try:
+				exec(function_code) #pylint: disable=exec-used
+				output = await locals()['__exec_code'](self, ctx)
+				if output:
+					formatted_output = '\n'.join(output) if len(code.splitlines()) > 1 else output
+				else:
+					formatted_output = None
+				await ctx.reply(embed=simple_embed(f"Sucess! Output:\n```\n{formatted_output}\n```", embedcolor))
+			except Exception as error: #pylint: disable=broad-except
+				await ctx.reply(embed=simple_embed(f"Error! Output:\n```{error}```", embedcolor))
+		else:
+			await ctx.reply("Please put the code in a codeblock")
 def setup(bot):
-    bot.add_cog(OwnerCog(bot))
-
+	bot.add_cog(OwnerCog(bot))
