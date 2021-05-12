@@ -24,60 +24,61 @@ INVITE_LOG_CHANNEL_ID = 807379254303653939
 INVITE_CHANNEL_ID = 796109386715758652
 INVITE_DISCUSSION_CHANNEL_ID = 792558439863681046
 INVITE_CHANNEL_LIMIT = 10
+WELCOME_CHANNEL_ID = 791520334826307584
 MANAGER_ROLES = (776953964003852309, 765809794732261417, 770135456724680704)
 
 DB_PATH = "storage/SachiBotStorage.db"
 dbcon = sqlite3.connect(str(DB_PATH))
 dbcur = dbcon.cursor()
 
-def get_term(action, word, status_editor_mention='Unknown'):
+def get_term(action, word, status_editor_mention='Unknown', user=None):
 	terms = {
 		"approve": {
 			"word1": "Approving",
 			"word2": f"<:Allowed:786997173845622824> - Approved by {status_editor_mention}",
-			"word3": "approved",
+			"word3": f"Successfully approved {user}",
 			"color": 0x17820e,
 			"name": 'approve'
 		},
 		"deny": {
 			"word1": "Denying",
 			"word2": f"<:Denied:786997173820588073> - Denied by {status_editor_mention}",
-			"word3": "denied",
+			"word3": f"Successfully denied {user}",
 			"color": 0xa01116,
 			"name": 'deny'
 		},
 		"pause": {
 			"word1": "Pausing",
 			"word2": f"⏸️ - Paused by {status_editor_mention}",
-			"word3": "paused",
+			"word3": f"Successfully paused {user}",
 			"color": 0x444444,
 			"name": 'pause'
 		},
 		"unpause": {
 			"word1": "Unpausing",
 			"word2": '"None"',
-			"word3": "unpaused",
+			"word3": f"Successfully unpaused {user}",
 			"color": 0xFFFF00,
 			"name": 'none'
 		},
 		"reset": {
 			"word1": "Resetting",
 			"word2": "None",
-			"word3": "reset",
+			"word3": f"Successfully reset status for {user}",
 			"color": 0xFFFF00,
 			"name": 'none'
 		},
 		"accept": {
 			"word1": "Accepting",
 			"word2": "<:Joined:796147287486627841> - Accepted invite/joined",
-			"word3": "changed status to accepted",
+			"word3": f"Successfully set accepted status for {user}",
 			"color": 0x1bc912,
 			"name": 'accept'
 		},
 		"decline": {
 			"word1": "Declining",
 			"word2": "<:Leave:796147707709358100> - Invited, but declined",
-			"word3": "changed status to declined",
+			"word3": f"Successfully set declined status for {user}",
 			"color": 0xd81d1a,
 			"name": 'decline'
 		},
@@ -113,7 +114,7 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	status_editor = ctx.author.id
 	word1 = get_term(action, 'word1')
 	word2 = get_term(action, 'word2', status_editor_mention)
-	word3 = get_term(action, 'word3')
+	word3 = get_term(action, 'word3', user=user.name)
 	color = get_term(action, 'color')
 	# try:
 	user_info = dbcon.execute(
@@ -199,6 +200,10 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 		invitediscussionchannel = self.bot.get_channel(
 			INVITE_DISCUSSION_CHANNEL_ID)
 		newmsg = await invitediscussionchannel.send(embed=embed)
+		welcome_channel = ctx.guild.get_channel(WELCOME_CHANNEL_ID)
+		invite_link = await welcome_channel.create_invite(reason=f"Invite for {user.name}", max_uses=1,unique=True, max_age=604800)
+		invite_link_embed = discord.Embed(title=f"Invite URL for {user.name}", description=f'This link should only be used to invite {user.name}\n{invite_link.url}')
+		await ctx.send(embed=invite_link_embed)
 		add_field(logembed, "User edited", f'[{user.name}]({newmsg.jump_url})')
 		await message.delete()
 		sql = f"""update invitees set invite_activity_type = 'approved', invite_message_id = {newmsg.id} where user_id = {userid}"""
