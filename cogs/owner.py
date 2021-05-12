@@ -46,7 +46,7 @@ async def apply_status(self):
 	status = config('status')
 	await self.bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
 
-async def changestatus(self, ctx, status_type):
+async def changestatus(self, ctx, status_type): #pylint:disable=unused-argument
 	if self.bot_member.activity is not None:
 		await self.bot.change_presence(activity=discord.Activity(type=self.bot_member.activity.type, name=self.bot_member.activity.name), status=status_type)
 	else:
@@ -194,7 +194,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		save_status(self)
 
 	@status.group()
-	async def activity(self, ctx):
+	async def activity(self, ctx): #pylint:disable=unused-argument
 		logging.info('activity called')
 
 	@activity.command()
@@ -233,30 +233,30 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.check(is_owner())
 	#commands.check(guild_only)
 	async def bottalk(self, ctx):
-		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ, dm_channel
+		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ, DM_CHANNEL #pylint:disable=global-variable-undefined
 		if BOT_TALK_CHANNEL is None:
-			dm_channel = await self.bot.fetch_user(ctx.author.id)
+			DM_CHANNEL = await self.bot.fetch_user(ctx.author.id)
 			try:
 				await ctx.message.delete()
 			except Forbidden:
 				return
-			await dm_channel.send("Bot talk started, type `stoptalk` to end")
+			await DM_CHANNEL.send("Bot talk started, type `stoptalk` to end")
 			BOT_TALK_CHANNEL = ctx.channel.id
 			BOT_TALK_CHANNEL_OBJ = self.bot.get_channel(BOT_TALK_CHANNEL)
-			dm_channel = await self.bot.fetch_user(ctx.author.id)
+			DM_CHANNEL = await self.bot.fetch_user(ctx.author.id)
 
 	@commands.Cog.listener("on_message")
 	async def speak_as_bot(self, msg):
-		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ
-		if (BOT_TALK_CHANNEL != None):
+		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ #pylint:disable=global-statement
+		if BOT_TALK_CHANNEL is not None:
 			if (isinstance(msg.channel, discord.channel.DMChannel)) and (msg.author.id == 545463550802395146):
-				if not(msg.content == "stoptalk"):
+				if not msg.content == "stoptalk":
 					await BOT_TALK_CHANNEL_OBJ.send(msg.content)
 				else:
 					BOT_TALK_CHANNEL = None
 					await msg.reply("Bot talk stopped")
 			elif msg.channel.id == BOT_TALK_CHANNEL and not (msg.author.id) == 796509133985153025:
-				await dm_channel.send(f'**{msg.author}:** {msg.content}')
+				await DM_CHANNEL.send(f'**{msg.author}:** {msg.content}')
 
 	@commands.command()
 	@commands.check(is_owner())
