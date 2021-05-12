@@ -104,25 +104,25 @@ def add_field(embed, key: str, value: str):
 def add_row(embed, value: str):
 	embed.__setattr__("description", f'{embed.description}\n{value}')
 
-async def update_invite_status(self, ctx: commands.Context, userid: int, action: str, force: bool = False):
+async def update_invite_status(self, ctx: commands.Context, userid: int, action: str, force: bool = False): #pylint:disable=too-many-locals
 	status_editor_mention = ctx.author.mention
-	print(status_editor_mention)
 	invitechannel = self.bot.get_channel(INVITE_CHANNEL_ID)
 	user = await self.bot.fetch_user(int(userid))
+	# Create an information message to show progress
 	infomsg = await ctx.reply(embed=discord.Embed(color=embedcolor, description=f"Searching for {user.name} in {invitechannel.mention}..."))
-
+	# Get the terms for the messages
 	status_editor = ctx.author.id
 	word1 = get_term(action, 'word1')
 	word2 = get_term(action, 'word2', status_editor_mention)
 	word3 = get_term(action, 'word3', user=user.name)
 	color = get_term(action, 'color')
-	# try:
+	# Get the database entry for the user
 	user_info = dbcon.execute(
 		f"""select * from invitees where user_id = {userid}""").fetchone()
 	if user_info is None:
 		await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} not found in {invitechannel.mention}"))
 		return
-
+	# Assign values from the database to variables for easy use
 	user_id = user_info[0]
 	invite_message_id = user_info[1]
 	invite_activity_type = user_info[2]
@@ -139,7 +139,7 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	logger.debug(messageid)
 	message = await self.bot.get_channel(INVITE_CHANNEL_ID).fetch_message(messageid)
 	messagecontents = message.embeds[0]
-
+	# Make sure rules aren't violated
 	roles = [str(role.id) for role in ctx.author.roles]
 	if (field_status != 'none') and (force is False or not (str(765809794732261417) in roles or str(776953964003852309) in roles)):
 		if action in ("accept", "decline"):
@@ -156,6 +156,7 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 
 	field_status = get_term(action, 'name')
 	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{word1} {user.name}..."))
+	# Create the new embed version
 	embed = discord.Embed(color=color, description=f'__**{field_username}**__')
 	status_editor_mention = ctx.author.mention
 	add_field(embed, "Maincord Level", field_level)
@@ -187,7 +188,7 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	sql = DatabaseFromDict.make_placeholder('invitees', db_data_dict)
 	dbcon.execute(sql, values)
 	dbcon.commit()
-
+	# Create an embed for the logging channel
 	logembed = discord.Embed(color=embedcolor,
 							 title="Invitee edited", description="")
 	logembed.set_author(name=ctx.author.name,
@@ -197,45 +198,38 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 
 	embed.set_thumbnail(url=user.avatar_url)
 	if action == "accept":
+		# Move the invite embed to the discussion channel
 		invitediscussionchannel = self.bot.get_channel(
 			INVITE_DISCUSSION_CHANNEL_ID)
 		newmsg = await invitediscussionchannel.send(embed=embed)
+		# Create an invite
 		welcome_channel = ctx.guild.get_channel(WELCOME_CHANNEL_ID)
 		invite_link = await welcome_channel.create_invite(reason=f"Invite for {user.name}", max_uses=1,unique=True, max_age=604800)
 		invite_link_embed = discord.Embed(title=f"Invite URL for {user.name}", description=f'This link should only be used to invite {user.name}\n{invite_link.url}')
 		await ctx.send(embed=invite_link_embed)
+		# Add the new message url to the embed sent to the logging channel
 		add_field(logembed, "User edited", f'[{user.name}]({newmsg.jump_url})')
+		# Delete the old invite message
 		await message.delete()
+		# Update the database
 		sql = f"""update invitees set invite_activity_type = 'approved', invite_message_id = {newmsg.id} where user_id = {userid}"""
 		dbcon.execute(sql)
 		dbcon.commit()
 	else:
+		# Update the embed in the invite channel
 		await message.edit(embed=embed)
 		add_field(logembed, "User edited",
 				  f'[{user.name}]({message.jump_url})')
-	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} successfully {word3}"))
-
+	# Edit the info message to show success
+	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{word3}"))
+	# Send the message in the loggging channel
 	await self.bot.get_channel(INVITE_LOG_CHANNEL_ID).send(embed=logembed)
-	# except:
-	#	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} not found")	)
+
 
 
 class MdspCog(commands.Cog, name="MDSP"):
 	def __init__(self, bot):
 		self.bot = bot
-
-	# @commands.Cog.listener("on_message")
-	# async def auto_delete(self, message: discord.Message):
-	# 	try:
-	# 		guild_id = message.guild.id
-	# 	except:
-	# 		guild_id = None
-	# 	if guild_id == 764981968579461130 and '@everyone' in message.content and not '`@everyone' in message.content and not message.mention_everyone:
-	# 		await message.delete()
-	# 		embed = discord.Embed(
-	# 			description=f'{message.author.display_name} just used `@ everyone`')
-	# 		logchannel = self.bot.get_channel(807379254303653939)
-	# 		await logchannel.send(embed=embed)
 
 	@commands.group(aliases=['invitee', 'invitees'])
 	@CustomChecks.limit_to_guild(764981968579461130)
@@ -250,8 +244,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 			await ctx.reply(embed=embed)
 
 	@invite.command(description="*Cooldown: 2 minutes*\nAdds a user to #potential-invitees")
-	# @commands.cooldown(rate=1, per=120, type=BucketType.user)
-	async def add(self, ctx, *args):
+	async def add(self, ctx, *args): #pylint:disable=too-many-locals,too-many-branches
 		flags = ['-f', '--force']
 		force = False
 		usedflags, args = CustomUtilities.find_flags(flags, args)
@@ -330,12 +323,12 @@ class MdspCog(commands.Cog, name="MDSP"):
 				dbcur.execute(sql, values)
 				dbcon.commit()
 				logembed = discord.Embed(
-					color=embedcolor,      
+					color=embedcolor,
 					title="Invitee added",
 					description="")
 				logembed.set_author(
-					name=ctx.author.name, 
-					url=ctx.message.jump_url, 
+					name=ctx.author.name,
+					url=ctx.message.jump_url,
 					icon_url=ctx.author.avatar_url)
 				add_field(logembed, "User added",
 						  f'[{user.name}]({message.jump_url})')
