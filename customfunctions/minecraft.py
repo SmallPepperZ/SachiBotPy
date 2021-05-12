@@ -1,5 +1,6 @@
 from typing import Tuple
-import requests, json
+import json
+import requests
 from discord.ext.commands import CommandError
 
 class ExpiredMcToken(CommandError):
@@ -57,11 +58,11 @@ def query_mc_server(*, server_ip:str, port:int=25565) -> dict:
 		{
 		  "MaxPlayers": int,
 		  "MOTD": str,
-		  "Playerlist": list, 
-		  "Players": int, 
-		  "Plugins": list, 
-		  "Software": str, 
-		  "Version": str, 
+		  "Playerlist": list,
+		  "Players": int,
+		  "Plugins": list,
+		  "Software": str,
+		  "Version": str,
 		  "Status": str
 		}
 
@@ -86,4 +87,3 @@ def query_mc_server(*, server_ip:str, port:int=25565) -> dict:
 		else:
 			raise CommandError(res["error"])
 	return res
-	

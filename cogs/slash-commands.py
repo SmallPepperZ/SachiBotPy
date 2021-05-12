@@ -1,3 +1,4 @@
+#pylint:disable=invalid-name
 from discord.ext import commands
 from discord_slash import cog_ext, SlashContext
 
@@ -80,7 +81,7 @@ class Slash(commands.Cog):
 										"force": "force"
 									})
 	@commands.command(name="invite_add_test")
-	async def _invite_add(self, ctx:SlashContext, user_id:int, info:str=None, force:bool=False, slash_command:bool=True) -> None:
+	async def _invite_add(self, ctx:SlashContext, user_id:int, info:str=None, force:bool=False, slash_command:bool=True) -> None: #pylint:disable=unused-argument
 		await ctx.respond()
 		hidden = await ctx.send('hi', hidden=False)
 		await hidden.edit(content="Test")
