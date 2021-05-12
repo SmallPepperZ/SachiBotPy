@@ -259,7 +259,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 			if flag in usedflags:
 				force = True
 		if force:
-			force = any([True for role in MANAGER_ROLES if role in ctx.author.roles])
+			force = any([True for role in MANAGER_ROLES if role in [role.id for role in ctx.author.roles]])
 
 		if len(args) > 1:
 			info = args[1:]
