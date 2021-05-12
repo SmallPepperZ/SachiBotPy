@@ -325,9 +325,13 @@ class MdspCog(commands.Cog, name="MDSP"):
 				dbcur.execute(sql, values)
 				dbcon.commit()
 				logembed = discord.Embed(
-					color=embedcolor,      title="Invitee added")
+					color=embedcolor,      
+					title="Invitee added",
+					description="")
 				logembed.set_author(
-					name=ctx.author.name, url=ctx.message.jump_url, icon_url=ctx.author.avatar_url)
+					name=ctx.author.name, 
+					url=ctx.message.jump_url, 
+					icon_url=ctx.author.avatar_url)
 				add_field(logembed, "User added",
 						  f'[{user.name}]({message.jump_url})')
 				logembed.set_thumbnail(url=user.avatar_url)
