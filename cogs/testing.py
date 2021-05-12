@@ -31,6 +31,18 @@ class TestingCog(commands.Cog, name="Testing"):
 
 	@commands.command()
 	@commands.is_owner()
+	async def inviteurltester(self, ctx, userid:int):
+		user = self.bot.get_user(int(userid))
+		try:
+			username=user.name
+		except AttributeError:
+			username="Unknown User"
+		channel = ctx.guild.get_channel(797308957478879234)
+		invite = await channel.create_invite(reason=f"Invite for {username}", max_uses=1,unique=True, max_age=604800)
+		await ctx.send(invite.url)
+
+	@commands.command()
+	@commands.is_owner()
 	async def errorme(self, ctx):
 		await ctx.reply(1/0)
 
@@ -59,5 +71,3 @@ class TestingCog(commands.Cog, name="Testing"):
 
 def setup(bot):
 	bot.add_cog(TestingCog(bot))
-
-

@@ -262,7 +262,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.check(is_owner())
 	async def enable_guild(self, ctx, guild_id:int):
 		guild_ids = [guild.id for guild in self.bot.guilds]
-		print([guild.name for guild in self.bot.guilds])
 		if guild_id in guild_ids:
 			await ctx.reply(embed=simple_embed("I am in that server", embedcolor))
 

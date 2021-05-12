@@ -83,8 +83,6 @@ class Slash(commands.Cog):
 	async def _invite_add(self, ctx:SlashContext, user_id:int, info:str=None, force:bool=False, slash_command:bool=True) -> None:
 		await ctx.respond()
 		hidden = await ctx.send('hi', hidden=False)
-		print(hidden)
-		print(type(hidden))
 		await hidden.edit(content="Test")
 		await ctx.send(f'{force}\n{user_id}\n{info}')
 
@@ -149,8 +147,7 @@ class Slash(commands.Cog):
 	async def _invite_action(self, ctx:SlashContext, user_id:int, action:str=None, force:bool=False) -> None:
 		await ctx.respond()
 		hidden = await ctx.send('hi', hidden=False)
-		print(hidden)
-		print(type(hidden))
+
 		await ctx.send(f'{force}\n{user_id}\n{action}')
 
 
