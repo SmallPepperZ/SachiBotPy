@@ -1,7 +1,7 @@
 from typing import Tuple
 import requests, json
 from discord.ext.commands import CommandError
-usertoken = "474005"
+
 class ExpiredMcToken(CommandError):
 	pass
 class InvalidMcServer(CommandError):
@@ -18,7 +18,7 @@ def link_discord_mc(usertoken:int) -> Tuple[str, str]:
 	-------
 	uuid : str
 		The minecraft uuid of the user's linked account
-	
+
 	username : str
 		The minecraft username of the user's linked account
 
@@ -37,8 +37,8 @@ def link_discord_mc(usertoken:int) -> Tuple[str, str]:
 		else:
 			raise ExpiredMcToken(res["message"])
 	else:
-		print("Invalid length")
-def query_mc_server(*, ip:str, port:int=25565) -> dict:
+		raise ValueError('Invalid Token Length')
+def query_mc_server(*, server_ip:str, port:int=25565) -> dict:
 	"""Gets information from a minecraft server
 
 	Keyword Arguments
@@ -76,7 +76,7 @@ def query_mc_server(*, ip:str, port:int=25565) -> dict:
 	CommandError
 		This is raised as a generic error response
 	"""
-	res = requests.get(f"https://api.minetools.eu/query/{ip}/{port}")
+	res = requests.get(f"https://api.minetools.eu/query/{server_ip}/{port}")
 	res = json.loads(res.text)
 	if res["status"] == "ERR":
 		if res["error"] == "[Errno -2] Name or service not known":
