@@ -76,7 +76,7 @@ class AdminCog(commands.Cog, name="Admin"):
 			await ctx.reply("This channel is already ignored")
 		else:
 			await ctx.reply("Valid scopes are `guild` and `channel`")
-		
+
 
 
 def setup(bot):

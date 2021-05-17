@@ -13,8 +13,8 @@ from customfunctions import config
 
 embedcolor = int(config("embedcolor"), 16)
 prefix = config("prefix")
-db_path = "storage/DiscordMessages.db"
-dbcon = sl.connect(str(db_path))
+DB_PATH = "storage/DiscordMessages.db"
+dbcon = sl.connect(str(DB_PATH))
 logger = logging.getLogger("bot.logging")
 #endregion
 

@@ -68,13 +68,13 @@ class CogsCog(commands.Cog, name="Cogs"):
 				embed.add_field(name="Cog:", value=f'{cog}')
 				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 				await ctx.reply(embed=embed)
-			
+
 			except:
 				embed = discord.Embed(color=embedcolor, title="Cog Not Loaded")
 				embed.add_field(name="Cog", value=cog)
 				await ctx.reply(embed=embed)
-		
-			
+
+
 
 def setup(bot):
 	bot.add_cog(CogsCog(bot))
