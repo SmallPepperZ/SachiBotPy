@@ -11,8 +11,8 @@ from discord.errors import NotFound
 from discord.ext import commands
 from discord.ext.commands import BadArgument, BucketType
 
-from customfunctions.checks import IncorrectGuild
-from customfunctions.mee6api import PlayerNotFound
+
+
 from customfunctions import config, DatabaseFromDict, CustomUtilities, CustomChecks, Mee6Api
 
 
@@ -282,7 +282,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				mc_level, mc_messages = Mee6Api.get_user(
 					userid, pages=10, limit=1000)
 				ironminer = bool(mc_level >= 10)
-			except PlayerNotFound:
+			except Mee6Api.PlayerNotFound:
 				mc_level = "Not found, too low?"
 				mc_messages = "Not found, too low?"
 				ironminer = False
@@ -401,7 +401,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				try:
 					mc_level, mc_messages = Mee6Api.get_user(
 						user_id, pages=10, limit=1000)
-				except PlayerNotFound:
+				except Mee6Api.PlayerNotFound:
 					mc_level = "Not found, too low?"
 					mc_messages = "Not found, too low?"
 				logger.debug("Got Mee6 info")
@@ -525,7 +525,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 		elif isinstance(error, NotFound):
 			await ctx.reply('User could not be found')
 			return
-		elif isinstance(error, IncorrectGuild):
+		elif isinstance(error, Mee6Api.IncorrectGuild):
 			await ctx.reply('This command is limited to a different guild')
 		else:
 			exc = error

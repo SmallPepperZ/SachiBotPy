@@ -16,4 +16,3 @@ def set_config(item:str, value:str):
 		raise ValueError(f'{item} not in config')
 	with open('storage/config.json', 'w') as file:
 		json.dump(config, file, indent=4)
-
