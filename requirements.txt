@@ -4,3 +4,4 @@ disputils==0.1.3
 discord_py_slash_command==1.0.9.5
 pytz==2020.5
 Pillow==8.2.0
+asyncio
