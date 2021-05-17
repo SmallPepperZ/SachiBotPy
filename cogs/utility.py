@@ -1,5 +1,7 @@
 import logging
-import time, datetime, asyncio
+import time
+import datetime
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -183,7 +185,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 	@commands.command()
 	async def selfmute(self, ctx, duration: int):
 		member = ctx.author.id
-		muted_role = discord.utils.get(member.server.roles, name='Muted')
+		muted_role = discord.utils.get(ctx.server.roles, name='Muted')
 		await ctx.author.add_roles(muted_role, reason=f"Requested self-mute for {duration}")
 		await asyncio.sleep(duration)
 		await ctx.author.remove_roles(muted_role, reason=f"Requested self-mute for {duration} has expired")
