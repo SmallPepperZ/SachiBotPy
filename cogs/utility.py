@@ -193,8 +193,9 @@ class UtilityCog(commands.Cog, name="Utility"):
 		async def selfmute(self, ctx, duration: int):
 			member = ctx.author.id
 			role = discord.utils.get(member.server.roles, name='Muted')
-			await asyncio.sleep()
 			await bot.add_roles(member, role)
+			await asyncio.sleep(duration)
+			await self.bot.remove_roles(member, role)
 
 
 	@commands.command(aliases=["online", "areyouthere"])
