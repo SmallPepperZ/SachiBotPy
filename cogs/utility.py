@@ -1,5 +1,5 @@
 import logging
-import time, datetime
+import time, datetime, asyncio
 
 import discord
 from discord.ext import commands
@@ -188,6 +188,13 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
 		await suggestion_channel.send(embed=embed)
 		await ctx.reply("Suggestion added")
+		
+		@commands.command()
+		async def selfmute(self, ctx, duration: int):
+			member = ctx.author.id
+			role = discord.utils.get(member.server.roles, name='Muted')
+			await asyncio.sleep()
+			await bot.add_roles(member, role)
 
 
 	@commands.command(aliases=["online", "areyouthere"])
