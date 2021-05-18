@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 import json
 import time
@@ -24,10 +25,13 @@ with open("storage/loggingignore.json", "r") as loggingignore:
 channelignore = json.loads(ignore_json)["channels"]
 guildignore   = json.loads(ignore_json)["guilds"]
 
+def dump_mutes(data:dict) -> None:
+	with open("storage/mutes.json", "w") as file:
+		json.dump(data, file, indent=2)
 
 class ListenerCog(commands.Cog, name="Logging"):
 	def __init__(self, bot):
-		self.bot = bot
+		self.bot:discord.Client = bot
 
 
 	@commands.Cog.listener("on_message")
@@ -119,6 +123,24 @@ class ListenerCog(commands.Cog, name="Logging"):
 				await msg.publish()
 
 	@commands.Cog.listener('on_message')
+	async def manual_remove_selfmute(self, message:discord.Message):
+		if not hasattr(message, "guild") and message.content == "unmute":
+			muted_list = self.bot.mutes
+			indexes, mutes = [(i,dct) for i,dct in enumerate(muted_list) if dct["userid"] == message.author.id]
+			if len (indexes) == 0:
+				await message.reply("You aren't self-muted anywhere")
+			if len (indexes) == 1:
+				mute = muted_list[indexes][0]
+				guild:discord.Guild = self.bot.get_guild(mute["guild"])
+				muted_role:discord.Role = guild.get_role(mute["role"])
+				await guild.get_member(message.author.id).remove_roles(muted_role, reason="Self mute manually removed")
+				self.bot.mutes.pop(indexes[0])
+				dump_mutes(self.bot.mutes)
+				await message.reply(f"Unmuting you in {guild.name}")
+			
+
+
+	@commands.Cog.listener('on_message')
 	@commands.Cog.listener('on_resumed')
 	@commands.Cog.listener('on_raw_reaction_add')
 	@commands.Cog.listener('on_raw_reaction_remove')
@@ -132,9 +154,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 				guild = self.bot.get_guild(mute["guild"])
 				role = guild.get_role(mute["role"])
 				await guild.get_member(mute["userid"]).remove_roles(role, reason="Self mute expiring")
-				with open("storage/mutes.json", "w") as file:
-					self.bot.mutes.pop(index)
-					json.dump(self.bot.mutes, file, indent=2)
+				self.bot.mutes.pop(index)
+				dump_mutes(self.bot.mutes)
 				break
 
 
