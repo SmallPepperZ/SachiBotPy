@@ -8,7 +8,7 @@ import discord
 
 import requests
 
-from discord.enums import Status
+
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound, errors
 from discord_slash import SlashCommand
@@ -51,6 +51,8 @@ bot.enabled_guilds = [764981968579461130, #MDSP
 					  797308956162392094, #SachiBotLand
 					  739176312081743934  #Notifications
 					  ]
+with open("storage/mutes.json", "r") as file:
+	bot.mutes = json.load(file)
 # endregion
 
 # region Cogs
@@ -138,7 +140,7 @@ async def on_command_error(ctx, error):
 		await ctx.reply("Error:\n```"+error_str+"```\nSmallPepperZ will be informed", delete_after=60)
 
 		# Get traceback info
-		
+
 		exc = error
 		error_type = type(exc)
 		trace = exc.__traceback__
