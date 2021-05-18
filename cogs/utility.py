@@ -2,6 +2,7 @@ import logging
 import time
 import datetime
 import asyncio
+import json
 
 import discord
 from discord.ext import commands
@@ -9,6 +10,7 @@ from discord.ext import commands
 from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
 from customfunctions import config
+from customfunctions import TimeUtils
 
 logger = logging.getLogger("bot.utility")
 logger.setLevel(logging.INFO)
@@ -45,7 +47,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed   = discord.Embed(color=embedcolor, title="Help")
 		cogdata = ''
 		pages   = []
-		for cog in commandsdict.keys():
+		for cog in commandsdict.keys(): #pylint:disable=consider-iterating-dictionary
 			logger.debug(f"Starting cog loop for {cog}")
 
 			for command in commandsdict[cog].keys():
@@ -182,13 +184,37 @@ class UtilityCog(commands.Cog, name="Utility"):
 		await suggestion_channel.send(embed=embed)
 		await ctx.reply("Suggestion added")
 
+
 	@commands.command()
-	async def selfmute(self, ctx, duration: int):
-		member = ctx.author.id
-		muted_role = discord.utils.get(ctx.server.roles, name='Muted')
+	@commands.is_owner()
+	async def selfmute(self, ctx, duration_str: str, *, sleep:bool=False):
+		try:
+			duration = TimeUtils.parse(duration_str)
+		except ValueError:
+			await ctx.reply("Please write your duration in the format of '10m'")
+		muted_role = discord.utils.get(ctx.guild.roles, name='Muted') # fetch role with name 'muted'
+		unmute_timestamp = TimeUtils.get_future_time(duration).timestamp() # Get a timestamp for the duration specified
+		with open("storage/mutes.json", "w") as file:
+			muted_list = self.bot.mutes
+			muted_list.append({"userid":ctx.author.id, "expiration": unmute_timestamp, "guild": ctx.guild.id, "msg_id": ctx.message.id, "role": muted_role.id}) # add new mute
+			json.dump(muted_list, file, indent=2) # dump new data
+
 		await ctx.author.add_roles(muted_role, reason=f"Requested self-mute for {duration}")
-		await asyncio.sleep(duration)
-		await ctx.author.remove_roles(muted_role, reason=f"Requested self-mute for {duration} has expired")
+
+		await ctx.reply(f"Muting for {duration_str} ...")
+
+		#sleep for the duration
+		if sleep:
+			await asyncio.sleep(duration)
+			# Remove mute from storage
+			with open("storage/mutes.json", "w") as file:
+				muted_list:list = self.bot.mutes
+				index = [i for i,dct in enumerate(muted_list) if dct["userid"] == ctx.author.id and dct["msg_id"] == ctx.message.id][0]
+				muted_list.pop(index)
+				json.dump(muted_list, file, indent=2)
+
+			await ctx.author.remove_roles(muted_role, reason=f"Requested self-mute for {duration} has expired")
+			await ctx.send(f"{ctx.author.mention}, your self mute for {duration} seconds has expired")
 
 
 	@commands.command(aliases=["online", "areyouthere"])
