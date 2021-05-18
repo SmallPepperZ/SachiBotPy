@@ -1,3 +1,5 @@
+import datetime
+
 
 def parse(value:str) -> int:
 	"""Converts a string like '10m' into seconds
@@ -30,4 +32,22 @@ def parse(value:str) -> int:
 	except ValueError as err:
 		raise ValueError("Invalid time") from err
 	return seconds*scale
-print(parse("10dm"))
+
+
+def get_future_time(seconds:int) -> datetime.datetime:
+	"""Adds the specified number of seconds to the current time
+
+	Parameters
+	----------
+	seconds : int
+		The number of seconds to add
+
+	Returns
+	-------
+	datetime.datetime
+		The new time with the seconds added
+	"""
+
+	current_time = datetime.datetime.now()
+	new_time = current_time+datetime.timedelta(0, seconds)
+	return new_time
