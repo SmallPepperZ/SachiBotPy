@@ -199,7 +199,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 			muted_list.append({"userid":ctx.author.id, "expiration": unmute_timestamp, "guild": ctx.guild.id, "msg_id": ctx.message.id, "role": muted_role.id}) # add new mute
 			json.dump(muted_list, file, indent=2) # dump new data
 
-		await ctx.author.add_roles(muted_role, reason=f"Requested self-mute for {duration}")
+		await ctx.author.add_roles(muted_role, reason=f"Requested self-mute for {duration_str}")
 
 		await ctx.reply(f"Muting for {duration_str} ...")
 
@@ -213,8 +213,8 @@ class UtilityCog(commands.Cog, name="Utility"):
 				muted_list.pop(index)
 				json.dump(muted_list, file, indent=2)
 
-			await ctx.author.remove_roles(muted_role, reason=f"Requested self-mute for {duration} has expired")
-			await ctx.send(f"{ctx.author.mention}, your self mute for {duration} seconds has expired")
+			await ctx.author.remove_roles(muted_role, reason=f"Requested self-mute for {duration_str} has expired")
+			await ctx.send(f"{ctx.author.mention}, your self mute for {duration_str} seconds has expired")
 
 
 	@commands.command(aliases=["online", "areyouthere"])
