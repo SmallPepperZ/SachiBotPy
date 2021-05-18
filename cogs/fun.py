@@ -66,7 +66,7 @@ class FunCog(commands.Cog, name="Fun"):
 	@commands.command(aliases=['factoid'])
 	async def fact(self, ctx):
 
-		fact = os.popen('curl -s -X GET "https://uselessfacts.jsph.pl/random.txt?language=en" | grep ">" | sed s/\>\ //g').read()
+		fact = os.popen('curl -s -X GET "https://uselessfacts.jsph.pl/random.txt?language=en" | grep ">" | sed s/> //g').read()
 		embed = discord.Embed(color=embedcolor, title="Fact:", description=fact)
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 
