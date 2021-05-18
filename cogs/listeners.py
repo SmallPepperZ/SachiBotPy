@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import time
 import sqlite3 as sl
@@ -116,6 +117,26 @@ class ListenerCog(commands.Cog, name="Logging"):
 				channel = self.bot.get_channel(channel_id)
 				msg:discord.Message = await channel.send(content)
 				await msg.publish()
+
+	@commands.Cog.listener('on_message')
+	@commands.Cog.listener('on_resumed')
+	@commands.Cog.listener('on_raw_reaction_add')
+	@commands.Cog.listener('on_raw_reaction_remove')
+	@commands.Cog.listener('on_raw_message_edit')
+	@commands.Cog.listener('on_user_update')
+	async def run_unmutes(self, *_args):
+		for index, mute in enumerate(self.bot.mutes.copy()):
+			print(mute)
+			if mute["expiration"] <= datetime.now().timestamp():
+				print("Expired mute!")
+				guild = self.bot.get_guild(mute["guild"])
+				guild.get_member(mute["userid"]).remove_roles(mute["role"], reason="Self mute expiring")
+				with open("storage/mutes.json", "w") as file:
+					self.bot.mutes.pop(index)
+					json.dump(self.bot.mutes, file, indent=2)
+				break
+
+
 
 
 	@commands.Cog.listener("on_resumed")
