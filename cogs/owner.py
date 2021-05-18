@@ -18,8 +18,9 @@ from discord.ext.commands.errors import NotOwner
 
 
 from customfunctions import config, set_config
-from customfunctions import confirmation as ConfirmationCheck
-from customfunctions.embedfunctions import simple_embed
+from customfunctions import ConfirmationCheck
+from customfunctions import EmbedMaker
+
 #region Variable Stuff
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(BASE_PATH)
@@ -263,10 +264,10 @@ class OwnerCog(commands.Cog,name="Owner"):
 	async def enable_guild(self, ctx, guild_id:int):
 		guild_ids = [guild.id for guild in self.bot.guilds]
 		if guild_id in guild_ids:
-			await ctx.reply(embed=simple_embed("I am in that server", embedcolor))
+			await ctx.reply(embed=EmbedMaker.simple_embed("I am in that server", embedcolor))
 
 		else:
-			await ctx.reply(embed=simple_embed("I am not in that server", embedcolor))
+			await ctx.reply(embed=EmbedMaker.simple_embed("I am not in that server", embedcolor))
 
 	@commands.command()
 	@commands.check(is_owner())
@@ -289,9 +290,9 @@ class OwnerCog(commands.Cog,name="Owner"):
 					formatted_output = '\n'.join(output) if len(code.splitlines()) > 1 else output
 				else:
 					formatted_output = None
-				await ctx.reply(embed=simple_embed(f"Sucess! Output:\n```\n{formatted_output}\n```", embedcolor))
+				await ctx.reply(embed=EmbedMaker.simple_embed(f"Sucess! Output:\n```\n{formatted_output}\n```", embedcolor))
 			except Exception as error: #pylint: disable=broad-except
-				await ctx.reply(embed=simple_embed(f"Error! Output:\n```{error}```", embedcolor))
+				await ctx.reply(embed=EmbedMaker.simple_embed(f"Error! Output:\n```{error}```", embedcolor))
 		else:
 			await ctx.reply("Please put the code in a codeblock")
 def setup(bot):

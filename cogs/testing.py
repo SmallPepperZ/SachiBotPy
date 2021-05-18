@@ -1,7 +1,7 @@
 import sqlite3
 import discord
 from discord.ext import commands
-from customfunctions import config, miscfunctions
+from customfunctions import config, CustomUtilities
 
 # region Variable Stuff
 
@@ -50,7 +50,7 @@ class TestingCog(commands.Cog, name="Testing"):
 
 	@commands.command()
 	async def testing12(self, ctx):
-		owner = await miscfunctions.get_owner(self.bot)
+		owner = await CustomUtilities.get_owner(self.bot)
 		await ctx.reply(owner.mention)
 
 	@commands.group()
