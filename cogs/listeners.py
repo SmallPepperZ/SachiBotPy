@@ -130,7 +130,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 			if mute["expiration"] <= datetime.now().timestamp():
 				print("Expired mute!")
 				guild = self.bot.get_guild(mute["guild"])
-				guild.get_member(mute["userid"]).remove_roles(mute["role"], reason="Self mute expiring")
+				role = guild.get_role(mute["role"])
+				await guild.get_member(mute["userid"]).remove_roles(role, reason="Self mute expiring")
 				with open("storage/mutes.json", "w") as file:
 					self.bot.mutes.pop(index)
 					json.dump(self.bot.mutes, file, indent=2)
