@@ -55,6 +55,7 @@ with open("storage/mutes.json", "r") as file:
 	bot.mutes = json.load(file)
 # endregion
 
+
 # region Cogs
 bot.coglist = [	'cogs.owner',
 				'cogs.fun',
@@ -205,9 +206,24 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_member_join(member: discord.Member):
-	channel = bot.get_channel(member.guild.system_channel)
-	await channel.send("Hello, "+member.display_name)
+	member_join_update(member, "joined")
 
+@bot.event
+async def on_member_remove(member: discord.Member):
+	member_join_update(member, "left")
+
+async def member_join_update(member:discord.Member, action:str) -> None:
+	channel:discord.TextChannel = bot.get_guild(797308956162392094).get_channel(844600626516328519)
+	embed = discord.Embed(title=f'User {action.capitalize()}', description=f"""
+	**Guild**
+	ID  : `{member.guild.id}`
+	Name: {member.guild.name}
+	**User**
+	ID     : `{member.id}`
+	Name   : {member.name}
+	Mention: {member.mention}
+	""")
+	await channel.send(embed=embed)
 # endregion
 
 
