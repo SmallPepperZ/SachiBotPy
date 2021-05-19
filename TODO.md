@@ -1,0 +1,3 @@
+- [ ] Add invite link to invitee embed
+- [ ] Add inviter to invitee embed
+- [ ] Make Mee6 cache not refresh if it has already done 10 pages and not found a user on `%invite update`
