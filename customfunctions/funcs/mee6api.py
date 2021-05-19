@@ -101,7 +101,7 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guild_id:int=30209480704
 		# Fill the table
 		with dbcon:
 			#dbcon.execute("delete from members").rowcount
-			dbcon.executemany("insert into members(id, messages, level) values (?,?,?)", people)
+			dbcon.executemany("INSERT or REPLACE INTO members(id, messages, level) values (?,?,?)", people)
 		if player is None:
 			raise PlayerNotFound("User could not be found")
 	else:

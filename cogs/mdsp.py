@@ -525,7 +525,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 		elif isinstance(error, NotFound):
 			await ctx.reply('User could not be found')
 			return
-		elif isinstance(error, Mee6Api.IncorrectGuild):
+		elif isinstance(error, CustomChecks.IncorrectGuild):
 			await ctx.reply('This command is limited to a different guild')
 		else:
 			exc = error
