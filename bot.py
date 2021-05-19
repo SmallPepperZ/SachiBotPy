@@ -203,9 +203,17 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_member_join(member: discord.Member):
-	channel = bot.get_channel(member.guild.system_channel)
-	await channel.send("Hello, "+member.display_name)
-
+	channel = bot.get_guild(797308956162392094).get_channel(844600626516328519)
+	embed = discord.Embed(title=f'User Joined "{member.guild.name}"', description=f"""
+	**Guild**
+	ID  : `{member.guild.id}`
+	Name: {member.guild.name}
+	**User**
+	ID     : `{member.id}`
+	Name   : {member.name}
+	Mention: {member.mention}
+	""")
+	await channel.send(embed=embed)
 # endregion
 
 
