@@ -7,6 +7,7 @@ import json
 import discord
 from discord.ext import commands
 
+
 from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
 from customfunctions import config
@@ -30,19 +31,17 @@ class UtilityCog(commands.Cog, name="Utility"):
 		for cog in self.bot.cogs.keys():
 			commandsdict[str(cog)] = {}
 		command_list = self.bot.walk_commands()
-		for cmd in command_list:
-			if (not cmd.hidden) and cmd.enabled:
-
-				qname =	cmd.qualified_name
-				cog = cmd.cog_name
-				commandsdict[str(cog)][str(qname)] = {
-					"description": cmd.description,
-					"usage"      : cmd.usage,
-					"parent"     : cmd.parent,
-					"aliases"    : cmd.aliases,
-					"cog"        : cmd.cog_name,
-					"signature"  : cmd.signature
-					}
+		for cmd in [cmd for cmd in command_list if (not cmd.hidden) and cmd.enabled]:
+			qname =	cmd.qualified_name
+			cog = cmd.cog_name
+			commandsdict[str(cog)][str(qname)] = {
+				"description": cmd.description,
+				"usage"      : cmd.usage,
+				"parent"     : cmd.parent,
+				"aliases"    : cmd.aliases,
+				"cog"        : cmd.cog_name,
+				"signature"  : cmd.signature
+				}
 		logger.debug("dumping to json finished")
 		embed   = discord.Embed(color=embedcolor, title="Help")
 		cogdata = ''
