@@ -124,20 +124,43 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener('on_message')
 	async def manual_remove_selfmute(self, message:discord.Message):
-		if not hasattr(message, "guild") and message.content == "unmute":
+		if message.guild is None and message.content == "unmute":
+			print(message.author.id)
 			muted_list = self.bot.mutes
-			indexes, mutes = [(i,dct) for i,dct in enumerate(muted_list) if dct["userid"] == message.author.id]
+			indexes = [i for i,dct in enumerate(muted_list) if dct["userid"] == message.author.id]
 			if len (indexes) == 0:
 				await message.reply("You aren't self-muted anywhere")
 			if len (indexes) == 1:
-				mute = muted_list[indexes][0]
+				mute = muted_list[indexes[0]]
 				guild:discord.Guild = self.bot.get_guild(mute["guild"])
 				muted_role:discord.Role = guild.get_role(mute["role"])
 				await guild.get_member(message.author.id).remove_roles(muted_role, reason="Self mute manually removed")
 				self.bot.mutes.pop(indexes[0])
 				dump_mutes(self.bot.mutes)
 				await message.reply(f"Unmuting you in {guild.name}")
-			
+			else:
+				await message.reply("You are selfmuted in more than one place, and I haven't added code to account for that")
+			# else: #If user is self-muted in more than one server
+			# 	server_list = {}
+			# 	for mute in mutes:
+			# 		guild = self.bot.get_guild(mute["guild"])
+			# 		server_list[guild.id]=guild.name
+			# 	await message.reply("You are self-muted in the following servers. Enter the id of the one you would like to revoke\n"+'\n'.join([f'{guild_id} | {guild_name}' for guild_id, guild_name in server_list.items()])) # Prompt with available guilds
+
+			# 	def guild_check(message):
+			# 		return message.content in server_list.keys() or message.content in server_list.values() # Make sure response is valid
+
+			# 	try:
+			# 		selected_guild = (await self.bot.wait_for('message', check=guild_check,timeout=60.0)).content # Ask for which guild to use
+			# 	except asyncio.TimeoutError:
+			# 		await message.reply("Timed out")
+			# 		return
+			# 	mute = [mute for mute in mutes if selected_guild in (mute["guild"],server_list[mute["guild"]])][0]
+			# 	guild:discord.Guild = self.bot.get_guild(mute["guild"])
+			# 	muted_role:discord.Role = guild.get_role(mute["role"])
+			# 	await guild.get_member(message.author.id).remove_roles(muted_role, reason="Self mute manually removed")
+			# 	self.bot.mutes.pop(indexes[0])
+			# 	dump_mutes(self.bot.mutes)
 
 
 	@commands.Cog.listener('on_message')
