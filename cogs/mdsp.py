@@ -108,6 +108,8 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	status_editor_mention = ctx.author.mention
 	invitechannel = self.bot.get_channel(INVITE_CHANNEL_ID)
 	user = await self.bot.fetch_user(int(userid))
+	if force:
+		force = any([True for role in MANAGER_ROLES if role in [role.id for role in ctx.author.roles]])
 	# Create an information message to show progress
 	infomsg = await ctx.reply(embed=discord.Embed(color=embedcolor, description=f"Searching for {user.name} in {invitechannel.mention}..."))
 	# Get the terms for the messages
@@ -140,13 +142,13 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	message = await self.bot.get_channel(INVITE_CHANNEL_ID).fetch_message(messageid)
 	messagecontents = message.embeds[0]
 	# Make sure rules aren't violated
-	roles = [str(role.id) for role in ctx.author.roles]
-	if (field_status != 'none') and (force is False or not (str(765809794732261417) in roles or str(776953964003852309) in roles)):
+	print(force)
+	if (field_status != 'none') and not force:
 		if action in ("accept", "decline"):
-			if not field_status == "approve" and not force:
+			if not field_status == "approve":
 				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires the user to be approved first"))
 				return
-		elif action == "unpause" and not force:
+		elif action == "unpause":
 			if not field_status == "pause":
 				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires the user to be paused"))
 				return
@@ -500,12 +502,14 @@ class MdspCog(commands.Cog, name="MDSP"):
 		await update_invite_status(self, ctx, userid, "unpause", force)
 
 	@invite.command(aliases=['declined', 'leave', 'left'], description="\nUsed by the person who invites a user if they decline the invitation")
-	async def decline(self, ctx, userid:int):
-		await update_invite_status(self, ctx, userid, "decline")
+	async def decline(self, ctx, userid:int, force:str=None):
+		force:bool = force in ('--force', '-f')
+		await update_invite_status(self, ctx, userid, "decline", force)
 
 	@invite.command(aliases=['joined', 'accepted', 'join'], description="\nUsed by the person who invites a user if they accept the invitation (or when they join, coming soon™)")
-	async def accept(self, ctx, userid:int):
-		await update_invite_status(self, ctx, userid, "accept")
+	async def accept(self, ctx, userid:int, force:str=None):
+		force:bool = force in ('--force', '-f')
+		await update_invite_status(self, ctx, userid, "accept", force)
 
 	@invite.command(aliases=['unset'], description="*Official Helpers Only*\nResets a user's status")
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
