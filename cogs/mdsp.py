@@ -143,10 +143,10 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	roles = [str(role.id) for role in ctx.author.roles]
 	if (field_status != 'none') and (force is False or not (str(765809794732261417) in roles or str(776953964003852309) in roles)):
 		if action in ("accept", "decline"):
-			if not field_status == "approve":
+			if not field_status == "approve" and not force:
 				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires the user to be approved first"))
 				return
-		elif action == "unpause":
+		elif action == "unpause" and not force:
 			if not field_status == "pause":
 				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{action.capitalize()} requires the user to be paused"))
 				return
