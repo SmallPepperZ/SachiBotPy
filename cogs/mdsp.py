@@ -142,7 +142,6 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	message = await self.bot.get_channel(INVITE_CHANNEL_ID).fetch_message(messageid)
 	messagecontents = message.embeds[0]
 	# Make sure rules aren't violated
-	print(force)
 	if (field_status != 'none') and not force:
 		if action in ("accept", "decline"):
 			if not field_status == "approve":
@@ -338,7 +337,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				add_field(logembed, "User added",
 						  f'[{user.name}]({message.jump_url})')
 				logembed.set_thumbnail(url=user.avatar_url)
-				
+
 				await self.bot.get_channel(INVITE_LOG_CHANNEL_ID).send(embed=logembed)
 
 			else:
