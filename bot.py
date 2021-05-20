@@ -206,13 +206,13 @@ async def on_command_error(ctx, error):
 
 @bot.event
 async def on_member_join(member: discord.Member):
-	member_join_update(member, "joined", 0x2BDE1F)
+	await member_join_update(member, "joined", 0x2BDE1F)
 
 @bot.event
 async def on_member_remove(member: discord.Member):
-	member_join_update(member, "left", 0xD9361C)
+	await member_join_update(member, "left", 0xD9361C)
 
-async def member_join_update(member:discord.Member, action:str, color:hex) -> None:
+async def member_join_update(member:discord.Member, action:str, color) -> None:
 	channel:discord.TextChannel = bot.get_guild(797308956162392094).get_channel(844600626516328519)
 	embed = discord.Embed(title=f'User {action.capitalize()}',color=color, description=f"""
 	**Guild**
