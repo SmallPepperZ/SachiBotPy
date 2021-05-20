@@ -505,7 +505,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 
 	@invite.command(aliases=['joined', 'accepted', 'join'], description="\nUsed by the person who invites a user if they accept the invitation (or when they join, coming soon™)")
 	async def accept(self, ctx, userid:int):
-		await update_invite_status(self, ctx, userid, "decline")
+		await update_invite_status(self, ctx, userid, "accept")
 
 	@invite.command(aliases=['unset'], description="*Official Helpers Only*\nResets a user's status")
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
