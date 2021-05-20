@@ -197,16 +197,17 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	logembed.set_thumbnail(url=user.avatar_url)
 
 	embed.set_thumbnail(url=user.avatar_url)
-	if action == "accept":
-		# Move the invite embed to the discussion channel
-		invitediscussionchannel = self.bot.get_channel(
-			INVITE_DISCUSSION_CHANNEL_ID)
-		newmsg = await invitediscussionchannel.send(embed=embed)
+	if action == "approve":
 		# Create an invite
 		welcome_channel = ctx.guild.get_channel(WELCOME_CHANNEL_ID)
 		invite_link = await welcome_channel.create_invite(reason=f"Invite for {user.name}", max_uses=1,unique=True, max_age=604800)
 		invite_link_embed = discord.Embed(title=f"Invite URL for {user.name}", description=f'This link should only be used to invite {user.name}\n{invite_link.url}')
 		await ctx.send(embed=invite_link_embed)
+	if action == "accept":
+		# Move the invite embed to the discussion channel
+		invitediscussionchannel = self.bot.get_channel(
+			INVITE_DISCUSSION_CHANNEL_ID)
+		newmsg = await invitediscussionchannel.send(embed=embed)
 		# Add the new message url to the embed sent to the logging channel
 		add_field(logembed, "User edited", f'[{user.name}]({newmsg.jump_url})')
 		# Delete the old invite message
@@ -322,6 +323,8 @@ class MdspCog(commands.Cog, name="MDSP"):
 					'invitees', db_data_dict)
 				dbcur.execute(sql, values)
 				dbcon.commit()
+
+
 				logembed = discord.Embed(
 					color=embedcolor,
 					title="Invitee added",
@@ -333,6 +336,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				add_field(logembed, "User added",
 						  f'[{user.name}]({message.jump_url})')
 				logembed.set_thumbnail(url=user.avatar_url)
+				
 				await self.bot.get_channel(INVITE_LOG_CHANNEL_ID).send(embed=logembed)
 
 			else:
