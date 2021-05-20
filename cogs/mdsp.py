@@ -222,7 +222,7 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 		add_field(logembed, "User edited", f'[{user.name}]({message.jump_url})')
 		add_field(logembed, "Action", f'`{action.capitalize()}`')
 	# Edit the info message to show success
-	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{word3}"))
+	await infomsg.edit(embed=discord.Embed(color=embedcolor, description=word3))
 	# Send the message in the loggging channel
 	await self.bot.get_channel(INVITE_LOG_CHANNEL_ID).send(embed=logembed)
 
