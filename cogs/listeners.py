@@ -11,6 +11,13 @@ from customfunctions import config
 
 #region Variable Stuff
 
+def get_logging_channel(bot:discord.Client,channel_name:str) -> discord.TextChannel:
+	logging_channels = {
+	"joins": lambda: bot.get_guild(797308956162392094).get_channel(844600626516328519),
+	"invites": lambda: bot.get_guild(797308956162392094).get_channel(845350291103809546)
+	}
+	return logging_channels[channel_name]
+
 
 embedcolor = int(config("embedcolor"), 16)
 prefix = config("prefix")
@@ -28,6 +35,18 @@ def dump_mutes(data:dict) -> None:
 	with open("storage/mutes.json", "w") as file:
 		json.dump(data, file, indent=2)
 
+async def member_join_update(bot:discord.Client, member:discord.Member, action:str, color) -> None:
+	channel = get_logging_channel(bot, "joins")
+	embed = discord.Embed(title=f'User {action.capitalize()}',color=color, description=f"""
+	**Guild**
+	ID  : `{member.guild.id}`
+	Name: {member.guild.name}
+	**User**
+	ID     : `{member.id}`
+	Name   : {member.name}
+	Mention: {member.mention}
+	""")
+	await channel.send(embed=embed)
 class ListenerCog(commands.Cog, name="Logging"):
 	def __init__(self, bot):
 		self.bot:discord.Client = bot
@@ -187,6 +206,16 @@ class ListenerCog(commands.Cog, name="Logging"):
 	async def on_resume(self):
 		status = config('status')
 		await self.bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
+
+	@commands.Cog.listener("on_member_join")
+	async def on_member_join(self, member: discord.Member):
+		await member_join_update(self.bot, member, "joined", 0x2BDE1F)
+
+	@commands.Cog.listener("on_member_leave")
+	async def on_member_remove(self, member: discord.Member):
+		await member_join_update(self.bot, member, "left", 0xD9361C)
+
+
 
 def setup(bot):
 	bot.add_cog(ListenerCog(bot))
