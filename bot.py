@@ -15,7 +15,7 @@ from discord_slash import SlashCommand
 
 
 from customfunctions import config, set_config
-from customfunctions import CustomChecks
+from customfunctions import CustomChecks, ErrorHandling
 # endregion
 
 # region Variable Stuff
@@ -97,46 +97,31 @@ async def on_command_error(ctx, error):
 	elif isinstance(error, CommandNotFound) or ctx.command.hidden:
 		await ctx.message.add_reaction(str('❔'))
 		return
-	elif isinstance(error, errors.NotOwner):
-		await ctx.message.add_reaction(str('🔏'))
-		return
-	elif isinstance(error, errors.DisabledCommand):
-		await ctx.message.add_reaction(str('<:DisabledCommand:804476191268536320>'))
-		return
-	elif isinstance(error, errors.MissingPermissions):
-		await ctx.message.add_reaction(str('🔐'))
-		return
-	elif isinstance(error, errors.BotMissingPermissions):
-		await ctx.reply("I do not have the requisite permissions")
-		return
-	elif isinstance(error, errors.MissingRole):
-		await ctx.message.add_reaction(str('🔐'))
-		return
-	elif isinstance(error, errors.CommandOnCooldown):
-		await ctx.message.add_reaction(str('<:Cooldown:804477347780493313>'))
-		if str(error.cooldown.type.name) != "default":
-			cooldowntype = f'per {error.cooldown.type.name}'
-		else:
-			cooldowntype = 'global'
-			await ctx.reply(f"This command is on a {round(error.cooldown.per, 0)}s {cooldowntype} cooldown. "
-							f"Wait {round(error.retry_after, 1)} seconds",
-							delete_after=min(10, error.retry_after))
-		return
-	elif isinstance(error, errors.MissingRequiredArgument):
-		await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
-		return
-	elif isinstance(error, errors.BadArgument):
-		await ctx.reply(f"Invalid argument!\nUsage: `{ctx.command.signature}`", delete_after=30)
-		return
-	elif isinstance(error, errors.NoPrivateMessage):
-		await ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>'))
-		return
-	elif isinstance(error, CustomChecks.IncorrectGuild):
-		await ctx.reply(content="This command does not work in this server.", delete_after=10)
-		return
 	else:
-		await uncaught_error(ctx,error)
+		await get_error(ctx, error)
 
+async def get_error(ctx, error:object):
+	lambda_error_handling = {
+		errors.NotOwner                 : lambda: ctx.message.add_reaction(str('🔏')),
+		errors.DisabledCommand          : lambda: ctx.message.add_reaction(str('<:DisabledCommand:804476191268536320>')),
+		errors.MissingPermissions       : lambda: ctx.message.add_reaction(str('🔐')),
+		errors.BotMissingPermissions    : lambda: ctx.reply("I do not have the requisite permissions"),
+		errors.MissingRole              : lambda: ctx.message.add_reaction(str('🔐')),
+		errors.MissingRequiredArgument  : lambda: ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30),
+		errors.BadArgument              : lambda: ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30),
+		errors.NoPrivateMessage         : lambda: ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>')),
+		CustomChecks.IncorrectGuild     : lambda: ctx.reply(content="This command does not work in this server.", delete_after=10)
+	}
+	function_error_handling = {
+		errors.CommandOnCooldown        : ErrorHandling.command_on_cooldown
+	}
+	error_type = type(error.original) if isinstance(error, errors.CommandInvokeError) else type(error)
+	if error_type in lambda_error_handling.keys():
+		await lambda_error_handling[error_type]()
+	elif error_type in function_error_handling.keys():
+		await function_error_handling[error_type](ctx, error)
+	else:
+		await uncaught_error(ctx, error)
 
 async def uncaught_error(ctx, error):
 	error_str = str(error).replace(personal_info, '')

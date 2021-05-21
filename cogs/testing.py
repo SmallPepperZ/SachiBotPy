@@ -41,10 +41,10 @@ class TestingCog(commands.Cog, name="Testing"):
 		invite = await channel.create_invite(reason=f"Invite for {username}", max_uses=1,unique=True, max_age=604800)
 		await ctx.send(invite.url)
 
-	@commands.command()
+	@commands.command(enabled=True)
 	@commands.is_owner()
 	async def errorme(self, ctx):
-		await ctx.reply(1/0)
+		raise ValueError
 
 
 
