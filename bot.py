@@ -204,26 +204,7 @@ async def on_command_error(ctx, error):
 		await ghost_ping.delete()
 
 
-@bot.event
-async def on_member_join(member: discord.Member):
-	await member_join_update(member, "joined", 0x2BDE1F)
 
-@bot.event
-async def on_member_remove(member: discord.Member):
-	await member_join_update(member, "left", 0xD9361C)
-
-async def member_join_update(member:discord.Member, action:str, color) -> None:
-	channel:discord.TextChannel = bot.get_guild(797308956162392094).get_channel(844600626516328519)
-	embed = discord.Embed(title=f'User {action.capitalize()}',color=color, description=f"""
-	**Guild**
-	ID  : `{member.guild.id}`
-	Name: {member.guild.name}
-	**User**
-	ID     : `{member.id}`
-	Name   : {member.name}
-	Mention: {member.mention}
-	""")
-	await channel.send(embed=embed)
 # endregion
 
 
