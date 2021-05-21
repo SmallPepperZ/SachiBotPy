@@ -11,10 +11,12 @@ from customfunctions import config
 
 #region Variable Stuff
 
-def get_logging_channel(bot:discord.Client,channel_name:str) -> discord.TextChannel:
+def get_logging_channel(bot:discord.Client, channel_name:str) -> discord.TextChannel:
 	logging_channels = {
 	"joins": lambda: bot.get_guild(797308956162392094).get_channel(844600626516328519),
-	"invites": lambda: bot.get_guild(797308956162392094).get_channel(845350291103809546)
+	"invites": lambda: bot.get_guild(797308956162392094).get_channel(845350291103809546),
+	"java_repost": lambda: bot.get_guild(797308956162392094).get_channel(821778423579410433),
+	"bedrock_repost": lambda: bot.get_guild(797308956162392094).get_channel(821778441133097021),
 	}
 	return logging_channels[channel_name]
 
@@ -129,16 +131,11 @@ class ListenerCog(commands.Cog, name="Logging"):
 	@commands.Cog.listener('on_message')
 	async def repost_mc(self, message:discord.Message):
 		if message.channel.id == 821778395297349692:
-			channel_id = None
-			if message.content.startswith("**Minecraft: Java Edition"):
-				channel_id = 821778423579410433
-			elif message.content.startswith("**Minecraft: Bedrock Edition"):
-				channel_id = 821778441133097021
-			if channel_id is not None:
-				content = message.content.replace('650159037924769793', '821781958622314576').replace('648530043647033344', '821781958282838069').replace('761566859220221963', '821781958312329237').replace('682276249053429807', '821781958383239188').replace('821162280905211964','821781958425968650')
-				channel = self.bot.get_channel(channel_id)
-				msg:discord.Message = await channel.send(content)
-				await msg.publish()
+			content = message.content.replace('650159037924769793', '821781958622314576').replace('648530043647033344', '821781958282838069').replace('761566859220221963', '821781958312329237').replace('682276249053429807', '821781958383239188').replace('821162280905211964','821781958425968650')
+			channel_name = "java_repost" if message.content.startswith("**Minecraft: Java Edition") else "bedrock repost"
+			channel = get_logging_channel(self.bot, channel_name)
+			msg:discord.Message = await channel.send(content)
+			await msg.publish()
 
 	@commands.Cog.listener('on_message')
 	async def manual_remove_selfmute(self, message:discord.Message):
