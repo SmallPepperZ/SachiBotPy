@@ -4,10 +4,8 @@ import os
 import requests
 import discord
 from discord.ext import commands
-from customfunctions import config
-from discord.ext.commands import Context
+from customfunctions import config, OBJECTS_TO_BONK_WITH
 
-from customfunctions import OBJECTS_TO_BONK_WITH
 #region Variable Stuff
 
 
@@ -126,7 +124,7 @@ class FunCog(commands.Cog, name="Fun"):
 			await ctx.send(embed=embed)
 
 	@commands.command()
-	async def ban(self, ctx:Context, user:discord.Member, *, reason:str=None):
+	async def ban(self, ctx, user:discord.Member, *, reason:str=None):
 		try:
 			await ctx.message.delete()
 		except discord.errors.Forbidden:
