@@ -101,7 +101,7 @@ async def on_command_error(ctx, error):
 		await get_error(ctx, error)
 
 async def get_error(ctx, error:object):
-	lambda_error_handling = {
+	lambda_error_handling = { # Errors that can be handled in one line of code
 		errors.NotOwner                 : lambda: ctx.message.add_reaction(str('🔏')),
 		errors.DisabledCommand          : lambda: ctx.message.add_reaction(str('<:DisabledCommand:804476191268536320>')),
 		errors.MissingPermissions       : lambda: ctx.message.add_reaction(str('🔐')),
@@ -112,15 +112,18 @@ async def get_error(ctx, error:object):
 		errors.NoPrivateMessage         : lambda: ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>')),
 		CustomChecks.IncorrectGuild     : lambda: ctx.reply(content="This command does not work in this server.", delete_after=10)
 	}
-	function_error_handling = {
+	function_error_handling = { # More complicated handling that require normal functions
 		errors.CommandOnCooldown        : ErrorHandling.command_on_cooldown
 	}
-	error_type = type(error.original) if isinstance(error, errors.CommandInvokeError) else type(error)
-	if error_type in lambda_error_handling.keys():
+	error_type = type(error.original) if isinstance(error, errors.CommandInvokeError) else type(error) # Get the type of the error
+
+	if error_type in lambda_error_handling.keys(): # check if the error is in the lambda dictionary and if so, call the handling function
 		await lambda_error_handling[error_type]()
-	elif error_type in function_error_handling.keys():
+
+	elif error_type in function_error_handling.keys(): # check if the error is in the function dictionary, and if so, call the function with arguments
 		await function_error_handling[error_type](ctx, error)
-	else:
+
+	else: # if the error isn't handled, handle it with the ungaught error handler
 		await uncaught_error(ctx, error)
 
 async def uncaught_error(ctx, error):
