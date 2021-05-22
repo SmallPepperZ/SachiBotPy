@@ -5,7 +5,9 @@ import requests
 import discord
 from discord.ext import commands
 from customfunctions import config
+from discord.ext.commands import Context
 
+from customfunctions import OBJECTS_TO_BONK_WITH
 #region Variable Stuff
 
 
@@ -122,6 +124,23 @@ class FunCog(commands.Cog, name="Fun"):
 			embed = discord.Embed(title="<a:WeeWooRed:771082566874169394>  " +
 								  content+"  <a:WeeWooRed:771082566874169394>", color=0xf21b1b)
 			await ctx.send(embed=embed)
+
+	@commands.command()
+	async def ban(self, ctx:Context, user:discord.Member, *, reason:str=None):
+		try:
+			await ctx.message.delete()
+		except discord.errors.Forbidden:
+			pass
+		quantity = random.randint(1,100000)
+		if quantity>1:
+			item = random.choice(OBJECTS_TO_BONK_WITH)[1]
+		else:
+			item = random.choice(OBJECTS_TO_BONK_WITH)[0]
+
+		if reason is None:
+			await ctx.send(embed=discord.Embed(color=embedcolor,description=f"{user.mention} was banned by {ctx.author.mention} for {quantity} {item}"))
+		else:
+			await ctx.send(embed=discord.Embed(color=embedcolor,description=f"{user.mention} was banned by {ctx.author.mention} for {quantity} {item} because {reason}"))
 
 
 def setup(bot):
