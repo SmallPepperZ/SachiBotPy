@@ -110,13 +110,13 @@ async def get_error(ctx, error:object):
 		errors.MissingRequiredArgument  : lambda: ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30),
 		errors.BadArgument              : lambda: ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30),
 		errors.NoPrivateMessage         : lambda: ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>')),
+		discord.errors.Forbidden        : lambda: ctx.reply("I do not have the requisite permissions"),
 		CustomChecks.IncorrectGuild     : lambda: ctx.reply(content="This command does not work in this server.", delete_after=10)
 	}
 	function_error_handling = { # More complicated handling that require normal functions
 		errors.CommandOnCooldown        : ErrorHandling.command_on_cooldown
 	}
 	error_type = type(error.original) if isinstance(error, errors.CommandInvokeError) else type(error) # Get the type of the error
-
 	if error_type in lambda_error_handling.keys(): # check if the error is in the lambda dictionary and if so, call the handling function
 		await lambda_error_handling[error_type]()
 
