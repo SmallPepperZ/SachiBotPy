@@ -65,7 +65,7 @@ bot.coglist = [	'cogs.owner',
 				'cogs.listeners',
 				'cogs.testing',
 				'cogs.mdsp',
-				'cogs.slash-commands'
+				'cogs.server-specific'
 				]
 
 if __name__ == '__main__':
@@ -117,7 +117,7 @@ async def get_error(ctx, error:object):
 
 	error_type = type(error.original) if isinstance(error, errors.CommandInvokeError) else type(error) # Get the type of the error
 	if error_type in error_handling.keys(): # check if the error is in the dictionary dictionary and if so, call the handling function
-		error_handling[error_type]()
+		await error_handling[error_type]()
 	else: # if the error isn't handled, handle it with the ungaught error handler
 		await uncaught_error(ctx, error)
 
