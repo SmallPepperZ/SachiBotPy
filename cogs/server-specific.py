@@ -36,7 +36,6 @@ class ServerCog(commands.Cog, name="Server Specific"):
 		else:
 			include = [role.strip() for role in include.strip('][').split(',')]
 			for role_id in include:
-				print(role_id)
 				role = ctx.guild.get_role(int(role_id))
 				included+=role.members
 
@@ -50,9 +49,6 @@ class ServerCog(commands.Cog, name="Server Specific"):
 		if include is None:
 			included = ctx.guild.members
 		elegible = [member for member in included if not member in excluded]
-		print(elegible)
-		print(included)
-		print(excluded)
 		if count > len(elegible):
 			await ctx.reply("Not enough members match these criteria")
 			return
