@@ -18,7 +18,7 @@ def get_logging_channel(bot:discord.Client, channel_name:str) -> discord.TextCha
 	"java_repost": lambda: bot.get_guild(797308956162392094).get_channel(821778423579410433),
 	"bedrock_repost": lambda: bot.get_guild(797308956162392094).get_channel(821778441133097021),
 	}
-	return logging_channels[channel_name]
+	return logging_channels[channel_name]()
 
 
 embedcolor = int(config("embedcolor"), 16)
