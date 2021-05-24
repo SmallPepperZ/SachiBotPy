@@ -26,6 +26,8 @@ prefix = config("prefix")
 DB_PATH = "storage/DiscordMessages.db"
 dbcon = sl.connect(str(DB_PATH))
 logger = logging.getLogger("bot.logging")
+delete_logger = logging.getLogger("bot.logging.delete")
+
 #endregion
 
 with open("storage/loggingignore.json", "r") as loggingignore:
@@ -212,7 +214,15 @@ class ListenerCog(commands.Cog, name="Logging"):
 	async def on_member_remove(self, member: discord.Member):
 		await member_join_update(self.bot, member, "left", 0xD9361C)
 
-
+	@commands.Cog.listener("on_raw_message_delete")
+	async def message_delete(self, payload:discord.RawMessageDeleteEvent):
+		guild:discord.Guild = self.bot.get_guild(payload.guild_id)
+		channel:discord.TextChannel = guild.get_channel(payload.channel_id)
+		if payload.cached_message is not None:
+			message:discord.Message = payload.cached_message
+			delete_logger.debug(f"{guild.name:20} | #{channel.name:20} | {payload.message_id:20} | {message.author} | {message.content}")
+		else:
+			delete_logger.debug(f"{guild.name:20} | #{channel.name:20} | {payload.message_id:20}")
 
 def setup(bot):
 	bot.add_cog(ListenerCog(bot))
