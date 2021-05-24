@@ -1,4 +1,5 @@
 from datetime import datetime
+import datetime as dt
 import json
 import time
 import sqlite3 as sl
@@ -51,6 +52,7 @@ async def member_join_update(bot:discord.Client, member:discord.Member, action:s
 	Mention: {member.mention}
 	""")
 	await channel.send(embed=embed)
+
 class ListenerCog(commands.Cog, name="Logging"):
 	def __init__(self, bot):
 		self.bot:discord.Client = bot
@@ -224,5 +226,26 @@ class ListenerCog(commands.Cog, name="Logging"):
 		else:
 			delete_logger.debug(f"{guild.name:20} | #{channel.name:20} | {payload.message_id:20}")
 
+	@commands.Cog.listener("on_invite_create")
+	async def on_invite_create(self, invite:discord.Invite):
+		channel = get_logging_channel(self.bot, "invites")
+		embed = discord.Embed(title='Invite Created',color=0x2BDE1F, description=f"""
+		**Guild**
+		ID       : `{invite.guild.id}`
+		Name     : {invite.guild.name}
+		**Channel**
+		ID       : `{invite.channel.id}`
+		Name     : {invite.channel.name}
+		Mention  : {invite.channel.mention}
+		**Inviter**
+		ID       : `{invite.inviter.id}`
+		Name     : {invite.inviter}
+		Mention  : {invite.inviter.mention}
+		**Other**
+		Max Time : `{str(dt.timedelta(seconds=invite.max_age))}`
+		Max Uses : `{invite.max_uses}`
+		Code     : `{invite.code}`
+		""")
+		await channel.send(embed=embed)
 def setup(bot):
 	bot.add_cog(ListenerCog(bot))
