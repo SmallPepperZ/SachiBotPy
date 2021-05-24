@@ -17,7 +17,7 @@ class ServerCog(commands.Cog, name="Server Specific"):
 
 	@commands.command()
 	@CustomChecks.limit_to_guild(846191837684826123)
-	async def roll_members(self, ctx, count:int=1, include:Union[discord.Role, "list[discord.Role]"]=None, exclude:Union[discord.Role, "list[discord.Role]"]=None):
+	async def roll_members(self, ctx, count:int=1, include:Union[discord.Role, str]=None, exclude:Union[discord.Role, str]=None):
 		"""Returns random member(s) from a guild
 
 		Parameters
@@ -33,25 +33,33 @@ class ServerCog(commands.Cog, name="Server Specific"):
 		included:"list[discord.Member]" = []
 		if isinstance(include,discord.Role):
 			included = include.members
-		elif isinstance(include,list):
-			for role in include:
-				included.append(role.members)
+		else:
+			include = [role.strip() for role in include.strip('][').split(',')]
+			for role_id in include:
+				print(role_id)
+				role = ctx.guild.get_role(int(role_id))
+				included+=role.members
 
 		if isinstance(exclude,discord.Role):
 			excluded = exclude.members
 		elif isinstance(exclude,list):
-			for role in exclude:
-				excluded.append(role.members)
+			for role_id in exclude:
+				role = ctx.guild.get_role(int(role_id))
+				excluded+=role.members
 
 		if include is None:
 			included = ctx.guild.members
 		elegible = [member for member in included if not member in excluded]
-		try:
-			chosen = random.sample(elegible, count)
-		except ValueError:
-			await ctx.reply("Not enough members match this criteria")
+		print(elegible)
+		print(included)
+		print(excluded)
+		if count > len(elegible):
+			await ctx.reply("Not enough members match these criteria")
+			return
+		chosen = random.sample(elegible, count)
 		formatted_chosen = '\n'.join([choice.mention for choice in chosen])
-		await ctx.reply(formatted_chosen)
+		embed = discord.Embed(title=f"Selected Member{'s' if len(chosen) > 1 else ''}", description=formatted_chosen)
+		await ctx.reply(embed=embed)
 
 def setup(bot):
 	bot.add_cog(ServerCog(bot))
