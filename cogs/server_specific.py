@@ -29,25 +29,25 @@ class ServerCog(commands.Cog, name="Server Specific"):
 		exclude : Union[discord.Role,list[discord.Role], optional
 			Don't select members with these roles, by default None
 		"""
-		excluded:"list[discord.Member]" = []
-		included:"list[discord.Member]" = []
-		if isinstance(include,discord.Role):
-			included = include.members
-		else:
-			include = [role.strip() for role in include.strip('][').split(',')]
-			for role_id in include:
-				role = ctx.guild.get_role(int(role_id))
-				included+=role.members
-
-		if isinstance(exclude,discord.Role):
-			excluded = exclude.members
-		elif isinstance(exclude,list):
-			for role_id in exclude:
-				role = ctx.guild.get_role(int(role_id))
-				excluded+=role.members
+		def _get_members(role:Union[discord.Role, str]=None) -> "list[discord.Member]":
+			members:"list[discord.Member]" = []
+			if role is None:
+				return []
+			if isinstance(role,discord.Role):
+				members = role.members
+			else:
+				roles = [role.strip() for role in role.strip('][').split(',')]
+				for role_id in roles:
+					role = ctx.guild.get_role(int(role_id))
+					members+=role.members
+			return members
 
 		if include is None:
 			included = ctx.guild.members
+		else:
+			included = _get_members(include)
+
+		excluded = _get_members(exclude)
 		elegible = [member for member in included if not member in excluded]
 		if count > len(elegible):
 			await ctx.reply("Not enough members match these criteria")
