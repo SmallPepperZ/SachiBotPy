@@ -65,7 +65,7 @@ bot.coglist = [	'cogs.owner',
 				'cogs.listeners',
 				'cogs.testing',
 				'cogs.mdsp',
-				'cogs.server-specific'
+				'cogs.server_specific'
 				]
 
 if __name__ == '__main__':

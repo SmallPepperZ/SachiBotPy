@@ -16,7 +16,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 	@commands.command()
 	@commands.is_owner()
 	async def reload(self, ctx, cog_to_reload="all"):
-		cognames = [cog.capitalize() for cog in [ cog.replace('cogs.', '').replace('-', ' ') for cog in ctx.bot.coglist]]
+		cognames = [cog.title() for cog in [ cog.replace('cogs.', '').replace('_', ' ') for cog in ctx.bot.coglist]]
 		cognames = '\n'.join(cognames)
 		ccog_to_reloadog = cog_to_reload.lower()
 		if cog_to_reload=="all":
