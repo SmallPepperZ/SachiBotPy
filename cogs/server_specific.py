@@ -62,7 +62,7 @@ class ServerCog(commands.Cog, name="Server Specific"):
 	@CustomChecks.limit_to_guild(846191837684826123)
 	async def roll_members_is_rigged(self, ctx):
 		customer_satisfaction_message:discord.Message = await ctx.reply(embed=EmbedMaker.simple_embed("I'm sorry you feel that way, please fill out our [customer satisfaction form](https://tinyurl.com/sachibotcustomersupport) so we can improve next time",embedcolor))
-		await asyncio.sleep(10)
+		await asyncio.sleep(20)
 		await customer_satisfaction_message.delete()
 		await ctx.reply(embed=discord.Embed(title="It isn't rigged™", description="This bot is open source on [this github repository](https://github.com/SmallPepperZ/SachiBotPy/blob/development/cogs/server_specific.py#L56). I've highlighted the line where the randomness takes place to enhance your viewing experience. I encourage you to let me know of any issues you find in the code"))
 
