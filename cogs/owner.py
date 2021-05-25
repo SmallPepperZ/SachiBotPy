@@ -1,3 +1,4 @@
+
 import time
 import datetime
 import re
@@ -282,17 +283,18 @@ class OwnerCog(commands.Cog,name="Owner"):
 			function_code = (
 			 'async def __exec_code(self, ctx):\n'
 			f'{code}')
-			await ctx.message.add_reaction('👍')
+			await ctx.message.add_reaction('<a:loading:846527533691568128>')
 			try:
 				exec(function_code) #pylint: disable=exec-used
 				output = await locals()['__exec_code'](self, ctx)
 				if output:
 					formatted_output = '\n'.join(output) if len(code.splitlines()) > 1 else output
-				else:
-					formatted_output = None
-				await ctx.reply(embed=EmbedMaker.simple_embed(f"Sucess! Output:\n```\n{formatted_output}\n```", embedcolor))
+					await ctx.reply(embed=EmbedMaker.simple_embed(f"Sucess! Output:\n```\n{formatted_output}\n```", embedcolor))
+				await ctx.message.add_reaction('👍')
 			except Exception as error: #pylint: disable=broad-except
 				await ctx.reply(embed=EmbedMaker.simple_embed(f"Error! Output:\n```{error}```", embedcolor))
+				await ctx.message.add_reaction('<:CommandError:804193351758381086>')
+			await ctx.message.remove_reaction('<a:loading:846527533691568128>', ctx.guild.me)
 		else:
 			await ctx.reply("Please put the code in a codeblock")
 def setup(bot):
