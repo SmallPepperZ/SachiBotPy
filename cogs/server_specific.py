@@ -56,7 +56,8 @@ class ServerCog(commands.Cog, name="Server Specific"):
 		chosen = random.sample(elegible, count)
 		formatted_chosen = '\n'.join([f'{chosen.index(choice)+1} - {choice.mention}' for choice in chosen])
 		embed = discord.Embed(title=f"Selected Member{'s' if len(chosen) > 1 else ''}", description=formatted_chosen)
-		await ctx.reply(embed=embed)
+		await ctx.delete()
+		await ctx.send(embed=embed)
 
 	@commands.command()
 	@CustomChecks.limit_to_guild(846191837684826123)
