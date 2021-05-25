@@ -1,8 +1,9 @@
+import asyncio
 import random
 from typing import Union
 import discord
 from discord.ext import commands
-from customfunctions import config, CustomChecks
+from customfunctions import config, CustomChecks, EmbedMaker
 
 #region Variable Stuff
 
@@ -56,6 +57,14 @@ class ServerCog(commands.Cog, name="Server Specific"):
 		formatted_chosen = '\n'.join([f'{chosen.index(choice)+1} - {choice.mention}' for choice in chosen])
 		embed = discord.Embed(title=f"Selected Member{'s' if len(chosen) > 1 else ''}", description=formatted_chosen)
 		await ctx.reply(embed=embed)
+
+	@commands.command()
+	@CustomChecks.limit_to_guild(846191837684826123)
+	async def roll_members_is_rigged(self, ctx):
+		rickroll:discord.Message = await ctx.reply(embed=EmbedMaker.simple_embed("I'm sorry you feel that way, please fill out our [customer satisfaction form](https://tinyurl.com/sachibotcustomersupport) so we can improve next time",embedcolor))
+		await asyncio.sleep(10)
+		await rickroll.delete()
+		await ctx.reply(embed=discord.Embed(title="It isn't rigged™", description="This bot is open source on [this github repository](https://github.com/SmallPepperZ/SachiBotPy/blob/development/cogs/server_specific.py#L56). I've highlighted the line where the randomness takes place to enhance your viewing experience. I encourage you to let me know of any issues you find in the code"))
 
 def setup(bot):
 	bot.add_cog(ServerCog(bot))
