@@ -53,7 +53,7 @@ class ServerCog(commands.Cog, name="Server Specific"):
 			await ctx.reply("Not enough members match these criteria")
 			return
 		chosen = random.sample(elegible, count)
-		formatted_chosen = '\n'.join([choice.mention for choice in chosen])
+		formatted_chosen = '\n'.join([f'{chosen.index(choice)+1} - {choice.mention}' for choice in chosen])
 		embed = discord.Embed(title=f"Selected Member{'s' if len(chosen) > 1 else ''}", description=formatted_chosen)
 		await ctx.reply(embed=embed)
 
