@@ -16,7 +16,7 @@ from customfunctions import config, CustomChecks, EmbedMaker
 embedcolor = int(config("embedcolor"), 16)
 #endregion
 
-def _get_members(roles:Union[discord.Role, "list[discord.Role]"]=None) -> "list[discord.Member]":
+def _get_members(roles:Union[discord.Role, "list[discord.Role]"]=None) -> "list[discord.Member]": # Get the members from a role or list of roles
 	members:"list[discord.Member]" = []
 	if roles == [None, None]:
 		return []
@@ -28,7 +28,7 @@ def _get_members(roles:Union[discord.Role, "list[discord.Role]"]=None) -> "list[
 			members+=role.members
 	return members
 
-def _get_elegible_members(guild:discord.Guild,include:"list[discord.Role]"=None, exclude:"list[discord.Role]"=None) -> "list[discord.Member]":
+def _get_elegible_members(guild:discord.Guild,include:"list[discord.Role]"=None, exclude:"list[discord.Role]"=None) -> "list[discord.Member]": # Get members that have roles in the inclusion list but not in the exclusion list
 	if include == [None, None]:
 		included = guild.members
 	else:
