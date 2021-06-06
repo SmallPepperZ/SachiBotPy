@@ -1,4 +1,3 @@
-import logging
 import time
 import datetime
 import asyncio
@@ -12,9 +11,9 @@ from disputils import BotEmbedPaginator
 from customfunctions import EmbedMaker
 from customfunctions import config
 from customfunctions import TimeUtils
+from customfunctions import master_logger
 
-logger = logging.getLogger("bot.utility")
-logger.setLevel(logging.INFO)
+logger = master_logger.getChild("utility")
 embedcolor = int(config("embedcolor"), 16)
 
 

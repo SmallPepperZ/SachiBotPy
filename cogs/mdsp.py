@@ -1,5 +1,4 @@
 import sqlite3
-import logging
 import traceback
 
 from datetime import datetime, timedelta
@@ -13,11 +12,10 @@ from discord.ext.commands import BadArgument, BucketType
 
 
 
-from customfunctions import config, DatabaseFromDict, CustomUtilities, CustomChecks, Mee6Api
+from customfunctions import config, DatabaseFromDict, CustomUtilities, CustomChecks, Mee6Api,master_logger
 
 
-logger = logging.getLogger('bot.mdsp')
-logg = logging.getLogger()
+logger = master_logger.getChild("mdsp")
 embedcolor = int(config("embedcolor"), 16)
 
 INVITE_LOG_CHANNEL_ID = 807379254303653939

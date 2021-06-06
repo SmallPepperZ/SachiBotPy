@@ -1,11 +1,11 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionNotFound, ExtensionFailed
-from customfunctions import config
+from customfunctions import config,master_logger
 
 
 embedcolor = int(config("embedcolor"), 16)
-
+logger = master_logger.getChild("cogs")
 
 
 

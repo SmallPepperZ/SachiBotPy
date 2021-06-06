@@ -2,7 +2,6 @@
 
 import time
 import json
-import logging
 import traceback
 import discord
 
@@ -13,9 +12,10 @@ from discord.ext import commands
 from discord.ext.commands import CommandNotFound, errors
 from discord_slash import SlashCommand
 
-
+from customfunctions.funcs import handling #pylint:disable=unused-import
 from customfunctions import config, set_config
 from customfunctions import CustomChecks, ErrorHandling
+from customfunctions import master_logger
 # endregion
 
 # region Variable Stuff
@@ -41,7 +41,7 @@ slash = SlashCommand(bot, override_type=True, sync_commands=True)
 errorchannel = int(config("errorchannel"))
 
 bot.start_time = start_time_local
-logging.basicConfig(level=logging.INFO)
+
 
 
 bot.remove_command('help')
@@ -74,8 +74,7 @@ if __name__ == '__main__':
 # endregion
 
 # region Logger Stuff
-logger = logging.getLogger("Discord - Main")
-logger.setLevel(logging.INFO)
+logger = master_logger.getChild("main")
 
 
 # endregion

@@ -9,10 +9,10 @@ from discord_slash import cog_ext, SlashContext
 
 
 from customfunctions import config, CustomChecks, EmbedMaker
-
+from customfunctions import master_logger
 #region Variable Stuff
 
-
+logger = master_logger.getChild("server_specific")
 embedcolor = int(config("embedcolor"), 16)
 #endregion
 

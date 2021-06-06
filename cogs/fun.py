@@ -4,11 +4,12 @@ import os
 import requests
 import discord
 from discord.ext import commands
-from customfunctions import config, OBJECTS_TO_BONK_WITH
+from customfunctions import config, OBJECTS_TO_BONK_WITH, master_logger
+
 
 #region Variable Stuff
 
-
+logger = master_logger.getChild("fun")
 embedcolor = int(config("embedcolor"), 16)
 #endregion
 

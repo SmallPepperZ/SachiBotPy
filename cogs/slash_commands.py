@@ -1,7 +1,10 @@
 #pylint:disable=invalid-name
 from discord.ext import commands
 from discord_slash import cog_ext, SlashContext
+from customfunctions import master_logger
 
+
+logger = master_logger.getChild("slashs")
 
 
 

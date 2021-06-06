@@ -5,7 +5,6 @@ import re
 
 import os
 import sys
-import logging
 
 from io import BytesIO
 from PIL import Image
@@ -21,6 +20,7 @@ from discord.ext.commands.errors import NotOwner
 from customfunctions import config, set_config
 from customfunctions import ConfirmationCheck
 from customfunctions import EmbedMaker
+from customfunctions import master_logger
 
 #region Variable Stuff
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,6 +29,8 @@ sys.path.append(BASE_PATH)
 BOT_TALK_CHANNEL = None
 BOT_TALK_CHANNEL_OBJ = None
 embedcolor       = int(config("embedcolor"), 16)
+logger = master_logger.getChild("owner")
+
 
 statuses={
 	0: "Playing",
@@ -197,7 +199,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 
 	@status.group()
 	async def activity(self, ctx): #pylint:disable=unused-argument
-		logging.info('activity called')
+		logger.info('activity called')
 
 	@activity.command()
 	async def playing(self, ctx, *, status:str):

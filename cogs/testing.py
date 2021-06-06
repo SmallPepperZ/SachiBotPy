@@ -2,10 +2,11 @@ import sqlite3
 import discord
 from discord.ext import commands
 from customfunctions import config, CustomUtilities
+from customfunctions import master_logger
 
 # region Variable Stuff
 
-
+logger = master_logger.getChild("testing")
 embedcolor = int(config("embedcolor"), 16)
 
 # endregion
@@ -45,6 +46,17 @@ class TestingCog(commands.Cog, name="Testing"):
 	@commands.is_owner()
 	async def errorme(self, ctx):
 		raise ValueError
+
+
+	@commands.command()
+	@commands.is_owner()
+	async def auditlog(self, ctx,*_,guild:discord.Guild=None, action:discord.AuditLogAction=None,limit:int=1000, user:discord.User=None, target:discord.User=None):
+		guild = guild if guild is not None else ctx.guild
+		async for entry in guild.audit_logs(action=action, limit=limit, user=user):
+			if target is not None and entry.target.id != target.id:
+				continue
+			entry:discord.AuditLogEntry = entry
+			await ctx.send(f'{entry.created_at} | {entry.user} | {entry.before} | {entry.after} | {entry.target}')
 
 
 

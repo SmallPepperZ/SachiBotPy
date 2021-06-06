@@ -3,13 +3,12 @@ import datetime as dt
 import json
 import time
 import sqlite3 as sl
-import logging
 
 import discord
 from discord.ext import commands
 
 from customfunctions import config
-
+from customfunctions import master_logger
 #region Variable Stuff
 
 def get_logging_channel(bot:discord.Client, channel_name:str) -> discord.TextChannel:
@@ -26,8 +25,8 @@ embedcolor = int(config("embedcolor"), 16)
 prefix = config("prefix")
 DB_PATH = "storage/DiscordMessages.db"
 dbcon = sl.connect(str(DB_PATH))
-logger = logging.getLogger("bot.logging")
-delete_logger = logging.getLogger("bot.logging.delete")
+logger = master_logger.getChild("listeners")
+delete_logger = master_logger.getChild("listeners").getChild("deletions")
 
 #endregion
 

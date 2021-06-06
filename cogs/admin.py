@@ -2,11 +2,12 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import MessageConverter
 from customfunctions import config, CustomUtilities
-
+from customfunctions import master_logger
 #region Variable Stuff
 
 
 embedcolor = int(config("embedcolor"), 16)
+logger = master_logger.getChild("admin")
 #endregion
 
 
