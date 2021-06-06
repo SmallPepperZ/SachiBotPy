@@ -14,9 +14,9 @@ def handler_maker(filepath:str,name:str,level:int, formatter:logging.Formatter) 
 
 my_formatter = logging.Formatter(style="{", fmt="{asctime} - {name} [{levelname}] {message}")
 class Handlers():
-	ERROR    = handler_maker("SachiBot.error.log", "SachiBotError", logging.ERROR, my_formatter)
-	INFO     = handler_maker("SachiBot.info.log" , "SachiBotInfo" , logging.INFO , my_formatter)
-	DEBUG    = handler_maker("SachiBot.debug.log", "SachiBotDebug", logging.DEBUG, my_formatter)
+	ERROR    = handler_maker("logs/SachiBot.error.log", "SachiBotError", logging.ERROR, my_formatter)
+	INFO     = handler_maker("logs/SachiBot.info.log" , "SachiBotInfo" , logging.INFO , my_formatter)
+	DEBUG    = handler_maker("logs/SachiBot.debug.log", "SachiBotDebug", logging.DEBUG, my_formatter)
 
 
 parentlogger.addHandler(Handlers.INFO)
