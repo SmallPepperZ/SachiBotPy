@@ -301,8 +301,9 @@ class MdspCog(commands.Cog, name="MDSP"):
 					text=f'Suggested by {ctx.author.name}', icon_url=ctx.author.avatar_url)
 				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f'Added "{user.name}" to {invitechannel.mention}'))
 				message = await invitechannel.send(embed=embed)
-				#	await message.add_reaction('<:upvote:771082566752665681>')
-				#	await message.add_reaction('<:downvote:771082566651609089>')
+				await message.add_reaction('<:upvote:771082566752665681>')
+				await message.add_reaction('<:downvote:771082566651609089>')
+				await message.add_reaction('🤷')
 
 				db_data_dict = {
 					'user_id': user.id,
