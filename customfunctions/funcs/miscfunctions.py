@@ -72,8 +72,8 @@ async def get_owner(bot:Bot) -> User:
 	return app_info.owner
 
 
-async def del_invocation(ctx):
+async def del_msg(message:discord.Message):
 	try:
-		await ctx.message.delete()
+		await message.delete()
 	except discord.errors.Forbidden:
 		return
