@@ -2,6 +2,7 @@ import json
 from typing import Union
 from discord.ext.commands import Bot
 from discord import User
+import discord
 
 def find_flags(flags:list, args:Union[list, tuple]) -> "tuple[list, list]":
 	"""Returns a list of flags and a list of arguments from an invocation
@@ -69,3 +70,10 @@ def read_file(filepath:str) -> dict:
 async def get_owner(bot:Bot) -> User:
 	app_info = await bot.application_info()
 	return app_info.owner
+
+
+async def del_invocation(ctx):
+	try:
+		await ctx.message.delete()
+	except discord.errors.Forbidden:
+		return
