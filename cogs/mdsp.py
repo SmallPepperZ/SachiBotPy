@@ -349,7 +349,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 	@invite.command(description="*Cooldown: 1 hour*\nUpdates maincord message counts, and moves declined/denied users when appropriate")
 	@commands.cooldown(rate=1, per=3600, type=BucketType.default)
 	async def update(self, ctx:discord.ext.commands.Context):
-		invitechannel = self.bot.get_channel(INVITE_CHANNEL_ID)
+		invitechannel:discord.TextChannel = self.bot.get_channel(INVITE_CHANNEL_ID)
 		invitediscussionchannel = self.bot.get_channel(
 			INVITE_DISCUSSION_CHANNEL_ID)
 		infomsg = await ctx.reply(embed=discord.Embed(color=embedcolor, description=f"Updating {invitechannel.mention}"))
@@ -358,7 +358,15 @@ class MdspCog(commands.Cog, name="MDSP"):
 			"""select invite_message_id from invitees where invite_activity_type = 'active'""")
 		message_id_tuples = message_id_query.fetchall()
 		message_ids = [id[0] for id in message_id_tuples]
-		messages = [await invitechannel.fetch_message(message) for message in message_ids]
+		messages:"list[discord.Message]" = []
+		for message_id in message_ids:
+			try:
+				message:discord.Message = await invitechannel.fetch_message(message_id)
+				messages.append(message)
+			except NotFound:
+				sql = f"""update invitees set invite_activity_type = 'deleted' where invite_message_id = {message_id}"""
+				dbcon.execute(sql)
+				dbcon.commit()
 		for message in messages:
 			messagecontents = message.embeds[0]
 			#l1, l2, l3, l4, l5, l6, l7 = list_lines(messagecontents)
