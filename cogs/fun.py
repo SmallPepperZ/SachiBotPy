@@ -4,6 +4,7 @@ import os
 import requests
 import discord
 from discord.ext import commands
+from customfunctions import del_msg
 from customfunctions import config, OBJECTS_TO_BONK_WITH, master_logger
 
 
@@ -45,7 +46,7 @@ class FunCog(commands.Cog, name="Fun"):
 				msg = random.choice(responses)
 				await ctx.reply(msg)
 			else:
-				await ctx.message.delete()
+				await del_msg(ctx.message)
 				await ctx.send(content)
 
 	@commands.command(aliases=['repeatembed'])
@@ -59,7 +60,7 @@ class FunCog(commands.Cog, name="Fun"):
 				#embed = discord.Embed(description=str(msg))
 				await ctx.reply(str(msg))
 			else:
-				await ctx.message.delete()
+				await del_msg(ctx.message)
 				embed=discord.Embed(color=embedcolor, description=content)
 				await ctx.send(embed=embed)
 
@@ -119,7 +120,7 @@ class FunCog(commands.Cog, name="Fun"):
 			await ctx.reply("Give me something to say!")
 		else:
 			content = ' '.join(content)
-			await ctx.message.delete()
+			await del_msg(ctx.message)
 			embed = discord.Embed(title="<a:WeeWooRed:771082566874169394>  " +
 								  content+"  <a:WeeWooRed:771082566874169394>", color=0xf21b1b)
 			await ctx.send(embed=embed)
@@ -127,7 +128,7 @@ class FunCog(commands.Cog, name="Fun"):
 	@commands.command()
 	async def ban(self, ctx, user:discord.Member, *, reason:str=None):
 		try:
-			await ctx.message.delete()
+			await del_msg(ctx.message)
 		except discord.errors.Forbidden:
 			pass
 		quantity = random.randint(1,100000)

@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.ext.commands import MessageConverter
 from customfunctions import config, CustomUtilities
 from customfunctions import master_logger
+from customfunctions import del_msg
 #region Variable Stuff
 
 
@@ -23,7 +24,7 @@ class AdminCog(commands.Cog, name="Admin"):
 		if args[1]:
 			try:
 				amount = int(args[1])
-				await ctx.message.delete()
+				await del_msg(ctx.message)
 				await ctx.channel.purge(limit=amount)
 				embed = discord.Embed(color=embedcolor)
 				embed.add_field(name="Clear", value="cleared " + args[1] + " messages")
@@ -37,7 +38,7 @@ class AdminCog(commands.Cog, name="Admin"):
 	async def delete(self, ctx, messageid):
 		message:discord.Message = await MessageConverter().convert(ctx, messageid)
 		if message.guild.id == ctx.guild.id:
-			await ctx.message.delete()
+			await del_msg(ctx.message)
 			await message.delete()
 
 

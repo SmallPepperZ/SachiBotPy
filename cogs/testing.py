@@ -44,8 +44,15 @@ class TestingCog(commands.Cog, name="Testing"):
 
 	@commands.command(enabled=True)
 	@commands.is_owner()
-	async def errorme(self, ctx):
-		raise ValueError
+	async def errorme(self, ctx, err_type:str="div"):
+		if err_type == "div":
+			logger.debug(0/0)
+		elif err_type == "del":
+			await ctx.message.delete()
+			await ctx.send("hi")
+		else:
+			raise ValueError
+
 
 
 	@commands.command()

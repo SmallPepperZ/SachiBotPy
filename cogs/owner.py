@@ -10,7 +10,7 @@ from io import BytesIO
 from PIL import Image
 
 import discord
-from discord.errors import Forbidden
+
 from discord.ext import commands
 from discord.ext.commands.core import is_owner
 from discord import Status
@@ -20,6 +20,7 @@ from discord.ext.commands.errors import NotOwner
 from customfunctions import config, set_config
 from customfunctions import ConfirmationCheck
 from customfunctions import EmbedMaker
+from customfunctions import del_msg
 from customfunctions import master_logger
 
 #region Variable Stuff
@@ -74,10 +75,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.command()
 	@commands.is_owner()
 	async def restart(self, ctx):
-		try:
-			await ctx.message.delete()
-		except:
-			null = None
+		await del_msg(ctx.message)
 		current_time = time.time()
 		start_time = ctx.bot.start_time
 		difference = int(round(current_time - start_time))
@@ -91,7 +89,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.command()
 	@commands.is_owner()
 	async def stop(self, ctx):
-		await ctx.message.delete()
+		await del_msg(ctx.message)
 		embed = discord.Embed(color=embedcolor, title="Stopping...")
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.send(embed=embed)
@@ -240,10 +238,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ, DM_CHANNEL #pylint:disable=global-variable-undefined
 		if BOT_TALK_CHANNEL is None:
 			DM_CHANNEL = await self.bot.fetch_user(ctx.author.id)
-			try:
-				await ctx.message.delete()
-			except Forbidden:
-				return
+			await del_msg(ctx.message)
 			await DM_CHANNEL.send("Bot talk started, type `stoptalk` to end")
 			BOT_TALK_CHANNEL = ctx.channel.id
 			BOT_TALK_CHANNEL_OBJ = self.bot.get_channel(BOT_TALK_CHANNEL)
