@@ -58,7 +58,7 @@ def get_user(userid:int, *, pages:int=3, limit:int=500, guild_id:int=30209480704
 		raise ValueError("Limit must be between 1 and 1000")
 	api       = "https://mee6.xyz/api/plugins/levels/leaderboard/"#?page = 2&limit = 500
 	cachedate = datetime.fromtimestamp(os.path.getmtime('storage/mee6.db'))
-	yesterday = datetime.now() - timedelta(hours = 1)
+	yesterday = datetime.now() - timedelta(days= 1)
 	player    = None
 
 	with dbcon:
