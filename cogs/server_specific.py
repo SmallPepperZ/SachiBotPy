@@ -14,6 +14,7 @@ from customfunctions import master_logger
 
 logger = master_logger.getChild("server_specific")
 embedcolor = int(config("embedcolor"), 16)
+ALLOWED_ROLES=[855519898025459783,855533279267520522]
 #endregion
 
 def _get_members(roles:Union[discord.Role, "list[discord.Role]"]=None) -> "list[discord.Member]": # Get the members from a role or list of roles
@@ -139,6 +140,60 @@ class ServerCog(commands.Cog, name="Server Specific"):
 		await asyncio.sleep(20)
 		await customer_satisfaction_message.delete()
 		await ctx.reply(embed=discord.Embed(title="It isn't rigged™", description="This bot is open source on [this github repository](https://github.com/SmallPepperZ/SachiBotPy/blob/development/cogs/server_specific.py#L127). I've highlighted the line where the randomness takes place to enhance your viewing experience. I encourage you to let me know of any issues you find in the code",color=embedcolor))
+	
+	@cog_ext.cog_slash( name="addrole",
+						description="Gives yourself a role",
+						guild_ids=[797308956162392094,855519898025459782],
+						options=[
+							{
+								"name": "role",
+								"description": "The role to add to yourself. Only works with",
+								"type":8,
+								"required": True
+							}
+						],
+						connector={"role": "role"}
+									)
+	async def _add_role(self, ctx:SlashContext, role:discord.Role):
+		
+		if role in ctx.author.roles:
+			await ctx.send(f"You already have {role.mention}",hidden=True)
+			logger.debug(f"{ctx.author} tried to add {role.name}, but already had it")
+		elif role.id in ALLOWED_ROLES:
+			await ctx.author.add_roles(role,reason="Self-added role")
+			await ctx.send(f"{role.mention} added successfully",hidden=True)
+			logger.debug(f"{ctx.author} added {role.name}")
+		else:
+			role_mentions=[(ctx.guild.get_role(role)).mention for role in ALLOWED_ROLES]
+			await ctx.send(f"You can only add the following roles:\n{', '.join(role_mentions)}",hidden=True)
+			logger.debug(f"{ctx.author} tried to add {role.name}, but it wasn't available")
+
+
+	@cog_ext.cog_slash( name="removerole",
+						description="Removes a role from yourself",
+						guild_ids=[797308956162392094,855519898025459782],
+						options=[
+							{
+								"name": "role",
+								"description": "The role to remove from yourself. Only works with",
+								"type":8,
+								"required": True
+							}
+						],
+						connector={"role": "role"}
+									)
+	async def _rem_role(self, ctx:SlashContext, role:discord.Role):
+		if role not in ctx.author.roles:
+			await ctx.send(f"You don't have {role.mention}",hidden=True)
+			logger.debug(f"{ctx.author} tried to remove {role.name}, but didn't have it")
+		elif role.id in ALLOWED_ROLES:
+			await ctx.author.remove_roles(role,reason="Self-removed role")
+			await ctx.send(f"{role.mention} removed successfully",hidden=True)
+			logger.info(f"{ctx.author} removed {role.name}")
+		else:
+			role_mentions=[(ctx.guild.get_role(role)).mention for role in ALLOWED_ROLES]
+			await ctx.send(f"You can only add or remove the following roles:\n{', '.join(role_mentions)}",hidden=True)
+			logger.debug(f"{ctx.author} tried to remove {role.name}, but it wasn't available")
 
 def setup(bot):
 	bot.add_cog(ServerCog(bot))
