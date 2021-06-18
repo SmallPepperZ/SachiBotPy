@@ -12,7 +12,7 @@ def handler_maker(filepath:str,name:str,level:int, formatter:logging.Formatter) 
 
 
 
-my_formatter = logging.Formatter(style="{", fmt="{asctime} [{levelname}] - ({name})  {message}")
+my_formatter = logging.Formatter(style="{", fmt="{asctime} [{name}/{levelname}] {message}")
 class Handlers():
 	ERROR    = handler_maker("logs/SachiBot.error.log", "SachiBotError", logging.ERROR, my_formatter)
 	INFO     = handler_maker("logs/SachiBot.info.log" , "SachiBotInfo" , logging.INFO , my_formatter)
