@@ -1,3 +1,4 @@
+from discord_slash.context import SlashContext
 from datetime import datetime
 import datetime as dt
 import json
@@ -89,9 +90,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 		else:
 			return
 
-	@commands.Cog.listener("on_message")
-	async def logcommands(self, message):
-
+	@commands.Cog.listener("on_message")	
+	async def logcommands(self, message:discord.Message):
 		content = message.content
 		if content.startswith(prefix):
 			try:
@@ -104,7 +104,7 @@ class ListenerCog(commands.Cog, name="Logging"):
 				channelname = message.author.name
 				guild       = 0
 				guildname   = "DM"
-			logger.info(f'{guildname} - {channelname} - {message.author.name} ({message.author.id}) just executed \'{message.content}\'')
+			logger.info(f'[{guildname}/{channelname}:{message.author}] just executed \'{message.content}\'')
 			sql = 'INSERT into Commands (created_at, msgid, guildid, channelid, authorid, guildname, channelname, authorname, message, url) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 			sqldata = [
 					int(time.time()),
@@ -121,6 +121,9 @@ class ListenerCog(commands.Cog, name="Logging"):
 			with dbcon:
 				dbcon.execute(sql, sqldata)
 
+	@commands.Cog.listener("on_slash_command")
+	async def log_slash_commands(self,ctx:SlashContext):
+		logger.info(f'[{ctx.guild}/{ctx.channel}:{ctx.message.author}] just executed \'{ctx.message.content}\'')
 	@commands.Cog.listener("on_message")
 	async def respond_to_pings(self, message:discord.Message):
 		pinged        = self.bot.user.mentioned_in(message)
