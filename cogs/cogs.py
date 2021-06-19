@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
-from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionNotFound, ExtensionFailed
-from customfunctions import config,master_logger
-
+from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionFailed
+from discord.ext.commands import Context
+from customfunctions import config,master_logger,ErrorHandling
 
 embedcolor = int(config("embedcolor"), 16)
 logger = master_logger.getChild("cogs")
@@ -11,45 +11,31 @@ logger = master_logger.getChild("cogs")
 
 class CogsCog(commands.Cog, name="Cogs"):
 	def __init__(self, bot):
-		self.bot = bot
+		self.bot:discord.Client = bot
 
 	@commands.command()
 	@commands.is_owner()
-	async def reload(self, ctx, cog_to_reload="all"):
-		cognames = [cog.title() for cog in [ cog.replace('cogs.', '').replace('_', ' ') for cog in ctx.bot.coglist]]
-		cognames = '\n'.join(cognames)
-		ccog_to_reloadog = cog_to_reload.lower()
-		if cog_to_reload=="all":
-			for cog in ctx.bot.coglist:
-				self.bot.reload_extension(cog)
-			embed = discord.Embed(color=embedcolor, title="Reloading Cogs...")
-			embed.add_field(name="Cogs:", value=f'{cognames}')
-			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-			await ctx.reply(embed=embed)
+	async def reload(self, ctx:Context, *cogs_to_reload):
+		def format_cog_name(cog_name:str) -> str:
+			return cog_name.replace('cogs.', '').replace('_', ' ').title()
+		cog_text_lines = []
+		if len(cogs_to_reload) == 0:
+			reload_cogs = self.bot.coglist
 		else:
+			reload_cogs = [f'cogs.{cog.lower()}' for cog in cogs_to_reload]
+		for cog in reload_cogs:
 			try:
-				self.bot.reload_extension(f'cogs.{cog_to_reload}')
-				embed = discord.Embed(color=embedcolor, title="Reloading Cog...")
-				embed.add_field(name="Cog:", value=f'{cog_to_reload}')
-				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-				await ctx.reply(embed=embed)
-			except ExtensionNotLoaded:
-				try:
-					self.bot.load_extension(f'cogs.{cog_to_reload}')
-					embed = discord.Embed(color=embedcolor, title="Cog Loaded")
-					embed.add_field(name="Cog", value=cog_to_reload)
-					ctx.reply(embed=embed)
-				except ExtensionNotFound:
-					embed = discord.Embed(color=embedcolor, title="Cog not found", description=f"Cog \"{cog_to_reload}\" not found")
-					embed.add_field(name="Cogs:", value=f'{cognames}')
-					embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-					await ctx.reply(embed=embed)
+				self.bot.reload_extension(cog)
+				cog_text_lines.append(f'<:yes:786997173845622824> | {format_cog_name(cog)}')
 			except ExtensionFailed as error:
-				embed = discord.Embed(color=embedcolor, title="Cog errored")
-				embed.add_field(name="Cog:", value=f'{cog_to_reload}')
-				embed.add_field(name="Error:", value=f'```{error}```', inline="false")
-				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
-				await ctx.reply(embed=embed)
+				cog_text_lines.append(f'<:no:786997173820588073> | {format_cog_name(cog)}')
+				await ErrorHandling.uncaught_error(ctx, error,self.bot,silent=True)
+		embed = discord.Embed(color=embedcolor, title="Reloading Cogs")
+		cog_text = "\n".join(cog_text_lines)
+		embed.add_field(name="Cogs:", value=f'{cog_text}')
+		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+		await ctx.reply(embed=embed)
+
 
 	@commands.command()
 	@commands.is_owner()
