@@ -2,7 +2,6 @@ import time
 import datetime
 import asyncio
 import json
-
 import discord
 from discord.ext import commands
 
@@ -218,6 +217,27 @@ class UtilityCog(commands.Cog, name="Utility"):
 	@commands.command(aliases=["online", "areyouthere"])
 	async def didyoudie(self, ctx):
 		await ctx.reply("I am very much alive", delete_after=20)
+
+	@commands.command(aliases=["vote"])
+	async def react(self, ctx, message:discord.Message, *args):
+		"""Reacts to a message with a set of emojis
+		Valid sets are "existing" and "yesno"
+		"""
+		emojis = []
+		reactions = {
+			"existing": message.reactions,
+			"yesno": ["<:yes:836795924977549362>", "<:no:836795924633354332>"],
+			"updown": ["<:upvote:771082566752665681>", "<:downvote:771082566651609089>"],
+			"_unicode": ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"]
+		}
+		emoji_sets:"list[str]" = [set_name for set_name in args if (set_name in reactions.keys() and set_name != "_unicode")]
+		for count in [arg for arg in args if arg.isdigit()]:
+			emojis = emojis+[reactions["_unicode"][num] for num in range(0, int(count)) if num < 10]
+		for emoji_set in emoji_sets:
+			emojis = emojis + reactions[emoji_set]
+		for emoji in emojis:
+			await message.add_reaction(emoji)
+		await ctx.add_reaction("👍")
 
 def setup(bot):
 	bot.add_cog(UtilityCog(bot))
