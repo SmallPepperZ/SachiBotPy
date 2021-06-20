@@ -21,7 +21,7 @@ embedcolor = int(config("embedcolor"), 16)
 
 class UtilityCog(commands.Cog, name="Utility"):
 	def __init__(self, bot):
-		self.bot = bot
+		self.bot:discord.Client = bot
 
 	@commands.command()
 	async def help(self, ctx):
@@ -223,7 +223,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		"""Reacts to a message with a set of emojis
 		Valid sets are "existing" and "yesno"
 		"""
-		emojis = []
+		emojis:"list[discord.Emoji]" = []
 		reactions = {
 			"existing": message.reactions,
 			"yesno": ["<:yes:836795924977549362>", "<:no:836795924633354332>"],
@@ -231,13 +231,22 @@ class UtilityCog(commands.Cog, name="Utility"):
 			"_unicode": ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"]
 		}
 		emoji_sets:"list[str]" = [set_name for set_name in args if (set_name in reactions.keys() and set_name != "_unicode")]
+		for emoji_name in args:
+			if not (emoji_name.isdigit() or emoji_name in reactions.keys()):
+				try:
+					emoji = await commands.EmojiConverter().convert(ctx,emoji_name)
+					emojis.append(emoji)
+				except commands.EmojiNotFound:
+					pass
+		logger.debug(emojis)
 		for count in [arg for arg in args if arg.isdigit()]:
 			emojis = emojis+[reactions["_unicode"][num] for num in range(0, int(count)) if num < 10]
 		for emoji_set in emoji_sets:
 			emojis = emojis + reactions[emoji_set]
 		for emoji in emojis:
-			await message.add_reaction(emoji)
-		await ctx.add_reaction("👍")
+			if emoji is not None:
+				await message.add_reaction(emoji)
+		await ctx.message.add_reaction("👍")
 
 def setup(bot):
 	bot.add_cog(UtilityCog(bot))
