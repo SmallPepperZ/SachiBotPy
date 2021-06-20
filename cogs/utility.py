@@ -221,7 +221,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 	@commands.command(aliases=["vote"])
 	async def react(self, ctx, message:discord.Message, *args):
 		"""Reacts to a message with a set of emojis
-		Valid sets are "existing" and "yesno"
+		Valid sets are "existing", "yesno", "updown", "checkx", and "shrug"
 		"""
 		if not (message.channel.permissions_for(ctx.author).manage_messages or ctx.author.id == 545463550802395146):
 			await ctx.reply("You need manage messages to do that")
@@ -231,6 +231,8 @@ class UtilityCog(commands.Cog, name="Utility"):
 			"existing": message.reactions,
 			"yesno": ["<:yes:836795924977549362>", "<:no:836795924633354332>"],
 			"updown": ["<:upvote:771082566752665681>", "<:downvote:771082566651609089>"],
+			"checkx": ["<:yes:786997173845622824>","<:no:786997173820588073>"],
+			"shrug": ["🤷"],
 			"_unicode": ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"]
 		}
 		emoji_sets:"list[str]" = [set_name for set_name in args if (set_name in reactions.keys() and set_name != "_unicode")]
