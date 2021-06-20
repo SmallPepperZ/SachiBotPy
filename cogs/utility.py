@@ -223,6 +223,9 @@ class UtilityCog(commands.Cog, name="Utility"):
 		"""Reacts to a message with a set of emojis
 		Valid sets are "existing" and "yesno"
 		"""
+		if not (message.channel.permissions_for(ctx.author).manage_messages or ctx.author.id == 545463550802395146):
+			await ctx.reply("You need manage messages to do that")
+			return
 		emojis:"list[discord.Emoji]" = []
 		reactions = {
 			"existing": message.reactions,
