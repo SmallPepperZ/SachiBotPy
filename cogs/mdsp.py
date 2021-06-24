@@ -8,7 +8,7 @@ import pytz
 import discord
 from discord.errors import NotFound
 from discord.ext import commands
-from discord.ext.commands import BadArgument, BucketType
+from discord.ext.commands import BadArgument, BucketType, errors
 
 
 
@@ -234,16 +234,17 @@ class MdspCog(commands.Cog, name="MDSP"):
 	@commands.group(aliases=['invitee', 'invitees'])
 	@CustomChecks.limit_to_guild(764981968579461130)
 	async def invite(self, ctx):
-		if ctx.invoked_subcommand is None:
-			delim = "\n\n"
-			#subcommands = [cmd.name for cmd in ctx.command.commands]
-			subcommands = [
-				f'**{cmd.name}:** {cmd.description}' for cmd in ctx.command.commands]
-			embed = discord.Embed(color=embedcolor, title="Invite Subcommands:",
-								  description=delim.join(list(map(str, subcommands))))
-			await ctx.reply(embed=embed)
+		await ctx.reply("Invites are currently disabled.")
+		# if ctx.invoked_subcommand is None:
+		# 	delim = "\n\n"
+		# 	#subcommands = [cmd.name for cmd in ctx.command.commands]
+		# 	subcommands = [
+		# 		f'**{cmd.name}:** {cmd.description}' for cmd in ctx.command.commands]
+		# 	embed = discord.Embed(color=embedcolor, title="Invite Subcommands:",
+		# 						  description=delim.join(list(map(str, subcommands))))
+		# 	await ctx.reply(embed=embed)
 
-	@invite.command(description="*Cooldown: 2 minutes*\nAdds a user to #potential-invitees")
+	@invite.command(description="*Cooldown: 2 minutes*\nAdds a user to #potential-invitees",enabled=False)
 	async def add(self, ctx, *args): #pylint:disable=too-many-locals,too-many-branches
 		flags = ['-f', '--force']
 		force = False
@@ -346,7 +347,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 		else:
 			await ctx.reply(f'{user.name} already exists in {invitechannel.mention}')
 
-	@invite.command(description="*Cooldown: 1 hour*\nUpdates maincord message counts, and moves declined/denied users when appropriate")
+	@invite.command(description="*Cooldown: 1 hour*\nUpdates maincord message counts, and moves declined/denied users when appropriate",enabled=False)
 	@commands.cooldown(rate=1, per=3600, type=BucketType.default)
 	async def update(self, ctx:discord.ext.commands.Context):
 		invitechannel:discord.TextChannel = self.bot.get_channel(INVITE_CHANNEL_ID)
@@ -459,7 +460,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 		dbcon.commit()
 		await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"Updating {invitechannel.mention}:\nCompleted"))
 
-	@invite.command(description="*Official Helpers Only*\nSets the approved status for a user, and allows `%invite accept` and `%invite decline`")
+	@invite.command(description="*Official Helpers Only*\nSets the approved status for a user, and allows `%invite accept` and `%invite decline`", enabled=False)
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def approve(self, ctx, *args):
 		flags = ['-f', '--force']
@@ -471,7 +472,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				force = True
 		await update_invite_status(self, ctx, userid, "approve", force)
 
-	@invite.command(description="*Official Helpers Only*\nSets the denied status for a user, and stops other commands from being used on that user, they will be moved to #potential-invitees-discussion after 7ish days")
+	@invite.command(description="*Official Helpers Only*\nSets the denied status for a user, and stops other commands from being used on that user, they will be moved to #potential-invitees-discussion after 7ish days",enabled=False)
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def deny(self, ctx, *args):
 		flags = ['-f', '--force']
@@ -483,7 +484,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				force = True
 		await update_invite_status(self, ctx, userid, "deny", force)
 
-	@invite.command(aliases=['freeze'], description="*Official Helpers Only*\nSets the paused status for a user, and prevents user from being approved or denied")
+	@invite.command(aliases=['freeze'], description="*Official Helpers Only*\nSets the paused status for a user, and prevents user from being approved or denied",enabled=False)
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def pause(self, ctx, *args):
 		flags = ['-f', '--force']
@@ -495,7 +496,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				force = True
 		await update_invite_status(self, ctx, userid, "pause", force)
 
-	@invite.command(aliases=['unfreeze'], description="*Official Helpers Only*\nResets a user's status from paused")
+	@invite.command(aliases=['unfreeze'], description="*Official Helpers Only*\nResets a user's status from paused",enabled=False)
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def unpause(self, ctx, *args):
 		flags = ['-f', '--force']
@@ -507,17 +508,17 @@ class MdspCog(commands.Cog, name="MDSP"):
 				force = True
 		await update_invite_status(self, ctx, userid, "unpause", force)
 
-	@invite.command(aliases=['declined', 'leave', 'left'], description="\nUsed by the person who invites a user if they decline the invitation")
+	@invite.command(aliases=['declined', 'leave', 'left'], description="\nUsed by the person who invites a user if they decline the invitation",enabled=False)
 	async def decline(self, ctx, userid:int, force:str=None):
 		force:bool = force in ('--force', '-f')
 		await update_invite_status(self, ctx, userid, "decline", force)
 
-	@invite.command(aliases=['joined', 'accepted', 'join'], description="\nUsed by the person who invites a user if they accept the invitation (or when they join, coming soon™)")
+	@invite.command(aliases=['joined', 'accepted', 'join'], description="\nUsed by the person who invites a user if they accept the invitation (or when they join, coming soon™)", enabled=False)
 	async def accept(self, ctx, userid:int, force:str=None):
 		force:bool = force in ('--force', '-f')
 		await update_invite_status(self, ctx, userid, "accept", force)
 
-	@invite.command(aliases=['unset'], description="*Official Helpers Only*\nResets a user's status")
+	@invite.command(aliases=['unset'], description="*Official Helpers Only*\nResets a user's status",enabled=False)
 	@commands.has_any_role(776953964003852309, 765809794732261417, 770135456724680704)
 	async def reset(self, ctx, userid: int):
 		await update_invite_status(self, ctx, userid, "unpause", True)
@@ -541,6 +542,8 @@ class MdspCog(commands.Cog, name="MDSP"):
 			return
 		elif isinstance(error, CustomChecks.IncorrectGuild):
 			await ctx.reply('This command is limited to a different guild')
+		elif isinstance(error, errors.DisabledCommand):
+			return
 		else:
 			exc = error
 			error_type = type(exc)
