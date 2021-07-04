@@ -1,14 +1,14 @@
-from discord_slash.context import SlashContext
+
 from datetime import datetime
 import datetime as dt
 import json
 import time
-import sqlite3 as sl
 
 import discord
 from discord.ext import commands
+from discord_slash.context import SlashContext
 
-from customfunctions import config
+from customfunctions import config, DBManager
 from customfunctions import master_logger
 #region Variable Stuff
 
@@ -24,17 +24,12 @@ def get_logging_channel(bot:discord.Client, channel_name:str) -> discord.TextCha
 
 embedcolor = config("embedcolor")
 prefix = config("prefix")
-DB_PATH = "storage/DiscordMessages.db"
-dbcon = sl.connect(str(DB_PATH))
+database = DBManager.Database()
 logger = master_logger.getChild("listeners")
 delete_logger = master_logger.getChild("listeners").getChild("deletions")
 
 #endregion
 
-with open("storage/loggingignore.json", "r") as loggingignore:
-	ignore_json = loggingignore.read()
-channelignore = json.loads(ignore_json)["channels"]
-guildignore   = json.loads(ignore_json)["guilds"]
 
 def dump_mutes(data:dict) -> None:
 	with open("storage/mutes.json", "w") as file:
@@ -60,6 +55,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener("on_message")
 	async def logmessages(self, message:discord.Message):
+		channelignore = [channel[0] for channel in database.cursor.execute("SELECT id from loggingignore where type='channel'")]
+		guildignore = [guild[0] for guild in database.cursor.execute("SELECT id from loggingignore where type='guild'")]
 		try:
 			channel = message.channel.id
 			channelname = message.channel.name
@@ -85,12 +82,12 @@ class ListenerCog(commands.Cog, name="Logging"):
 					str(message.jump_url),
 					str(message.attachments)
 						]
-			with dbcon:
-				dbcon.execute(sql, sqldata)
+			database.cursor.execute(sql, sqldata)
+			database.commit()
 		else:
 			return
 
-	@commands.Cog.listener("on_message")	
+	@commands.Cog.listener("on_message")
 	async def logcommands(self, message:discord.Message):
 		content = message.content
 		if content.startswith(prefix):
@@ -118,8 +115,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 					str(message.content),
 					str(message.jump_url)
 					]
-			with dbcon:
-				dbcon.execute(sql, sqldata)
+			database.cursor.execute(sql, sqldata)
+			database.commit()
 
 	@commands.Cog.listener("on_slash_command")
 	async def log_slash_commands(self,ctx:SlashContext):
