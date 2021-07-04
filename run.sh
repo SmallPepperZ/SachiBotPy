@@ -1,14 +1,15 @@
 #!/bin/bash
-if ! which tmux >/dev/null
+if ! which /usr/local/bin/tmux >/dev/null
 then
 	echo "tmux is not installed"
 	exit 0
-elif ! tmux has-session -t SachiBot &> /dev/null
+elif ! /usr/local/bin/tmux has-session -t SachiBot &> /dev/null
 then
 	echo "1" > storage/disabled
 	cd `dirname $0`
 	source ./venv/bin/activate
-	tmux new-session -d -s SachiBot python3 "./bot.py"
+	/usr/local/bin/tmux new-session -d -s SachiBot python3 "./bot.py" &> out.log
 else
+	echo "3.3" >> /Users/zachy/.tmp/test
 	exit 0
 fi
