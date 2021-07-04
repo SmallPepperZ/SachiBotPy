@@ -16,13 +16,13 @@ def get_logging_channel(bot:discord.Client, channel_name:str) -> discord.TextCha
 	logging_channels = {
 	"joins": lambda: bot.get_guild(797308956162392094).get_channel(844600626516328519),
 	"invites": lambda: bot.get_guild(797308956162392094).get_channel(845350291103809546),
-	"java_repost": lambda: bot.get_guild(797308956162392094).get_channel(821778423579410433),
-	"bedrock_repost": lambda: bot.get_guild(797308956162392094).get_channel(821778441133097021),
+	"java_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778423579410433),
+	"bedrock_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778441133097021),
 	}
 	return logging_channels[channel_name]()
 
 
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 prefix = config("prefix")
 DB_PATH = "storage/DiscordMessages.db"
 dbcon = sl.connect(str(DB_PATH))
@@ -124,6 +124,7 @@ class ListenerCog(commands.Cog, name="Logging"):
 	@commands.Cog.listener("on_slash_command")
 	async def log_slash_commands(self,ctx:SlashContext):
 		logger.info(f'[{ctx.guild}#{ctx.channel}/{ctx.message.author}] just executed \'{ctx.message.content}\'')
+
 	@commands.Cog.listener("on_message")
 	async def respond_to_pings(self, message:discord.Message):
 		pinged        = self.bot.user.mentioned_in(message)
@@ -212,9 +213,10 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener("on_member_join")
 	async def on_member_join(self, member: discord.Member):
+		logger.info("Member left!")
 		await member_join_update(self.bot, member, "joined", 0x2BDE1F)
 
-	@commands.Cog.listener("on_member_leave")
+	@commands.Cog.listener("on_member_remove")
 	async def on_member_remove(self, member: discord.Member):
 		await member_join_update(self.bot, member, "left", 0xD9361C)
 

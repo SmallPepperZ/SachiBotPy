@@ -7,7 +7,7 @@ from customfunctions import del_msg
 #region Variable Stuff
 
 
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 logger = master_logger.getChild("admin")
 #endregion
 

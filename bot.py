@@ -19,7 +19,7 @@ from customfunctions import master_logger
 # region Variable Stuff
 
 
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 token = config('discordtoken')
 
 personal_info = config("pathtohide")

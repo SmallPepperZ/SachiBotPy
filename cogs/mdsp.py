@@ -16,7 +16,7 @@ from customfunctions import config, DatabaseFromDict, CustomUtilities, CustomChe
 
 
 logger = master_logger.getChild("mdsp")
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 
 INVITE_LOG_CHANNEL_ID = 807379254303653939
 INVITE_CHANNEL_ID = 796109386715758652

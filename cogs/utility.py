@@ -13,7 +13,7 @@ from customfunctions import TimeUtils
 from customfunctions import master_logger
 
 logger = master_logger.getChild("utility")
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 
 
 

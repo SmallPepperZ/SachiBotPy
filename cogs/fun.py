@@ -11,7 +11,7 @@ from customfunctions import config, OBJECTS_TO_BONK_WITH, master_logger
 #region Variable Stuff
 
 logger = master_logger.getChild("fun")
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 #endregion
 
 def simonsays_responses(ctx, content):

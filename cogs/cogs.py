@@ -4,7 +4,7 @@ from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionFailed
 from discord.ext.commands import Context
 from customfunctions import config,master_logger,ErrorHandling
 
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 logger = master_logger.getChild("cogs")
 
 

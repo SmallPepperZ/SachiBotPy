@@ -13,7 +13,7 @@ from customfunctions import master_logger
 #region Variable Stuff
 
 logger = master_logger.getChild("server_specific")
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 ALLOWED_ROLES=[855519898025459783,855533279267520522]
 #endregion
 

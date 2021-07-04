@@ -1,13 +1,15 @@
 import sqlite3
+import datetime
+
 import discord
 from discord.ext import commands
-from customfunctions import config, CustomUtilities
+from customfunctions import config, DBManager
 from customfunctions import master_logger
 
 # region Variable Stuff
 
 logger = master_logger.getChild("testing")
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 
 # endregion
 
@@ -68,25 +70,15 @@ class TestingCog(commands.Cog, name="Testing"):
 
 
 	@commands.command()
-	async def testing12(self, ctx):
-		owner = await CustomUtilities.get_owner(self.bot)
-		await ctx.reply(owner.mention)
-
-	@commands.group()
-	async def newexport(self, ctx):
-		if ctx.invoked_subcommand is None:
-			delim = ", "
-			subcommands = [cmd.name for cmd in ctx.command.commands]
-			await ctx.send(f'Please select one of the subcommands ({delim.join(list(map(str, subcommands)))})')
-
-	@newexport.command()
-	async def channel(self, ctx, channelid: str):
-		await ctx.send(f'Exporting channel {channelid}...')
-
-	@newexport.command()
-	async def guild(self, ctx, guild_id: str):
-		await ctx.send(f'Exporting Guild {guild_id}...')
-
+	@commands.is_owner()
+	async def msg_count(self,ctx,channel,date_range:int=5):
+		channel:discord.TextChannel=await self.bot.fetch_channel(channel)
+		today = datetime.datetime.today()
+		for i in range(date_range):
+			start_day = today - datetime.timedelta(days=(i+1))
+			end_day = today - datetime.timedelta(days=i)
+			history:"list[discord.Message]" = await channel.history(limit=20000,after=start_day,before=end_day).flatten()
+			await ctx.send(history[0].jump_url+"\n"+history[-1].jump_url)
 
 def setup(bot):
 	bot.add_cog(TestingCog(bot))

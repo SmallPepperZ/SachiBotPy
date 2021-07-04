@@ -8,7 +8,7 @@ from customfunctions import config, set_config
 
 errorchannel = int(config("errorchannel"))
 personal_info = config("pathtohide")
-embedcolor = int(config("embedcolor"), 16)
+embedcolor = config("embedcolor")
 
 async def command_on_cooldown(ctx, error):
 	await ctx.message.add_reaction(str('<:Cooldown:804477347780493313>'))
