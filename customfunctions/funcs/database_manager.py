@@ -27,3 +27,6 @@ class Database():
 		self.connection = sqlite3.connect(database_path)
 		self.cursor = self.connection.cursor()
 		self.name = database_name
+
+	def commit(self):
+		self.connection.commit()
