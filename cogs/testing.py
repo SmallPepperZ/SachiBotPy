@@ -3,7 +3,7 @@ import datetime
 
 import discord
 from discord.ext import commands
-from customfunctions import config, DBManager
+from customfunctions import config
 from customfunctions import master_logger
 
 # region Variable Stuff
