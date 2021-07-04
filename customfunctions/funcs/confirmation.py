@@ -23,8 +23,6 @@ async def confirm(self:discord.ext.commands.Cog, ctx:discord.ext.commands.Contex
 	-------
 	output : bool or None
 		True if user confirms action, False if user does not confirm action, None if confirmation times out
-	
-	
 	"""
 	for emoji in emojis.keys():
 		await msg.add_reaction(emoji)
@@ -34,7 +32,7 @@ async def confirm(self:discord.ext.commands.Cog, ctx:discord.ext.commands.Contex
 			check=lambda r, u: (r.message.id == msg.id) and (u.id == ctx.author.id) and (r.emoji in emojis),
 			timeout=timeout
 			)
-		if emojis[reaction.emoji] == True:
+		if emojis[reaction.emoji] is True:
 			return True
 		else:
 			return False
