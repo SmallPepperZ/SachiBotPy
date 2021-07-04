@@ -29,7 +29,7 @@ sys.path.append(BASE_PATH)
 
 BOT_TALK_CHANNEL = None
 BOT_TALK_CHANNEL_OBJ = None
-embedcolor       = int(config("embedcolor"), 16)
+embedcolor       = config("embedcolor")
 logger = master_logger.getChild("owner")
 
 
