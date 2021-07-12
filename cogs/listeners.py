@@ -40,7 +40,7 @@ async def member_join_update(bot:discord.Client, member:discord.Member, action:s
 	embed = discord.Embed(title=f'User {action.capitalize()}',color=color, description=f"""
 	**Guild**
 	ID  : `{member.guild.id}`
-	Name: {member.guild.name}
+	Name: [{member.guild.name}](https://discord.com/channels/{member.guild.id})
 	**User**
 	ID     : `{member.id}`
 	Name   : {member.name}
@@ -233,10 +233,10 @@ class ListenerCog(commands.Cog, name="Logging"):
 		embed = discord.Embed(title='Invite Created',color=0x2BDE1F, description=f"""
 		**Guild**
 		ID       : `{invite.guild.id}`
-		Name     : {invite.guild.name}
+		Name     : [{invite.guild.name}](https://discord.com/channels/{invite.guild.id})
 		**Channel**
 		ID       : `{invite.channel.id}`
-		Name     : {invite.channel.name}
+		Name     : [{invite.channel.name}](https://discord.com/channels/{invite.guild.id}/{invite.channel.id})
 		Mention  : {invite.channel.mention}
 		**Inviter**
 		ID       : `{invite.inviter.id}`
