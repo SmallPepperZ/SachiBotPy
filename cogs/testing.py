@@ -1,10 +1,8 @@
-import sqlite3
 import datetime
-import json
 
 import discord
 from discord.ext import commands
-from customfunctions import config, DBManager
+from customfunctions import config
 from customfunctions import master_logger
 
 # region Variable Stuff
@@ -14,9 +12,6 @@ embedcolor = config("embedcolor")
 
 # endregion
 
-DB_PATH = "storage/SachiBotStorage.db"
-dbcon = sqlite3.connect(str(DB_PATH))
-dbcur = dbcon.cursor()
 
 
 class TestingCog(commands.Cog, name="Testing"):
