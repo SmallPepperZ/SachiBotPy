@@ -63,7 +63,8 @@ bot.coglist = [	'cogs.owner',
 				'cogs.listeners',
 				'cogs.testing',
 				'cogs.mdsp',
-				'cogs.server_specific'
+				'cogs.server_specific',
+				'cogs.minecraft'
 				]
 
 if __name__ == '__main__':
