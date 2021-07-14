@@ -29,7 +29,11 @@ class MinecraftUser():
 	def profile(self) -> "dict[str,str | list[dict[str,str]]]":
 		return requests.get(f'https://sessionserver.mojang.com/session/minecraft/profile/{self.uuid}').json()
 
-	def skin(self, skin_format:str="avatar", helm:bool=True) -> str:
+	@property
+	def name_history(self) -> "list[dict[str,str|int]]":
+		return requests.get(f'https://api.mojang.com/user/profiles/{self.uuid}/names').json()
+
+	def get_skin(self, skin_format:str="avatar", helm:bool=True) -> str:
 		"""Gets a user's skin in different formats
 
 		Parameters
