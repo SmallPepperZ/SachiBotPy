@@ -164,7 +164,7 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 	add_field(embed, "User ID",  f'`{user.id}`')
 	add_field(embed, "Invite Status", f'{word2}')
 	add_field(embed, "Info", field_info)
-	embed.set_thumbnail(url=user.avatar_url)
+	embed.set_thumbnail(url=user.avatar.url)
 	footer = messagecontents.footer
 	embed.set_footer(text=footer.text, icon_url=footer.icon_url)
 	db_data_dict = {
@@ -192,10 +192,10 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 							 title="Invitee edited", description="")
 	logembed.set_author(name=ctx.author.name,
 						url=ctx.message.jump_url,
-						icon_url=ctx.author.avatar_url)
-	logembed.set_thumbnail(url=user.avatar_url)
+						icon_url=ctx.author.avatar.url)
+	logembed.set_thumbnail(url=user.avatar.url)
 
-	embed.set_thumbnail(url=user.avatar_url)
+	embed.set_thumbnail(url=user.avatar.url)
 	if action == "approve":
 		# Create an invite
 		welcome_channel = ctx.guild.get_channel(WELCOME_CHANNEL_ID)
@@ -291,7 +291,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 			if ironminer or force:
 				embed = discord.Embed(
 					color=0xffff00, description=f'__**{user.name}#{user.discriminator}**__')
-				embed.set_thumbnail(url=user.avatar_url)
+				embed.set_thumbnail(url=user.avatar.url)
 				add_field(embed, "Maincord Level", mc_level)
 				add_field(embed, "Maincord Messages", mc_messages)
 				add_field(embed, "Mention", user.mention)
@@ -299,7 +299,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				add_field(embed, "Invite Status",  'None')
 				add_field(embed, "Info",  info)
 				embed.set_footer(
-					text=f'Suggested by {ctx.author.name}', icon_url=ctx.author.avatar_url)
+					text=f'Suggested by {ctx.author.name}', icon_url=ctx.author.avatar.url)
 				await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f'Added "{user.name}" to {invitechannel.mention}'))
 				message = await invitechannel.send(embed=embed)
 				await message.add_reaction('<:upvote:771082566752665681>')
@@ -333,10 +333,10 @@ class MdspCog(commands.Cog, name="MDSP"):
 				logembed.set_author(
 					name=ctx.author.name,
 					url=ctx.message.jump_url,
-					icon_url=ctx.author.avatar_url)
+					icon_url=ctx.author.avatar.url)
 				add_field(logembed, "User added",
 						  f'[{user.name}]({message.jump_url})')
-				logembed.set_thumbnail(url=user.avatar_url)
+				logembed.set_thumbnail(url=user.avatar.url)
 
 				await self.bot.get_channel(INVITE_LOG_CHANNEL_ID).send(embed=logembed)
 
@@ -432,7 +432,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				add_field(embed, "User ID",  f'`{user.id}`')
 				add_field(embed, "Invite Status", f'{status_value}')
 				add_field(embed, "Info", field_info)
-				embed.set_thumbnail(url=user.avatar_url)
+				embed.set_thumbnail(url=user.avatar.url)
 				footer = messagecontents.footer
 				embed.set_footer(text=footer.text, icon_url=footer.icon_url)
 				db_data_dict = {

@@ -77,7 +77,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed        = discord.Embed(color=embedcolor)
 		embed.add_field(name="Ping", value=f'🏓 Pong! {round(self.bot.latency * 1000)}ms', inline='false')
 		embed.add_field(name="Uptime", value=f'{uptime}')
-		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 		await ctx.reply(embed=embed)
 
 
@@ -140,7 +140,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		badgestr   = " ".join(list(map(str, badgeicons)))
 
 		isbot      = user.bot
-		avatar     = user.avatar_url
+		avatar     = user.avatar.url
 		createdate = user.created_at
 		mention    = user.mention
 		userid     = user.id
@@ -148,7 +148,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		color      = user.color
 
 		embed       = discord.Embed(color=color,title=username)
-		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 		embed.set_image(url=avatar)
 		if isguildmember:
 			EmbedMaker.add_description_field(embed, "Is a bot?", isbot)
@@ -177,7 +177,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 	async def suggest(self, ctx, *, suggestion):
 		suggestion_channel = self.bot.get_channel(801576966952058910)
 		embed = discord.Embed(title='', description=suggestion)
-		embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+		embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar.url)
 		await suggestion_channel.send(embed=embed)
 		await ctx.reply("Suggestion added")
 

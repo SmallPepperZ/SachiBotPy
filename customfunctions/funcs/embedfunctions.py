@@ -72,7 +72,7 @@ def footer_presets(embed:discord.Embed, ctx, *presets:str, delimiter:str=" - ", 
 		raise ValueError(f"{customtextloc.capitalize()} must be either 'Append' or 'Prepend'")
 	text:list = []
 	if "author" in presets:
-		icon_url= ctx.author.avatar_url
+		icon_url= ctx.author.avatar.url
 		text = text.append(f'Request by {ctx.author}')
 	icon_url = customurl if customurl is not None else None
 	if "timestamp" in presets:

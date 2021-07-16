@@ -33,7 +33,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 		embed = discord.Embed(color=embedcolor, title="Reloading Cogs")
 		cog_text = "\n".join(cog_text_lines)
 		embed.add_field(name="Cogs:", value=f'{cog_text}')
-		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 		await ctx.reply(embed=embed)
 
 
@@ -45,14 +45,14 @@ class CogsCog(commands.Cog, name="Cogs"):
 			self.bot.unload_extension(cog)
 			embed = discord.Embed(color=embedcolor, title="Unloaded Cog")
 			embed.add_field(name="Cog:", value=f'{cog}')
-			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 			await ctx.reply(embed=embed)
 		except ExtensionNotLoaded as error:
 			try:
 				self.bot.unload_extension(f'cogs.{cog_lower}')
 				embed = discord.Embed(color=embedcolor, title="Unloaded Cog")
 				embed.add_field(name="Cog:", value=f'{cog}')
-				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 				await ctx.reply(embed=embed)
 
 			except:

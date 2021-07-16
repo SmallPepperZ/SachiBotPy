@@ -28,7 +28,7 @@ class AdminCog(commands.Cog, name="Admin"):
 				await ctx.channel.purge(limit=amount)
 				embed = discord.Embed(color=embedcolor)
 				embed.add_field(name="Clear", value="cleared " + args[1] + " messages")
-				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
+				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 				await ctx.send(embed=embed)
 			except ValueError:
 				await ctx.reply("Error, most likely not a number")
