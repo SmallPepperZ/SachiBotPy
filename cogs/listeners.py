@@ -25,6 +25,7 @@ def get_logging_channel(bot:discord.Client, channel_name:str) -> discord.TextCha
 embedcolor = config("embedcolor")
 prefix = config("prefix")
 database = DBManager.Database()
+messages_database = DBManager.Database("messages")
 logger = master_logger.getChild("listeners")
 delete_logger = master_logger.getChild("listeners").getChild("deletions")
 
@@ -55,8 +56,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener("on_message")
 	async def logmessages(self, message:discord.Message):
-		channelignore = [channel[0] for channel in database.cursor.execute("SELECT id from loggingignore where type='channel'")]
-		guildignore = [guild[0] for guild in database.cursor.execute("SELECT id from loggingignore where type='guild'")]
+		channelignore = [channel[0] for channel in messages_database.cursor.execute("SELECT id from loggingignore where type='channel'")]
+		guildignore = [guild[0] for guild in messages_database.cursor.execute("SELECT id from loggingignore where type='guild'")]
 		try:
 			channel = message.channel.id
 			channelname = message.channel.name
@@ -82,8 +83,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 					str(message.jump_url),
 					str(message.attachments)
 						]
-			database.cursor.execute(sql, sqldata)
-			database.commit()
+			messages_database.cursor.execute(sql, sqldata)
+			messages_database.commit()
 		else:
 			return
 
@@ -115,8 +116,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 					str(message.content),
 					str(message.jump_url)
 					]
-			database.cursor.execute(sql, sqldata)
-			database.commit()
+			messages_database.cursor.execute(sql, sqldata)
+			messages_database.commit()
 
 	@commands.Cog.listener("on_slash_command")
 	async def log_slash_commands(self,ctx:SlashContext):
