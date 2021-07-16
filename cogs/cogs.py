@@ -17,7 +17,8 @@ class CogsCog(commands.Cog, name="Cogs"):
 	@commands.is_owner()
 	async def reload(self, ctx:Context, *cogs_to_reload):
 		def format_cog_name(cog_name:str) -> str:
-			return cog_name.replace('cogs.', '').replace('_', ' ').title()
+			return cog_name.replace('cogs.', '').replace('_', ' ').title().replace('.','/')
+
 		cog_text_lines = []
 		if len(cogs_to_reload) == 0:
 			reload_cogs = self.bot.coglist
@@ -26,9 +27,9 @@ class CogsCog(commands.Cog, name="Cogs"):
 		for cog in reload_cogs:
 			try:
 				self.bot.reload_extension(cog)
-				cog_text_lines.append(f'<:yes:786997173845622824> | {format_cog_name(cog)}')
+				cog_text_lines.append(f'<:Success:865674863330328626> | {format_cog_name(cog)}')
 			except ExtensionFailed as error:
-				cog_text_lines.append(f'<:no:786997173820588073> | {format_cog_name(cog)}')
+				cog_text_lines.append(f'<:Failure:865674863031877663> | {format_cog_name(cog)}')
 				await ErrorHandling.uncaught_error(ctx, error,self.bot,silent=True)
 		embed = discord.Embed(color=embedcolor, title="Reloading Cogs")
 		cog_text = "\n".join(cog_text_lines)
