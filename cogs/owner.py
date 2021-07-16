@@ -83,7 +83,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Restarting...")
 		embed.set_footer(text=f"lasted for {uptime}")
 		await ctx.send(embed=embed)
-		os.system("screen -dmS SachiBotRestarter /Users/zachy/.scripts/SachiBotPy/restart.sh")
+		os.system("screen -dmS SachiBotRestarter $HOME/.scripts/SachiBotPy/restart.sh")
 		#await self.bot.logout()
 
 	@commands.command()
@@ -93,7 +93,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Stopping...")
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar_url)
 		await ctx.send(embed=embed)
-		os.system("/Users/zachy/.scripts/SachiBotPy/stop.sh")
+		os.system("$HOME/.scripts/SachiBotPy/stop.sh")
 		#await self.bot.logout()
 
 	@commands.command()

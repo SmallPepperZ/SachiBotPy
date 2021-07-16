@@ -10,6 +10,6 @@ then
 	source ./venv/bin/activate
 	/usr/local/bin/tmux new-session -d -s SachiBot python3 "./bot.py" &> logs/SachiBot.info.log
 else
-	echo "3.3" >> /Users/zachy/.tmp/test
+	echo "3.3" >> $HOME/.tmp/test
 	exit 0
 fi
