@@ -45,11 +45,11 @@ statuses={
 
 #endregion
 def save_status(self):
-	set_config('status', (self.bot_member.activity.type, self.bot_member.activity.name, self.bot_member.status))
+	set_config('status', [list(self.bot_member.activity.type)[1], str(self.bot_member.activity.name), list(self.bot_member.status)[0]])
 
 async def apply_status(self):
 	status = config('status')
-	await self.bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
+	await self.bot.change_presence(activity=discord.Activity(type=status[0], name=status[1]), status=status[2])
 
 async def changestatus(self, ctx, status_type): #pylint:disable=unused-argument
 	if self.bot_member.activity is not None:

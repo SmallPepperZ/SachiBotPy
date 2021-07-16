@@ -18,7 +18,7 @@ def set_config(item:str, value:str):
 	my_db = DBManager.Database()
 	keys = my_db.cursor.execute("""select key from config""").fetchall()
 	if item in [key[0] for key in keys]:
-		my_db.cursor.execute("""UPDATE config SET value = ? WHERE key = ?""", (value, item))
+		my_db.cursor.execute("""UPDATE config SET value = ? WHERE key = ?""", (str(value), item))
 		my_db.connection.commit()
 	else:
 		raise ValueError(f'{item} not in config')
