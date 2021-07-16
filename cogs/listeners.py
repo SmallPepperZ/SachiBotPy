@@ -6,7 +6,6 @@ import time
 
 import discord
 from discord.ext import commands
-from discord_slash.context import SlashContext
 
 from customfunctions import config, DBManager
 from customfunctions import master_logger
@@ -118,9 +117,6 @@ class ListenerCog(commands.Cog, name="Logging"):
 			database.cursor.execute(sql, sqldata)
 			database.commit()
 
-	@commands.Cog.listener("on_slash_command")
-	async def log_slash_commands(self,ctx:SlashContext):
-		logger.info(f'[{ctx.guild}#{ctx.channel}/{ctx.message.author}] just executed \'{ctx.message.content}\'')
 
 	@commands.Cog.listener("on_message")
 	async def respond_to_pings(self, message:discord.Message):
