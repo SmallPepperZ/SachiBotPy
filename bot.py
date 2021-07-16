@@ -8,7 +8,6 @@ import discord
 
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound, errors
-from discord_slash import SlashCommand
 
 from customfunctions.funcs import handling #pylint:disable=unused-import
 from customfunctions import config
@@ -34,7 +33,6 @@ bot = commands.Bot(command_prefix=prefix,
 				   intents=intents,
 				   case_insensitive=True)
 
-slash = SlashCommand(bot, override_type=True, sync_commands=True)
 
 errorchannel = int(config("errorchannel"))
 
