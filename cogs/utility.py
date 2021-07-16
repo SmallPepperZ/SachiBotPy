@@ -57,7 +57,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 				cogdata += f'\n`{command} {signature}`{description}'
 			if cogdata != '':
 				if cog in ("Owner", "Testing"):
-					if ctx.author.id == self.bot.owner_id:
+					if ctx.author.id == self.bot.owner.id:
 						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
 				elif cog == "MDSP":
 					if ctx.guild.id == 764981968579461130:
@@ -223,7 +223,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 		"""Reacts to a message with a set of emojis
 		Valid sets are "existing", "yesno", "updown", "checkx", and "shrug"
 		"""
-		if not (message.channel.permissions_for(ctx.author).manage_messages or ctx.author.id == self.bot.owner_id):
+		if not (message.channel.permissions_for(ctx.author).manage_messages or ctx.author.id == self.bot.owner.id):
 			await ctx.reply("You need manage messages to do that")
 			return
 		emojis:"list[discord.Emoji]" = []

@@ -248,7 +248,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	async def speak_as_bot(self, msg):
 		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ #pylint:disable=global-statement
 		if BOT_TALK_CHANNEL is not None:
-			if (isinstance(msg.channel, discord.channel.DMChannel)) and (msg.author.id == self.bot.owner_id):
+			if (isinstance(msg.channel, discord.channel.DMChannel)) and (msg.author.id == self.bot.owner.id):
 				if not msg.content == "stoptalk":
 					await BOT_TALK_CHANNEL_OBJ.send(msg.content)
 				else:
@@ -269,7 +269,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.command()
 	@commands.check(is_owner())
 	async def exec(self, ctx, *, code:str):
-		if int(ctx.author.id) != self.bot.owner_id:
+		if int(ctx.author.id) != self.bot.owner.id:
 			raise NotOwner
 		code = re.findall('```[\S\s]+```', code) #pylint: disable=anomalous-backslash-in-string
 		if len(code) != 0:
