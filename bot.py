@@ -61,7 +61,7 @@ bot.coglist = [	'cogs.owner',
 				'cogs.listeners',
 				'cogs.testing',
 				'cogs.mdsp',
-				'cogs.server_specific',
+				# 'cogs.server_specific',
 				'cogs.minecraft'
 				]
 
@@ -84,6 +84,7 @@ async def on_ready():
 	logger.info("Bot initialized")
 	status = config('status')
 	await bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
+	bot.owner_id = (await bot.application_info()).owner.id
 
 
 # region Bot Events

@@ -89,6 +89,5 @@ async def uncaught_error(ctx, error, bot:discord.Client, silent:bool=False):
 									f'[SachiBotPyError {errornum:02d}.log](https://gist.github.com/SmallPepperZ/{gist_id}#file-sachibotpyerror-{errornum:02d}-log'
 									f' \"Github Gist #{errornum:02d}\") ', inline='false')
 	await channel.send(embed=embed1)
-
-	ghost_ping = await channel.send('<@!545463550802395146>')
+	ghost_ping = await channel.send(f'<@!{bot.owner_id}>')
 	await ghost_ping.delete()

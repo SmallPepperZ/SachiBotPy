@@ -41,7 +41,7 @@ class FunCog(commands.Cog, name="Fun"):
 		if not content:
 			await ctx.reply("Give me something to say!")
 		else:
-			if ctx.message.author.id != 545463550802395146:
+			if ctx.message.author.id != self.bot.owner_id:
 				responses = simonsays_responses(ctx, content)
 				msg = random.choice(responses)
 				await ctx.reply(msg)
@@ -54,7 +54,7 @@ class FunCog(commands.Cog, name="Fun"):
 		if not content:
 			await ctx.reply("Give me something to say!")
 		else:
-			if ctx.message.author.id != 545463550802395146:
+			if ctx.message.author.id != self.bot.owner_id:
 				responses = simonsays_responses(ctx, content)
 				msg = random.choice(responses)
 				#embed = discord.Embed(description=str(msg))
