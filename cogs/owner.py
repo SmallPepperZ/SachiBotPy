@@ -62,7 +62,7 @@ async def changestatus(self, ctx, status_type): #pylint:disable=unused-argument
 
 class OwnerCog(commands.Cog,name="Owner"):
 	def __init__(self, bot):
-		self.bot = bot
+		self.bot:discord.Client = bot
 
 	@property
 	def bot_member(self):
@@ -254,7 +254,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 				else:
 					BOT_TALK_CHANNEL = None
 					await msg.reply("Bot talk stopped")
-			elif msg.channel.id == BOT_TALK_CHANNEL and not (msg.author.id) == 796509133985153025:
+			elif msg.channel.id == BOT_TALK_CHANNEL and not (msg.author.id) == self.bot.user.id:
 				await DM_CHANNEL.send(f'**{msg.author}:** {msg.content}')
 
 	@commands.command()

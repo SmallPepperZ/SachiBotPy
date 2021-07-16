@@ -121,7 +121,7 @@ class ListenerCog(commands.Cog, name="Logging"):
 	@commands.Cog.listener("on_message")
 	async def respond_to_pings(self, message:discord.Message):
 		pinged        = self.bot.user.mentioned_in(message)
-		replied_to    = not("<@796509133985153025>" in message.content or "<@!796509133985153025>" in message.content)
+		replied_to    = not("<@self.bot.user.id>" in message.content or "<@!self.bot.user.id>" in message.content)
 		message_length = len(message.content.split(' '))
 		if pinged and not replied_to:
 			await message.add_reaction('<:PING:796424651374985266>')
