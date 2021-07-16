@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import commands
 from customfunctions import config
-from customfunctions import master_logger
+from customfunctions import master_logger,del_msg
 
 # region Variable Stuff
 
@@ -51,7 +51,16 @@ class TestingCog(commands.Cog, name="Testing"):
 		else:
 			raise ValueError
 
-
+	@commands.Cog.listener('on_message')
+	async def _thread_test(self, message:discord.Message):
+		if message.channel.id != 864189383518715904:
+			return
+		channel:discord.TextChannel = message.channel
+		thread:discord.Thread = await channel.start_thread(name=f"{message.author.name}", message=(await message.channel.pins())[0])
+		embed = discord.Embed(title=f"{message.author.name}'s Issue", color=embedcolor, description=message.content)
+		thread.add_user(message.author)
+		await del_msg(message)
+		await thread.send(embed=embed)
 
 	@commands.command()
 	@commands.is_owner()
