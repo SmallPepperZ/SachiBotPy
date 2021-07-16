@@ -55,8 +55,8 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener("on_message")
 	async def logmessages(self, message:discord.Message):
-		channelignore = [channel[0] for channel in messages_database.cursor.execute("SELECT id from loggingignore where type='channel'")]
-		guildignore = [guild[0] for guild in messages_database.cursor.execute("SELECT id from loggingignore where type='guild'")]
+		channelignore = [channel[0] for channel in database.cursor.execute("SELECT id from loggingignore where type='channel'")]
+		guildignore = [guild[0] for guild in database.cursor.execute("SELECT id from loggingignore where type='guild'")]
 		try:
 			channel = message.channel.id
 			channelname = message.channel.name
