@@ -33,7 +33,7 @@ def simonsays_responses(ctx, content):
 
 class FunCog(commands.Cog, name="Fun"):
 	def __init__(self, bot):
-		self.bot = bot
+		self.bot:discord.Client = bot
 
 
 	@commands.command(aliases=['repeat'])

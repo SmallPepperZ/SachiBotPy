@@ -16,7 +16,7 @@ embedcolor = config("embedcolor")
 
 class TestingCog(commands.Cog, name="Testing"):
 	def __init__(self, bot):
-		self.bot = bot
+		self.bot:discord.Client = bot
 
 	@commands.command()
 	@commands.cooldown(rate=1, per=300)

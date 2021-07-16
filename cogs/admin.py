@@ -15,7 +15,7 @@ logger = master_logger.getChild("admin")
 
 class AdminCog(commands.Cog, name="Admin"):
 	def __init__(self, bot):
-		self.bot = bot
+		self.bot:discord.Client = bot
 
 	@commands.command()
 	@commands.has_guild_permissions(manage_messages=True)
