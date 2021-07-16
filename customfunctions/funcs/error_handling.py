@@ -23,7 +23,7 @@ async def command_on_cooldown(ctx, error):
 async def invalid_invocation(ctx, error): #pylint:disable=unused-argument
 	command:commands.Command = ctx.command
 	if command.help is not None:
-		await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`\n\nHelp:{command.help}", delete_after=30)
+		await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`\n\nHelp: {command.help}", delete_after=30)
 	else:
 		await ctx.reply(f"Missing required argument!\nUsage:`{ctx.command.signature}`", delete_after=30)
 
@@ -32,7 +32,7 @@ async def uncaught_error(ctx, error, bot:discord.Client, silent:bool=False):
 	# Send user a message
 	if not silent:
 		await ctx.message.add_reaction('<:CommandError:804193351758381086>')
-		await ctx.reply(f"Error:\n```{error_str}```\{bot.owner.name} will be informed", delete_after=60)
+		await ctx.reply(f"Error:\n```{error_str}```\n{bot.owner.name} will be informed", delete_after=60)
 
 	# Get traceback info
 
