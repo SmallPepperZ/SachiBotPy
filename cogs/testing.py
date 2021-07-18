@@ -2,13 +2,15 @@ import datetime
 
 import discord
 from discord.ext import commands
-from customfunctions import config
+from discord.types.threads import ThreadArchiveDuration
+from customfunctions import config,DBManager
 from customfunctions import master_logger,del_msg
 
 # region Variable Stuff
 
 logger = master_logger.getChild("testing")
 embedcolor = config("embedcolor")
+database = DBManager.Database()
 
 # endregion
 
@@ -55,12 +57,19 @@ class TestingCog(commands.Cog, name="Testing"):
 	async def _thread_test(self, message:discord.Message):
 		if message.channel.id != 864189383518715904:
 			return
-		channel:discord.TextChannel = message.channel
-		thread:discord.Thread = await channel.start_thread(name=f"{message.author.name}", message=(await message.channel.pins())[0])
-		embed = discord.Embed(title=f"{message.author.name}'s Issue", color=embedcolor, description=message.content)
-		thread.add_user(message.author)
-		await del_msg(message)
-		await thread.send(embed=embed)
+		thread:discord.Thread = await message.start_thread(name=f"{message.author.name}-{message.author.discriminator}", auto_archive_duration=60)
+		database.cursor.execute("INSERT into threads (thread_id, author_id) values (?,?)",(thread.id,message.author.id))
+		database.commit()
+		await thread.send("Use `$close` when you're done")
+		await thread.add_user(message.author)
+
+	@commands.command(name="close")
+	async def _close_thread(self, message:discord.Message):
+		if not isinstance(message.channel, discord.Thread) and message.channel.parent_id == 864189383518715904:
+			return
+		if database.cursor.execute("SELECT author_id from threads where thread_id=?", (message.channel.id,)).fetchone()[0] == message.author.id:
+			await message.channel.edit(archived=True)
+		
 
 	@commands.command()
 	@commands.is_owner()
