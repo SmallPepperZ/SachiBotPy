@@ -62,6 +62,5 @@ class CogsCog(commands.Cog, name="Cogs"):
 				await ctx.reply(embed=embed)
 
 
-
 def setup(bot):
 	bot.add_cog(CogsCog(bot))
