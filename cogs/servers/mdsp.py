@@ -123,11 +123,9 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 		await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"{user.name} not found in {invitechannel.mention}"))
 		return
 	# Assign values from the database to variables for easy use
-	user_id = user_info[0]
 	invite_message_id = user_info[1]
 	invite_activity_type = user_info[2]
 	field_status = user_info[3]
-	field_status_editor = user_info[4]
 	field_username = user_info[5]
 	field_level = user_info[6]
 	field_messages = user_info[7]
@@ -376,13 +374,10 @@ class MdspCog(commands.Cog, name="MDSP"):
 				f"""select * from invitees where invite_message_id = {message.id}""").fetchone()
 
 			user_id = user_info[0]
-			invite_message_id = user_info[1]
 			invite_activity_type = user_info[2]
 			field_status = user_info[3]
 			field_status_editor = user_info[4]
 			field_username = user_info[5]
-			field_level = user_info[6]
-			field_messages = user_info[7]
 			field_mention = user_info[8]
 			field_info = user_info[9]
 			field_inviter_id = user_info[10]
@@ -390,7 +385,6 @@ class MdspCog(commands.Cog, name="MDSP"):
 			user = await self.bot.fetch_user(user_id)
 			sevendaysago = datetime.now(
 				pytz.timezone("UTC")) - timedelta(days=7)
-			yesterday = datetime.now(pytz.timezone("UTC")) - timedelta(days=1)
 			try:
 				lastedited = message.edited_at.replace(
 					tzinfo=pytz.timezone("UTC"))

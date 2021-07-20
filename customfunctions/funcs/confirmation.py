@@ -27,7 +27,7 @@ async def confirm(self:discord.ext.commands.Cog, ctx:discord.ext.commands.Contex
 	for emoji in emojis.keys():
 		await msg.add_reaction(emoji)
 	try:
-		reaction, user = await self.bot.wait_for(
+		reaction, _ = await self.bot.wait_for(
 			'reaction_add',
 			check=lambda r, u: (r.message.id == msg.id) and (u.id == ctx.author.id) and (r.emoji in emojis),
 			timeout=timeout

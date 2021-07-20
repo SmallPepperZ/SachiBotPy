@@ -82,7 +82,6 @@ logger = master_logger.getChild("main")
 @bot.event
 async def on_ready():
 	logger.info("Bot initialized")
-	status = config('status')
 	await StatusManager.apply_status(bot)
 	bot.owner = (await bot.application_info()).owner
 

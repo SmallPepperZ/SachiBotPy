@@ -21,7 +21,7 @@ def make_placeholder(table:str, dictionary:dict):
 	"""
 	columns = tuple(dictionary.keys())
 	valueplaceholder = '?'
-	for item in range(len(columns)-1):
+	for _ in range(len(columns)-1):
 		valueplaceholder += ', ?'
 	sql  = f"INSERT or REPLACE into {table} {columns} values ({valueplaceholder})"
 	return sql

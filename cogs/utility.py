@@ -41,7 +41,6 @@ class UtilityCog(commands.Cog, name="Utility"):
 				"signature"  : cmd.signature
 				}
 		logger.debug("dumping to json finished")
-		embed   = discord.Embed(color=embedcolor, title="Help")
 		cogdata = ''
 		pages   = []
 		for cog in commandsdict.keys(): #pylint:disable=consider-iterating-dictionary
@@ -119,11 +118,8 @@ class UtilityCog(commands.Cog, name="Utility"):
 		badgeicons = [badgelist[badge] for badge in badgelist if badge in flagnames]
 		badgestr   = " ".join(list(map(str, badgeicons)))
 
-		isbot      = user.bot
 		avatar     = user.avatar.url
-		createdate = user.created_at
 		mention    = user.mention
-		userid     = user.id
 		username   = user.name+"#"+user.discriminator
 		color      = user.color
 

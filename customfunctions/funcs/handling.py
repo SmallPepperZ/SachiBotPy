@@ -14,8 +14,6 @@ def error_handling(exctype:Type[BaseException], value:BaseException, traceback:T
 		traceback_lines = [line for line in traceback_lines if line != ""]
 		for line in traceback_lines:
 			master_logger.error(line)
-		extra={"type": exctype}
-		#master_logger.error(extra=extra)
 	except:
 		sys.__excepthook__(exctype,value,traceback)
 sys.excepthook = error_handling

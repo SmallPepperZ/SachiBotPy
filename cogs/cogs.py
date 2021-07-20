@@ -48,7 +48,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 			embed.add_field(name="Cog:", value=f'{cog}')
 			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 			await ctx.reply(embed=embed)
-		except ExtensionNotLoaded as error:
+		except ExtensionNotLoaded:
 			try:
 				self.bot.unload_extension(f'cogs.{cog_lower}')
 				embed = discord.Embed(color=embedcolor, title="Unloaded Cog")
