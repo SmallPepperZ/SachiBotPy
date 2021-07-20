@@ -8,17 +8,22 @@ def get_config(item:str) -> "str|list|int":
 	if config[2] == "string":
 		return config[1]
 	if config[2] == "list":
+		print(config[1])
 		return json.loads(config[1])
 	if config[2] == "hex":
 		return int(config[1], 16)
 	else:
 		raise ValueError("Invalid config type")
 
-def set_config(item:str, value:str):
+def set_config(item:str, value:str, config_type:str="string"):
+	if config_type in ("string", "hex"):
+		formatted_item = str(value)
+	elif config_type == "list":
+		formatted_item = json.dumps(value)
 	my_db = DBManager.Database()
 	keys = my_db.cursor.execute("""select key from config""").fetchall()
 	if item in [key[0] for key in keys]:
-		my_db.cursor.execute("""UPDATE config SET value = ? WHERE key = ?""", (str(value), item))
+		my_db.cursor.execute("""UPDATE config SET value = ? WHERE key = ?""", (str(formatted_item), item))
 		my_db.connection.commit()
 	else:
 		raise ValueError(f'{item} not in config')
