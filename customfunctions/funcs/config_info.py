@@ -1,8 +1,9 @@
 import json
 from customfunctions.funcs import database_manager as DBManager
+
 def get_config(item:str) -> "str|list|int":
 	my_db = DBManager.Database()
-	config:"list[tuple[str,str,str]]" = my_db.cursor.execute("""select * from config where key=?""", (item,)).fetchone()
+	config:"tuple[str,str,str]" = my_db.cursor.execute("""select * from config where key=?""", (item,)).fetchone()
 	if config is None:
 		raise ValueError(f'{item} not in config')
 	if config[2] == "string":
@@ -19,6 +20,8 @@ def set_config(item:str, value:str, config_type:str="string"):
 		formatted_item = str(value)
 	elif config_type == "list":
 		formatted_item = json.dumps(value)
+	else:
+		raise TypeError("Invalid config type")
 	my_db = DBManager.Database()
 	keys = my_db.cursor.execute("""select key from config""").fetchall()
 	if item in [key[0] for key in keys]:

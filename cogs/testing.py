@@ -2,7 +2,6 @@ import datetime
 
 import discord
 from discord.ext import commands
-from discord.types.threads import ThreadArchiveDuration
 from customfunctions import config,DBManager
 from customfunctions import master_logger,del_msg
 
@@ -35,7 +34,7 @@ class TestingCog(commands.Cog, name="Testing"):
 	async def inviteurltester(self, ctx, userid:int):
 		user = self.bot.get_user(int(userid))
 		try:
-			username=user.name
+			username=user.name #type: ignore
 		except AttributeError:
 			username="Unknown User"
 		channel = ctx.guild.get_channel(797308957478879234)

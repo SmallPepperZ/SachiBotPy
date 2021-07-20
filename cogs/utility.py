@@ -82,46 +82,26 @@ class UtilityCog(commands.Cog, name="Utility"):
 
 
 	@commands.command(aliases=['userinfo'])
-	async def whois(self,ctx, userid):
-		try:
-			userid = ctx.message.mentions[0].id
-		except:
-			try:
-				userid = int(userid)
-			except ValueError:
-				await ctx.message.add_reaction('<:CommandError:804193351758381086>')
-				await ctx.reply("Invalid User ID!", delete_after=10)
-				return
-		isguildmember = ctx.guild.get_member(userid) is not None
-		if isguildmember:
-			user      = ctx.guild.get_member(userid)
-			isadmin   = user.guild_permissions.administrator
-			nickname  = user.display_name
-			joindate  = user.joined_at
-			isowner   = ctx.guild.owner.id == user.id
-			status    = user.status
-			statusmsg = f' | {user.activity.name}' if user.activity is not None else ''
-			statuseemojis  = {
+	async def whois(self,ctx, user:"discord.User|discord.Member"):
+		isguildmember = isinstance(discord.Member, user)
+		statuseemojis  = {
 				"online" : "🟢",
 				"idle"   : "🟡",
 				"dnd"    : "🔴",
 				"offline": "⚫"
 
 			}
-			logger.debug(status)
+		if isguildmember:
+			assert user is discord.Member
 			if user.is_on_mobile():
-				ismobile  = '📱 - '
-			elif str(status) != "offline":
-				ismobile = '💻 - '
+				platform  = '📱 - '
+			elif str(user.status) != "offline":
+				platform = '💻 - '
 			else:
-				ismobile = ""
-			statusicon = statuseemojis[str(status)]
+				platform = ""
 		else:
-			try:
-				user = await self.bot.fetch_user(int(userid))
-			except discord.errors.NotFound:
-				await ctx.reply("Invalid User ID!")
-				return
+			assert user is discord.User
+			platform = None
 		flags = user.public_flags.all()
 		badgelist = {
 			"staff"                 : "<:developer:802021494778626080>",
@@ -151,21 +131,20 @@ class UtilityCog(commands.Cog, name="Utility"):
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 		embed.set_image(url=avatar)
 		if isguildmember:
-			EmbedMaker.add_description_field(embed, "Is a bot?", isbot)
-			EmbedMaker.add_description_field(embed, "Is the owner?", isowner)
-			EmbedMaker.add_description_field(embed, "Is an admin?", isadmin)
+			EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)
+			EmbedMaker.add_description_field(embed, "Is the owner?", bool(ctx.guild.owner.id == user.id))
+			EmbedMaker.add_description_field(embed, "Is an admin?", user.guild_permissions.administrator)
 			EmbedMaker.add_blank_field(embed)
-			EmbedMaker.add_description_field(embed, "Status", f'{ismobile}{statusicon}{statusmsg}')
+			EmbedMaker.add_description_field(embed, "Status", f"{platform}{statuseemojis[str(user.status)]}{f' | {user.activity.name}' if user.activity is not None else ''}")
 			EmbedMaker.add_blank_field(embed)
-
 		EmbedMaker.add_description_field(embed, "Mention", mention)
 		if isguildmember:
-			EmbedMaker.add_description_field(embed, "Nickname", nickname)
+			EmbedMaker.add_description_field(embed, "Nickname", user.display_name)
 		EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
 		EmbedMaker.add_blank_field(embed)
-		EmbedMaker.add_description_field(embed, "Account Creation Date", createdate)
+		EmbedMaker.add_description_field(embed, "Account Creation Date", user.created_at)
 		if isguildmember:
-			EmbedMaker.add_description_field(embed, "Join Date", joindate)
+			EmbedMaker.add_description_field(embed, "Join Date", user.joined_at)
 		EmbedMaker.add_blank_field(embed)
 		if str(badgeicons) != "[]":
 			EmbedMaker.add_description_field(embed, "Profile Badges", badgestr)
@@ -189,6 +168,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 			duration = TimeUtils.parse(duration_str)
 		except ValueError:
 			await ctx.reply("Please write your duration in the format of '10m'")
+			return
 		muted_role = discord.utils.get(ctx.guild.roles, name='Muted') # fetch role with name 'muted'
 		unmute_timestamp = TimeUtils.get_future_time(duration).timestamp() # Get a timestamp for the duration specified
 		with open("storage/mutes.json", "w") as file:

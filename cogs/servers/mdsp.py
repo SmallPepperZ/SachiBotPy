@@ -368,6 +368,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				sql = f"""update invitees set invite_activity_type = 'deleted' where invite_message_id = {message_id}"""
 				dbcon.execute(sql)
 				dbcon.commit()
+		db_data_dict = None
 		for message in messages:
 			messagecontents = message.embeds[0]
 			#l1, l2, l3, l4, l5, l6, l7 = list_lines(messagecontents)
@@ -435,7 +436,7 @@ class MdspCog(commands.Cog, name="MDSP"):
 				embed.set_thumbnail(url=user.avatar.url)
 				footer = messagecontents.footer
 				embed.set_footer(text=footer.text, icon_url=footer.icon_url)
-				db_data_dict = {
+				db_data_dict:"dict[str,str|int]" = {
 					'user_id': user.id,
 					'invite_message_id': message.id,
 					'invite_activity_type': invite_activity_type,
@@ -455,7 +456,8 @@ class MdspCog(commands.Cog, name="MDSP"):
 				# Send embed
 				await message.edit(embed=embed)
 		logger.debug("Update completed")
-		sql = DatabaseFromDict.make_placeholder('invitees', db_data_dict)
+		if db_data_dict is not None:
+			sql = DatabaseFromDict.make_placeholder('invitees', db_data_dict)
 		dbcon.executemany(sql, invitee_info_list)
 		dbcon.commit()
 		await infomsg.edit(embed=discord.Embed(color=embedcolor, description=f"Updating {invitechannel.mention}:\nCompleted"))

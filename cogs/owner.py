@@ -259,7 +259,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	async def exec(self, ctx, *, code:str):
 		if int(ctx.author.id) != self.bot.owner.id:
 			raise NotOwner
-		code = re.findall('```[\S\s]+```', code) #pylint: disable=anomalous-backslash-in-string
+		code = re.findall('```[\S\s]+```', code) #type: ignore
 		if len(code) != 0:
 			code = code[0]
 			code = code.replace('```py', '').replace('```', '').strip()
