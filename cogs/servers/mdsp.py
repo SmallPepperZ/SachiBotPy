@@ -12,7 +12,8 @@ from discord.ext.commands import BadArgument, BucketType, errors
 
 
 
-from customfunctions import config, DatabaseFromDict, CustomUtilities, CustomChecks, Mee6Api,master_logger
+from customfunctions import config, DatabaseFromDict, CustomUtilities, CustomChecks, Mee6Api
+from cogs.servers import master_logger
 
 
 logger = master_logger.getChild("mdsp")
