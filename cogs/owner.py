@@ -45,7 +45,7 @@ statuses={
 
 #endregion
 def save_status(self):
-	set_config('status', [list(self.bot_member.activity.type)[1], str(self.bot_member.activity.name), list(self.bot_member.status)[0]])
+	set_config('status', [list(self.bot_member.activity.type)[1], str(self.bot_member.activity.name), list(self.bot_member.status)[0]], "list")
 
 async def apply_status(self):
 	status = config('status')
@@ -83,7 +83,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Restarting...")
 		embed.set_footer(text=f"lasted for {uptime}")
 		await ctx.send(embed=embed)
-		os.system("screen -dmS SachiBotRestarter $HOME/.scripts/SachiBotPy-Updated/restart.sh")
+		os.system(f"screen -dmS SachiBotRestarter {os.getcwd()}/restart.sh")
 		#await self.bot.logout()
 
 	@commands.command()
@@ -93,7 +93,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 		embed = discord.Embed(color=embedcolor, title="Stopping...")
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
 		await ctx.send(embed=embed)
-		os.system("$HOME/.scripts/SachiBotPy-Updated/stop.sh")
+		os.system(f"{os.getcwd()}/stop.sh")
 		#await self.bot.logout()
 
 	@commands.command()
