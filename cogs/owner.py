@@ -22,6 +22,7 @@ from customfunctions import ConfirmationCheck
 from customfunctions import EmbedMaker
 from customfunctions import del_msg
 from customfunctions import master_logger
+from customfunctions import StatusManager
 
 #region Variable Stuff
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,19 +45,6 @@ statuses={
 }
 
 #endregion
-def save_status(self):
-	set_config('status', [list(self.bot_member.activity.type)[1], str(self.bot_member.activity.name), list(self.bot_member.status)[0]], "list")
-
-async def apply_status(self):
-	status = config('status')
-	await self.bot.change_presence(activity=discord.Activity(type=status[0], name=status[1]), status=status[2])
-
-async def changestatus(self, ctx, status_type): #pylint:disable=unused-argument
-	if self.bot_member.activity is not None:
-		await self.bot.change_presence(activity=discord.Activity(type=self.bot_member.activity.type, name=self.bot_member.activity.name), status=status_type)
-	else:
-		await self.bot.change_presence(status=status_type)
-	save_status(self)
 
 
 
@@ -169,31 +157,31 @@ class OwnerCog(commands.Cog,name="Owner"):
 				statuscolor = embedcolor
 			embed = discord.Embed(color=statuscolor, title="Status:", description=f'**Status:** {statusemoji}{status} - {statuses[self.bot_member.activity.type.value]} {self.bot_member.activity.name}')
 			await ctx.reply(embed=embed)
-			save_status(self)
+			StatusManager.save_status(self)
 
 	@status.command(aliases=['green', 'good'])
 	async def online(self, ctx):
-		await changestatus(self, ctx, Status.online)
+		await StatusManager.changestatus(self, ctx, Status.online)
 		await ctx.message.add_reaction(str('🟢'))
-		save_status(self)
+		StatusManager.save_status(self)
 
 	@status.command(aliases=['yellow', 'okay', 'ok', 'decent', 'afk'])
 	async def idle(self, ctx):
-		await changestatus(self, ctx, Status.idle)
+		await StatusManager.changestatus(self, ctx, Status.idle)
 		await ctx.message.add_reaction(str('🟡'))
-		save_status(self)
+		StatusManager.save_status(self)
 
 	@status.command(aliases=['red', 'bad', 'broken', 'error', 'donotdisturb'])
 	async def dnd(self, ctx):
-		await changestatus(self, ctx, Status.dnd)
+		await StatusManager.changestatus(self, ctx, Status.dnd)
 		await ctx.message.add_reaction(str('🔴'))
-		save_status(self)
+		StatusManager.save_status(self)
 
 	@status.command(aliases=['grey','gray', 'hide', 'offline', 'invis', 'hidden'])
 	async def invisible(self, ctx):
-		await changestatus(self, ctx, Status.invisible)
+		await StatusManager.changestatus(self, ctx, Status.invisible)
 		await ctx.message.add_reaction(str('⚫'))
-		save_status(self)
+		StatusManager.save_status(self)
 
 	@status.group()
 	async def activity(self, ctx): #pylint:disable=unused-argument
@@ -203,25 +191,25 @@ class OwnerCog(commands.Cog,name="Owner"):
 	async def playing(self, ctx, *, status:str):
 		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name=status), status=self.bot_member.status)
 		await ctx.message.add_reaction(str('✅'))
-		save_status(self)
+		StatusManager.save_status(self)
 
 	@activity.command()
 	async def competing(self, ctx, *, status:str):
 		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.competing, name=status), status=self.bot_member.status)
 		await ctx.message.add_reaction(str('✅'))
-		save_status(self)
+		StatusManager.save_status(self)
 
 	@activity.command()
 	async def listening(self, ctx, *, status:str):
 		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=status), status=self.bot_member.status)
 		await ctx.message.add_reaction(str('✅'))
-		save_status(self)
+		StatusManager.save_status(self)
 
 	@activity.command()
 	async def watching(self, ctx, *, status:str):
 		await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status), status=self.bot_member.status)
 		await ctx.message.add_reaction(str('✅'))
-		save_status(self)
+		StatusManager.save_status(self)
 
 	@status.command()
 	async def subcommands(self, ctx):

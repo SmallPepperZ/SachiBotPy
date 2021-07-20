@@ -11,7 +11,7 @@ from .funcs import time_utils as TimeUtils
 from .funcs import confirmation as ConfirmationCheck
 from .funcs import error_handling as ErrorHandling
 from .funcs import database_manager as DBManager
-
+from .funcs import bot_status as StatusManager
 
 from .funcs.things_to_bonk import OBJECTS_TO_BONK_WITH
 

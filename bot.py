@@ -11,7 +11,7 @@ from discord.ext.commands import CommandNotFound, errors
 
 from customfunctions.funcs import handling #pylint:disable=unused-import
 from customfunctions import config
-from customfunctions import CustomChecks, ErrorHandling
+from customfunctions import CustomChecks, ErrorHandling, StatusManager
 from customfunctions import master_logger
 # endregion
 
@@ -83,7 +83,7 @@ logger = master_logger.getChild("main")
 async def on_ready():
 	logger.info("Bot initialized")
 	status = config('status')
-	await bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
+	await StatusManager.apply_status(bot)
 	bot.owner = (await bot.application_info()).owner
 
 
