@@ -8,7 +8,6 @@ def get_config(item:str) -> "str|list|int":
 	if config[2] == "string":
 		return config[1]
 	if config[2] == "list":
-		print(config[1])
 		return json.loads(config[1])
 	if config[2] == "hex":
 		return int(config[1], 16)

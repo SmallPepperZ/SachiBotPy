@@ -141,7 +141,6 @@ class ListenerCog(commands.Cog, name="Logging"):
 	@commands.Cog.listener('on_message')
 	async def manual_remove_selfmute(self, message:discord.Message):
 		if message.guild is None and message.content == "unmute":
-			print(message.author.id)
 			muted_list = self.bot.mutes
 			indexes = [i for i,dct in enumerate(muted_list) if dct["userid"] == message.author.id]
 			if len (indexes) == 0:
@@ -187,9 +186,7 @@ class ListenerCog(commands.Cog, name="Logging"):
 	@commands.Cog.listener('on_user_update')
 	async def run_unmutes(self, *_args):
 		for index, mute in enumerate(self.bot.mutes.copy()):
-			print(mute)
 			if mute["expiration"] <= datetime.now().timestamp():
-				print("Expired mute!")
 				guild = self.bot.get_guild(mute["guild"])
 				role = guild.get_role(mute["role"])
 				await guild.get_member(mute["userid"]).remove_roles(role, reason="Self mute expiring")
