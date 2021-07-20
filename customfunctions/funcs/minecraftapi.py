@@ -62,4 +62,3 @@ class MinecraftUser():
 			raise ValueError("Unrecognized skin format")
 		return skin_formats[skin_format]
 
-print(MinecraftUser("jeb_").profile)
