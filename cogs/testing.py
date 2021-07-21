@@ -18,6 +18,7 @@ database = DBManager.Database()
 class TestingCog(commands.Cog, name="Testing"):
 	def __init__(self, bot):
 		self.bot:discord.Client = bot
+		self.hide_help = True
 
 	@commands.command()
 	@commands.cooldown(rate=1, per=300)

@@ -226,9 +226,10 @@ async def update_invite_status(self, ctx: commands.Context, userid: int, action:
 
 
 
-class MdspCog(commands.Cog, name="MDSP"):
+class MdspCog(commands.Cog, name="Server/MDSP"):
 	def __init__(self, bot):
 		self.bot:discord.Client = bot
+		self.guild_limit = 764981968579461130
 
 	@commands.group(aliases=['invitee', 'invitees'])
 	@CustomChecks.limit_to_guild(764981968579461130)

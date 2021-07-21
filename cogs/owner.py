@@ -51,6 +51,7 @@ statuses={
 class OwnerCog(commands.Cog,name="Owner"):
 	def __init__(self, bot):
 		self.bot:discord.Client = bot
+		self.hide_help = True
 
 	@property
 	def bot_member(self):
