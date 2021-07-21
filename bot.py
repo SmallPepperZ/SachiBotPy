@@ -3,7 +3,7 @@
 import time
 import json
 import discord
-
+import traceback
 
 
 from discord.ext import commands
@@ -54,10 +54,10 @@ with open("storage/mutes.json", "r") as file:
 
 # region Cogs
 bot.coglist = [	'cogs.owner',
+				'cogs.cogs',
 				'cogs.fun',
 				'cogs.utility',
 				'cogs.admin',
-				'cogs.cogs',
 				'cogs.listeners',
 				'cogs.testing',
 				'cogs.servers.mdsp',
@@ -66,11 +66,23 @@ bot.coglist = [	'cogs.owner',
 				]
 
 if __name__ == '__main__':
+	def format_cog_name(cog_name:str) -> str:
+			return cog_name.replace('cogs.', '').replace('_', ' ').title().replace('.','/')
+
+	
+	startup_lines = []
+	
 	for extension in bot.coglist:
 		try:
 			bot.load_extension(extension)
-		except:
-			pass
+			startup_lines.append(f'<:Success:865674863330328626> | {format_cog_name(extension)}')
+		except Exception as error:
+			startup_lines.append(f'<:Failure:865674863031877663> | {format_cog_name(extension)}')
+			for line in traceback.format_exception(type(error), error, error.__traceback__):
+				master_logger.error(line)
+	startup_text = "\n".join(startup_lines)
+	
+
 # endregion
 
 # region Logger Stuff
@@ -84,6 +96,8 @@ async def on_ready():
 	logger.info("Bot initialized")
 	await StatusManager.apply_status(bot)
 	bot.owner = (await bot.application_info()).owner
+	startup_channel:discord.TextChannel = bot.get_guild(797308956162392094).get_channel(867140356424466448)
+	await startup_channel.send(embed=discord.Embed(color=embedcolor,title="Startup", description=startup_text))
 
 
 # region Bot Events
