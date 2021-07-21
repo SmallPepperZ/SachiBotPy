@@ -1,3 +1,4 @@
+import os
 import discord
 from discord.ext import commands
 from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionFailed
@@ -23,7 +24,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 		if len(cogs_to_reload) == 0:
 			reload_cogs = self.bot.coglist
 		else:
-			reload_cogs = [f'cogs.{cog.lower()}' for cog in cogs_to_reload]
+			reload_cogs = [f'cogs.{cog.replace("cogs.", "").strip("./").replace(".py", "").replace("/", ".").replace(" ", "_").lower()}' for cog in cogs_to_reload]
 		for cog in reload_cogs:
 			try:
 				self.bot.reload_extension(cog)
@@ -61,6 +62,16 @@ class CogsCog(commands.Cog, name="Cogs"):
 				embed.add_field(name="Cog", value=cog)
 				await ctx.reply(embed=embed)
 
+	@commands.command()
+	@commands.is_owner()
+	async def load(self, ctx, *, cog:str):
+		import_path:str = f'cogs.{cog.replace("cogs.", "").strip("./").replace(".py", "").replace("/", ".").replace(" ", "_").lower()}'
+		file_path:str=f'{import_path.replace(".", "/")}.py'
+		if os.path.exists(file_path):
+			self.bot.load_extension(import_path)
+			await ctx.send("Cog sucessfully loaded")
+		else:
+			await ctx.reply(f"Cannot find cog at {file_path}")
 
 def setup(bot):
 	bot.add_cog(CogsCog(bot))
