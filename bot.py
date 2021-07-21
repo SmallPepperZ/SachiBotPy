@@ -95,9 +95,11 @@ logger = master_logger.getChild("main")
 async def on_ready():
 	logger.info("Bot initialized")
 	await StatusManager.apply_status(bot)
-	bot.owner = (await bot.application_info()).owner
 	startup_channel:discord.TextChannel = bot.get_guild(797308956162392094).get_channel(867140356424466448)
 	await startup_channel.send(embed=discord.Embed(color=embedcolor,title="Startup", description=startup_text))
+
+	bot.owner = (await bot.application_info()).owner
+	bot.prefix = prefix
 
 
 # region Bot Events

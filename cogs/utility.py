@@ -4,10 +4,11 @@ import asyncio
 import json
 import discord
 from discord.ext import commands
+from discord.ext.commands.converter import Greedy
 
 
 from disputils import BotEmbedPaginator
-from customfunctions import EmbedMaker
+from customfunctions import EmbedMaker, CustomChecks
 from customfunctions import config
 from customfunctions import TimeUtils
 from customfunctions import master_logger
@@ -25,45 +26,36 @@ class UtilityCog(commands.Cog, name="Utility"):
 
 	@commands.command()
 	async def help(self, ctx):
-		commandsdict = {}
-		for cog in self.bot.cogs.keys():
-			commandsdict[str(cog)] = {}
-		command_list = self.bot.walk_commands()
-		for cmd in [cmd for cmd in command_list if (not cmd.hidden) and cmd.enabled]:
-			qname =	cmd.qualified_name
-			cog = cmd.cog_name
-			commandsdict[str(cog)][str(qname)] = {
-				"description": cmd.description,
-				"usage"      : cmd.usage,
-				"parent"     : cmd.parent,
-				"aliases"    : cmd.aliases,
-				"cog"        : cmd.cog_name,
-				"signature"  : cmd.signature
-				}
 		logger.debug("dumping to json finished")
-		cogdata = ''
 		pages   = []
-		for cog in commandsdict.keys(): #pylint:disable=consider-iterating-dictionary
+		for cog, cog_data in self.bot.cogs.items():
+			cog:str
+			cog_data:commands.Cog
+			print(cog_data)
+			cog_commands:"list[commands.Command|commands.Group]" = []
 			logger.debug(f"Starting cog loop for {cog}")
 
-			for command in commandsdict[cog].keys():
-				logger.debug(f"Starting command loop for {cog}")
-				signature = f'{commandsdict[cog][command]["signature"]}'
-				if commandsdict[cog][command]["description"] != '':
-					description = f': {commandsdict[cog][command]["description"]}'
+			for command in cog_data.walk_commands():
+				command:"commands.Command|commands.Group"
+				if command.hidden or not command.enabled:
+					pass
 				else:
-					description = ''
-				cogdata += f'\n`{command} {signature}`{description}'
-			if cogdata != '':
-				if cog in ("Owner", "Testing"):
-					if ctx.author.id == self.bot.owner.id:
-						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
-				elif cog == "MDSP":
-					if ctx.guild.id == 764981968579461130:
-						pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
-				else:
-					pages.append(discord.Embed(title=f'Help: {cog}', description=cogdata, color=embedcolor))
-			cogdata = ''
+					short_help = " - "+command.help.split("\n")[0] if command.help is not None else ""
+					signature = f" {command.signature}" if command.signature is not "" else ""
+					cog_commands.append(f'''`{self.bot.prefix}{command.qualified_name}{signature}` {short_help}''')
+
+			cog_help_page="\n".join(cog_commands)
+
+			if hasattr(cog_data, "hide_help") and cog_data.hide_help:
+				if ctx.author.id == self.bot.owner.id:
+					pages.append(discord.Embed(title=f'Help: {cog}', description=cog_help_page, color=embedcolor))
+
+			elif hasattr(cog_data, "guild_limit"):
+				if CustomChecks.check_enabled_guild(ctx, cog_data.guild_limit):
+					pages.append(discord.Embed(title=f'Help: {cog}', description=cog_help_page, color=embedcolor))
+
+			else:
+				pages.append(discord.Embed(title=f'Help: {cog}', description=cog_help_page, color=embedcolor))
 
 		paginator = BotEmbedPaginator(ctx, pages)
 		await paginator.run()
@@ -80,73 +72,73 @@ class UtilityCog(commands.Cog, name="Utility"):
 		await ctx.reply(embed=embed)
 
 
-	@commands.command(aliases=['userinfo'])
-	async def whois(self,ctx, user:"discord.User|discord.Member"):
-		isguildmember = isinstance(discord.Member, user)
-		statuseemojis  = {
-				"online" : "🟢",
-				"idle"   : "🟡",
-				"dnd"    : "🔴",
-				"offline": "⚫"
+	# @commands.command(aliases=['userinfo'])
+	# async def whois(self,ctx, members:Greedy[discord.Member]=None, users:Greedy[discord.User]=None):
+	# 	for member in members:
 
-			}
-		if isguildmember:
-			assert user is discord.Member
-			if user.is_on_mobile():
-				platform  = '📱 - '
-			elif str(user.status) != "offline":
-				platform = '💻 - '
-			else:
-				platform = ""
-		else:
-			assert user is discord.User
-			platform = None
-		flags = user.public_flags.all()
-		badgelist = {
-			"staff"                 : "<:developer:802021494778626080>",
-			"partner"               : "<:partneredserverowner:802021495089004544>",
-			"hypesquad"             : "<:hypesquad:802021494925557791>",
-			"bug_hunter"            : "<:bughunterl1:802021561967575040>",
-			"hypesquad_bravery"     : "<:hypesquadbravery:802021495185473556>",
-			"hypesquad_brilliance"  : "<:hypesquadbrilliance:802021495433461810>",
-			"hypesquad_balance"     : "<:hypesquadbalance:802010940698132490>",
-			"early_supporter"       : "<:earlysupporter:802021494989389885>",
-			"bug_hunter_level_2"    : "<:bughunterl2:802021494975889458>",
-			"verified_bot_developer": "<:earlybotdeveloper:802021494875488297>"
-		}
-		flagnames = [flag.name for flag in flags]
-		badgeicons = [badgelist[badge] for badge in badgelist if badge in flagnames]
-		badgestr   = " ".join(list(map(str, badgeicons)))
+	# 	statuseemojis  = {
+	# 			"online" : "🟢",
+	# 			"idle"   : "🟡",
+	# 			"dnd"    : "🔴",
+	# 			"offline": "⚫"
 
-		avatar     = user.avatar.url
-		mention    = user.mention
-		username   = user.name+"#"+user.discriminator
-		color      = user.color
+	# 		}
+	# 	if isguildmember:
+	# 		if member.is_on_mobile():
+	# 			platform  = '📱 - '
+	# 		elif str(user.status) != "offline":
+	# 			platform = '💻 - '
+	# 		else:
+	# 			platform = ""
+	# 	else:
+	# 		assert user is discord.User
+	# 		platform = None
+	# 	flags = user.public_flags.all()
+	# 	badgelist = {
+	# 		"staff"                 : "<:developer:802021494778626080>",
+	# 		"partner"               : "<:partneredserverowner:802021495089004544>",
+	# 		"hypesquad"             : "<:hypesquad:802021494925557791>",
+	# 		"bug_hunter"            : "<:bughunterl1:802021561967575040>",
+	# 		"hypesquad_bravery"     : "<:hypesquadbravery:802021495185473556>",
+	# 		"hypesquad_brilliance"  : "<:hypesquadbrilliance:802021495433461810>",
+	# 		"hypesquad_balance"     : "<:hypesquadbalance:802010940698132490>",
+	# 		"early_supporter"       : "<:earlysupporter:802021494989389885>",
+	# 		"bug_hunter_level_2"    : "<:bughunterl2:802021494975889458>",
+	# 		"verified_bot_developer": "<:earlybotdeveloper:802021494875488297>"
+	# 	}
+	# 	flagnames = [flag.name for flag in flags]
+	# 	badgeicons = [badgelist[badge] for badge in badgelist if badge in flagnames]
+	# 	badgestr   = " ".join(list(map(str, badgeicons)))
 
-		embed       = discord.Embed(color=color,title=username)
-		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
-		embed.set_image(url=avatar)
-		if isguildmember:
-			EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)
-			EmbedMaker.add_description_field(embed, "Is the owner?", bool(ctx.guild.owner.id == user.id))
-			EmbedMaker.add_description_field(embed, "Is an admin?", user.guild_permissions.administrator)
-			EmbedMaker.add_blank_field(embed)
-			EmbedMaker.add_description_field(embed, "Status", f"{platform}{statuseemojis[str(user.status)]}{f' | {user.activity.name}' if user.activity is not None else ''}")
-			EmbedMaker.add_blank_field(embed)
-		EmbedMaker.add_description_field(embed, "Mention", mention)
-		if isguildmember:
-			EmbedMaker.add_description_field(embed, "Nickname", user.display_name)
-		EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
-		EmbedMaker.add_blank_field(embed)
-		EmbedMaker.add_description_field(embed, "Account Creation Date", user.created_at)
-		if isguildmember:
-			EmbedMaker.add_description_field(embed, "Join Date", user.joined_at)
-		EmbedMaker.add_blank_field(embed)
-		if str(badgeicons) != "[]":
-			EmbedMaker.add_description_field(embed, "Profile Badges", badgestr)
+	# 	avatar     = user.avatar.url
+	# 	mention    = user.mention
+	# 	username   = user.name+"#"+user.discriminator
+	# 	color      = user.color
 
-		await ctx.send(embed=embed)
-		#ctx.guild.get_member(user)
+	# 	embed       = discord.Embed(color=color,title=username)
+	# 	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
+	# 	embed.set_image(url=avatar)
+	# 	if isguildmember:
+	# 		EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)
+	# 		EmbedMaker.add_description_field(embed, "Is the owner?", bool(ctx.guild.owner.id == user.id))
+	# 		EmbedMaker.add_description_field(embed, "Is an admin?", user.guild_permissions.administrator)
+	# 		EmbedMaker.add_blank_field(embed)
+	# 		EmbedMaker.add_description_field(embed, "Status", f"{platform}{statuseemojis[str(user.status)]}{f' | {user.activity.name}' if user.activity is not None else ''}")
+	# 		EmbedMaker.add_blank_field(embed)
+	# 	EmbedMaker.add_description_field(embed, "Mention", mention)
+	# 	if isguildmember:
+	# 		EmbedMaker.add_description_field(embed, "Nickname", user.display_name)
+	# 	EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
+	# 	EmbedMaker.add_blank_field(embed)
+	# 	EmbedMaker.add_description_field(embed, "Account Creation Date", user.created_at)
+	# 	if isguildmember:
+	# 		EmbedMaker.add_description_field(embed, "Join Date", user.joined_at)
+	# 	EmbedMaker.add_blank_field(embed)
+	# 	if str(badgeicons) != "[]":
+	# 		EmbedMaker.add_description_field(embed, "Profile Badges", badgestr)
+
+	# 	await ctx.send(embed=embed)
+	# 	#ctx.guild.get_member(user)
 
 	@commands.command()
 	async def suggest(self, ctx, *, suggestion):
