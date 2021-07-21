@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from customfunctions import config,DBManager
 from customfunctions import master_logger,del_msg
+import inspect
 
 # region Variable Stuff
 
@@ -93,6 +94,14 @@ class TestingCog(commands.Cog, name="Testing"):
 			end_day = today - datetime.timedelta(days=i)
 			history:"list[discord.Message]" = await channel.history(limit=20000,after=start_day,before=end_day).flatten()
 			await ctx.send(history[0].jump_url+"\n"+history[-1].jump_url)
+
+	@commands.command(name="dmcog_test")
+	@commands.is_owner()
+	async def mcog_test(self, ctx):
+		for cog, cog_data in self.bot.cogs.items():
+			cog:str
+			cog_data:commands.Cogds
+			await ctx.send()
 
 def setup(bot):
 	bot.add_cog(TestingCog(bot))

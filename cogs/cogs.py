@@ -1,4 +1,5 @@
 import os
+import inspect
 import discord
 from discord.ext import commands
 from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionFailed
@@ -22,7 +23,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 
 		cog_text_lines = []
 		if len(cogs_to_reload) == 0:
-			reload_cogs = self.bot.coglist
+			reload_cogs = [inspect.getmodule(cog).__name__ for cog in self.bot.cogs.values()]
 		else:
 			reload_cogs = [f'cogs.{cog.replace("cogs.", "").strip("./").replace(".py", "").replace("/", ".").replace(" ", "_").lower()}' for cog in cogs_to_reload]
 		for cog in reload_cogs:
@@ -33,6 +34,7 @@ class CogsCog(commands.Cog, name="Cogs"):
 				cog_text_lines.append(f'<:Failure:865674863031877663> | {format_cog_name(cog)}')
 				await ErrorHandling.uncaught_error(ctx, error,self.bot,silent=True)
 		embed = discord.Embed(color=embedcolor, title="Reloading Cogs")
+		cog_text_lines.sort()
 		cog_text = "\n".join(cog_text_lines)
 		embed.add_field(name="Cogs:", value=f'{cog_text}')
 		embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
