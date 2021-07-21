@@ -7,9 +7,11 @@ import time
 import discord
 from discord.ext import commands
 
-from customfunctions import config, DBManager
+from customfunctions import config, DBManager,EmbedMaker, StatusManager
 from customfunctions import master_logger
 #region Variable Stuff
+
+
 
 def get_logging_channel(bot:discord.Client, channel_name:str) -> discord.TextChannel:
 	logging_channels = {
@@ -49,8 +51,9 @@ async def member_join_update(bot:discord.Client, member:discord.Member, action:s
 	await channel.send(embed=embed)
 
 class ListenerCog(commands.Cog, name="Logging"):
-	def __init__(self, bot):
+	def __init__(self, bot:discord.Client):
 		self.bot:discord.Client = bot
+		self.sachibotland = bot.get_guild(797308956162392094)
 
 
 	@commands.Cog.listener("on_message")
@@ -199,8 +202,7 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener("on_resumed")
 	async def on_resume(self):
-		status = config('status')
-		await self.bot.change_presence(activity=discord.Activity(type=status[0][1], name=status[1]), status=status[2][1])
+		await StatusManager.apply_status(self.bot)
 
 	@commands.Cog.listener("on_member_join")
 	async def on_member_join(self, member: discord.Member):
@@ -242,5 +244,38 @@ class ListenerCog(commands.Cog, name="Logging"):
 		Code     : `{invite.code}`
 		""")
 		await channel.send(embed=embed)
+
+
+	@commands.Cog.listener("on_guild_join")
+	async def on_guild_join(self, guild:discord.Guild):
+		database.cursor.execute("""CREATE TABLE IF NOT EXISTS log_threads (
+			guild_id      INT PRIMARY KEY NOT NULL,
+			log_channel   INT             NOT NULL,
+			join_thread   INT             NOT NULL,
+			invite_thread INT             NOT NULL)""")
+		sachi_guild_category = discord.utils.get(self.sachibotland.categories,name="Guilds")
+		guild_channel = await self.sachibotland.create_text_channel(name=guild.name, reason=f"Joined {guild.name}", category=sachi_guild_category)
+		
+		guild_embed = discord.Embed(title=f"{guild.name}", color=embedcolor, description="")
+		if guild.icon is not None:
+			guild_embed.set_thumbnail(url=guild.icon.url)
+		EmbedMaker.add_description_field(guild_embed, "ID", f"`{guild.id}`")
+		EmbedMaker.add_description_field(guild_embed, "Name", f"[{guild.name}](https://discord.com/channels/{guild.id})")
+		EmbedMaker.add_description_field(guild_embed, "Owner", f"{guild.owner}")
+		
+		await guild_channel.send(embed=guild_embed)
+
+		join_message = await guild_channel.send(embed=discord.Embed(title=f"Joins", color=embedcolor))
+		invite_message = await guild_channel.send(embed=discord.Embed(title=f"Invites", color=embedcolor))
+
+		join_thread = await join_message.start_thread(name=f"Joins for {guild.name}", auto_archive_duration=10080)
+		invite_thread = await invite_message.start_thread(name=f"Invites for {guild.name}", auto_archive_duration=10080)
+
+		await join_thread.add_user(self.bot.owner)
+		await invite_thread.add_user(self.bot.owner)
+		database.cursor.execute("INSERT INTO log_threads (guild_id, log_channel, join_thread, invite_thread) values (?,?,?,?)", (guild.id, guild_channel.id, join_thread.id, invite_thread.id))
+		database.commit()
+
+
 def setup(bot):
 	bot.add_cog(ListenerCog(bot))
