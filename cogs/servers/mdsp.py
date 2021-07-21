@@ -231,18 +231,24 @@ class MdspCog(commands.Cog, name="Server/MDSP"):
 		self.bot:discord.Client = bot
 		self.guild_limit = 764981968579461130
 
+	async def cog_before_invoke(self, ctx):
+		if CustomChecks.check_enabled_guild(ctx, self.guild_limit):
+			return
+		else:
+			raise CustomChecks.IncorrectGuild
+
 	@commands.group(aliases=['invitee', 'invitees'])
-	@CustomChecks.limit_to_guild(764981968579461130)
 	async def invite(self, ctx):
 		await ctx.reply("Invites are currently disabled.")
-		# if ctx.invoked_subcommand is None:
-		# 	delim = "\n\n"
-		# 	#subcommands = [cmd.name for cmd in ctx.command.commands]
-		# 	subcommands = [
-		# 		f'**{cmd.name}:** {cmd.description}' for cmd in ctx.command.commands]
-		# 	embed = discord.Embed(color=embedcolor, title="Invite Subcommands:",
-		# 						  description=delim.join(list(map(str, subcommands))))
-		# 	await ctx.reply(embed=embed)
+		return
+		if ctx.invoked_subcommand is None:
+			delim = "\n\n"
+			#subcommands = [cmd.name for cmd in ctx.command.commands]
+			subcommands = [
+				f'**{cmd.name}:** {cmd.description}' for cmd in ctx.command.commands]
+			embed = discord.Embed(color=embedcolor, title="Invite Subcommands:",
+								  description=delim.join(list(map(str, subcommands))))
+			await ctx.reply(embed=embed)
 
 	@invite.command(description="*Cooldown: 2 minutes*\nAdds a user to #potential-invitees",enabled=False)
 	async def add(self, ctx, *args): #pylint:disable=too-many-locals,too-many-branches
