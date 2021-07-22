@@ -1,6 +1,11 @@
 from urllib import parse
+from discord import integrations
 import requests
+import json
+from discord.ext.commands import CommandError
 
+class InvalidMcServer(CommandError):
+	pass
 
 class MinecraftUser():
 	def __init__(self, user:str) -> None:
@@ -61,4 +66,66 @@ class MinecraftUser():
 		if skin_format not in skin_formats.keys():
 			raise ValueError("Unrecognized skin format")
 		return skin_formats[skin_format]
+				
 
+
+class MinecraftServer():
+	ip:str = None
+	port:int = None
+	online:bool = None
+	motd: "list[str]" = None
+	version:str = None
+	world:str = None
+	software:str = None
+	plugins:"list[str]" = None
+	mods:"list[str]" = None
+
+	
+
+	def __init__(self, ip:str, port:int=25565) -> None:
+		self.ip = ip
+		self.port = port
+		data = requests.get(f"https://api.mcsrvstat.us/2/{ip}:{port}").json()
+		self.online = data["online"]
+		if self.online:
+			
+			self.players = _Players(data)
+			self.motd = data["motd"]["clean"]
+			self.version = data["version"]
+			if "map" in data.keys():
+				self.world = data["map"]
+			if "software" in data.keys():
+				self.software = data["software"]
+			
+			if "plugins" in data.keys():				
+				self.plugins = data["plugins"]["names"]
+			if "mods" in data.keys():
+				self.mods = data["mods"]["names"]
+
+	@property
+	def server_icon(self) -> str:
+		"""Returns the url to the server icon as a png"""
+		return f"https://api.mcsrvstat.us/icon/{self.ip}:{self.port}"
+
+	@property
+	def color(self) -> int:
+		"""Returns 0xFF0000 if the server is offline and 0x00FF00 if it is online"""
+		if self.online:
+			return 0x00FF00
+		else:
+			return 0xFF0000
+
+class _Players():
+	names    : "list[str]"     = None
+	uuids    : "dict[str,str]" = None
+	max      : int             = None
+	count    : int             = None
+
+	def __init__(self, data):
+		self.max = data["players"]["max"]
+		self.count = data["players"]["online"]
+		if "uuid" in data["players"].keys():
+			self.uuids = data["players"]["uuid"]
+			self.names = data["players"]["list"]
+
+print(MinecraftServer("mc.hypixel.net").players.uuids)

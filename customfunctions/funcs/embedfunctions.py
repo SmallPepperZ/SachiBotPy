@@ -20,14 +20,20 @@ def add_description_field(embed:discord.Embed, key:str, value:str, *, boldkey:bo
 		Whether to bold the key value, set to false if there is alternate formatting.
 
 	"""
-	if boldkey:
-		boldmarks = '**'
+	if key is not None:
+		if boldkey:
+			boldmarks = '**'
+		else:
+			boldmarks = ''
+		if embed.description == Embed.Empty:
+			embed.__setattr__("description", f'{boldmarks}{key}:{boldmarks} {value}')
+		else:
+			embed.__setattr__("description", f'{embed.description}\n{boldmarks}{key}:{boldmarks} {value}')
 	else:
-		boldmarks = ''
-	if embed.description == Embed.Empty:
-		embed.__setattr__("description", f'{boldmarks}{key}:{boldmarks} {value}')
-	else:
-		embed.__setattr__("description", f'{embed.description}\n{boldmarks}{key}:{boldmarks} {value}')
+		if embed.description == Embed.Empty:
+			embed.__setattr__("description", f'{value}')
+		else:
+			embed.__setattr__("description", f'{embed.description}\n{value}')
 
 def add_blank_field(embed:discord.Embed):
 	"""Adds a line break to the description of an embed
