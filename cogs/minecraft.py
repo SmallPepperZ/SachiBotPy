@@ -91,7 +91,7 @@ class MinecraftCog(commands.Cog, name="Minecraft"):
 			server_port = port
 		author:discord.Member = ctx.author
 		if save_name is not None:
-			if database.cursor.execute("SELECT * FROM mc_servers WHERE guild_id=? AND name=?", (ctx.guild.id,save_name)).fetchone() is None:
+			if database.cursor.execute("SELECT * FROM mc_servers WHERE guild_id=? AND name=?", (ctx.guild.id,save_name)).fetchone() is None and save_name != "default":
 				database.cursor.execute("INSERT INTO mc_servers (guild_id, owner_id, ip_address, port, name) values (?,?,?,?,?)", (ctx.guild.id, ctx.author.id, server, port, save_name))
 				database.commit()
 			elif author.guild_permissions.manage_messages:
