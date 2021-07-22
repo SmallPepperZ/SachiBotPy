@@ -13,14 +13,7 @@ from customfunctions import master_logger
 
 
 
-def get_logging_channel(bot:discord.Client, channel_name:str) -> discord.TextChannel:
-	logging_channels = {
-	"joins": lambda: bot.get_guild(797308956162392094).get_channel(844600626516328519),
-	"invites": lambda: bot.get_guild(797308956162392094).get_channel(845350291103809546),
-	"java_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778423579410433),
-	"bedrock_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778441133097021),
-	}
-	return logging_channels[channel_name]()
+
 
 
 embedcolor = config("embedcolor")
@@ -31,14 +24,21 @@ logger = master_logger.getChild("listeners")
 delete_logger = master_logger.getChild("listeners").getChild("deletions")
 
 #endregion
-
+def get_logging_channel(bot:discord.Client, channel_name:str, guild:int) -> discord.TextChannel:
+	logging_channels = {
+	"joins": lambda: bot.get_guild(797308956162392094).get_thread(database.cursor.execute("select join_thread from log_threads where guild_id=?", (guild,)).fetchone()[0]),
+	"invites": lambda: bot.get_guild(797308956162392094).get_thread(database.cursor.execute("select invite_thread from log_threads where guild_id=?", (guild,)).fetchone()[0]),
+	"java_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778423579410433),
+	"bedrock_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778441133097021),
+	}
+	return logging_channels[channel_name]()
 
 def dump_mutes(data:dict) -> None:
 	with open("storage/mutes.json", "w") as file:
 		json.dump(data, file, indent=2)
 
 async def member_join_update(bot:discord.Client, member:discord.Member, action:str, color) -> None:
-	channel = get_logging_channel(bot, "joins")
+	channel = get_logging_channel(bot, "joins",member.guild.id)
 	embed = discord.Embed(title=f'User {action.capitalize()}',color=color, description=f"""
 	**Guild**
 	ID  : `{member.guild.id}`
@@ -206,7 +206,6 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener("on_member_join")
 	async def on_member_join(self, member: discord.Member):
-		logger.info("Member left!")
 		await member_join_update(self.bot, member, "joined", 0x2BDE1F)
 
 	@commands.Cog.listener("on_member_remove")
@@ -225,7 +224,7 @@ class ListenerCog(commands.Cog, name="Logging"):
 
 	@commands.Cog.listener("on_invite_create")
 	async def on_invite_create(self, invite:discord.Invite):
-		channel = get_logging_channel(self.bot, "invites")
+		channel = get_logging_channel(self.bot, "invites", invite.guild.id)
 		embed = discord.Embed(title='Invite Created',color=0x2BDE1F, description=f"""
 		**Guild**
 		ID       : `{invite.guild.id}`
@@ -241,6 +240,22 @@ class ListenerCog(commands.Cog, name="Logging"):
 		**Other**
 		Max Time : `{str(dt.timedelta(seconds=invite.max_age))}`
 		Max Uses : `{invite.max_uses}`
+		Code     : `{invite.code}`
+		""")
+		await channel.send(embed=embed)
+
+	@commands.Cog.listener("on_invite_delete")
+	async def on_invite_delete(self, invite:discord.Invite):
+		channel = get_logging_channel(self.bot, "invites", invite.guild.id)
+		embed = discord.Embed(title='Invite Deleted',color=0xD9361C, description=f"""
+		**Guild**
+		ID       : `{invite.guild.id}`
+		Name     : [{invite.guild.name}](https://discord.com/channels/{invite.guild.id})
+		**Channel**
+		ID       : `{invite.channel.id}`
+		Name     : [{invite.channel.name}](https://discord.com/channels/{invite.guild.id}/{invite.channel.id})
+		Mention  : {invite.channel.mention}
+		**Other**
 		Code     : `{invite.code}`
 		""")
 		await channel.send(embed=embed)
