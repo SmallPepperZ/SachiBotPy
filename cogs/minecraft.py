@@ -63,27 +63,36 @@ class MinecraftCog(commands.Cog, name="Minecraft"):
 		await ctx.send(embed=embed)
 
 	@minecraft.command()
-	async def server(self, ctx, server_ip:str, port:int=25565):
-		"""Gets information about a Minecraft Server"""
-		server = MinecraftApi.MinecraftServer(server_ip, port)
-		embed = discord.Embed(color=server.color, title="Server Status")
-		embed.set_author(name=server.ip)
-		embed.set_thumbnail(url=server.server_icon)
-		status = "Online" if server.online else "Offline"
+	async def server(self, ctx, server:str, port:int=25565, save_name:str=None):
+		"""
+		Gets information about a Minecraft Server
+
+		server_ip should be the numeric ip address for the server, eg 123.456.789.012. It can also be a server's saved name, if it is saved
+
+		port should be the port of the server, 25565 by default
+
+		save_name is used to save the server so it can be easily accessed again
+		"""
+		server_data = MinecraftApi.MinecraftServer(server, port)
+		embed = discord.Embed(color=server_data.color, title="Server Status")
+		embed.set_author(name=server_data.ip)
+		embed.set_thumbnail(url=server_data.server_icon)
+		status = "Online" if server_data.online else "Offline"
 		EmbedMaker.add_description_field(embed, "Status", status)
-		if server.online:
-			EmbedMaker.add_description_field(embed, "Version", server.version)
-			EmbedMaker.add_description_field(embed, "Software", server.software)
-			EmbedMaker.add_description_field(embed, "Player Count", f'{server.players.count}/{server.players.max}')
-			formatted_motd = "\n".join([f"> {line}" for line in server.motd])
+		if server_data.online:
+			EmbedMaker.add_description_field(embed, "Version", server_data.version)
+			EmbedMaker.add_description_field(embed, "Software", server_data.software)
+			EmbedMaker.add_description_field(embed, "Player Count", f'{server_data.players.count}/{server_data.players.max}')
+			formatted_motd = "\n".join([f"> {line}" for line in server_data.motd])
 			EmbedMaker.add_description_field(embed, None, f'\n{formatted_motd}')
-			if server.mods is not None:
-				EmbedMaker.add_description_field(embed, "Mods", ", ".join(server.mods))
-			if server.plugins is not None:
-				EmbedMaker.add_description_field(embed, "Plugins", ", ".join(server.plugins))
-			if server.players.names is not None:
-				EmbedMaker.add_description_field(embed, "Players", ", ".join(server.players.names))
+			if server_data.mods is not None:
+				EmbedMaker.add_description_field(embed, "Mods", ", ".join(server_data.mods))
+			if server_data.plugins is not None:
+				EmbedMaker.add_description_field(embed, "Plugins", ", ".join(server_data.plugins))
+			if server_data.players.names is not None:
+				EmbedMaker.add_description_field(embed, "Players", ", ".join(server_data.players.names))
 		await ctx.send(embed=embed)
+
 
 def setup(bot):
 	bot.add_cog(MinecraftCog(bot))
