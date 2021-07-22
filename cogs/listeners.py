@@ -24,12 +24,13 @@ logger = master_logger.getChild("listeners")
 delete_logger = master_logger.getChild("listeners").getChild("deletions")
 
 #endregion
-def get_logging_channel(bot:discord.Client, channel_name:str, guild:int) -> discord.TextChannel:
+def get_logging_channel(bot:discord.Client, channel_name:str, guild:int=None) -> discord.TextChannel:
 	logging_channels = {
 	"joins": lambda: bot.get_guild(797308956162392094).get_thread(database.cursor.execute("select join_thread from log_threads where guild_id=?", (guild,)).fetchone()[0]),
 	"invites": lambda: bot.get_guild(797308956162392094).get_thread(database.cursor.execute("select invite_thread from log_threads where guild_id=?", (guild,)).fetchone()[0]),
 	"java_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778423579410433),
 	"bedrock_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778441133097021),
+	"servers": lambda: bot.get_guild(797308956162392094).get_channel(867605721424199710)
 	}
 	return logging_channels[channel_name]()
 
@@ -268,28 +269,43 @@ class ListenerCog(commands.Cog, name="Logging"):
 			log_channel   INT             NOT NULL,
 			join_thread   INT             NOT NULL,
 			invite_thread INT             NOT NULL)""")
-		sachi_guild_category = discord.utils.get(self.sachibotland.categories,name="Guilds")
-		guild_channel = await self.sachibotland.create_text_channel(name=guild.name, reason=f"Joined {guild.name}", category=sachi_guild_category)
-		
-		guild_embed = discord.Embed(title=f"{guild.name}", color=embedcolor, description="")
-		if guild.icon is not None:
-			guild_embed.set_thumbnail(url=guild.icon.url)
-		EmbedMaker.add_description_field(guild_embed, "ID", f"`{guild.id}`")
-		EmbedMaker.add_description_field(guild_embed, "Name", f"[{guild.name}](https://discord.com/channels/{guild.id})")
-		EmbedMaker.add_description_field(guild_embed, "Owner", f"{guild.owner}")
-		
-		await guild_channel.send(embed=guild_embed)
+		channel = get_logging_channel(self.bot, "servers")
+		join_embed = discord.Embed(color=embedcolor,title="Added to guild", description=f"""
+		**Guild**
+		ID       : `{guild.id}`
+		Name     : [{guild.name}](https://discord.com/channels/{guild.id})
+		Owner    : {guild.owner.mention}({guild.owner})""")
+		owner_in_server = discord.utils.get(guild.members, id=self.bot.owner.id) is not None
+		join_embed.add_field(name="Owner in Guild",value=owner_in_server)
+		if owner_in_server:
+			await channel.send(embed=join_embed)
+		else:
+			await channel.send(embed=join_embed, content="Leaving server")
+			await guild.leave()
 
-		join_message = await guild_channel.send(embed=discord.Embed(title=f"Joins", color=embedcolor))
-		invite_message = await guild_channel.send(embed=discord.Embed(title=f"Invites", color=embedcolor))
+		if database.cursor.execute("SELECT guild_id from log_threads where guild_id=?", (guild.id,)).fetchone() is None:
+			sachi_guild_category = discord.utils.get(self.sachibotland.categories,name="Guilds")
+			guild_channel = await self.sachibotland.create_text_channel(name=guild.name, reason=f"Joined {guild.name}", category=sachi_guild_category)
+			
+			guild_embed = discord.Embed(title=f"{guild.name}", color=embedcolor, description="")
+			if guild.icon is not None:
+				guild_embed.set_thumbnail(url=guild.icon.url)
+			EmbedMaker.add_description_field(guild_embed, "ID", f"`{guild.id}`")
+			EmbedMaker.add_description_field(guild_embed, "Name", f"[{guild.name}](https://discord.com/channels/{guild.id})")
+			EmbedMaker.add_description_field(guild_embed, "Owner", f"{guild.owner}")
+			
+			await guild_channel.send(embed=guild_embed)
 
-		join_thread = await join_message.start_thread(name=f"Joins for {guild.name}", auto_archive_duration=10080)
-		invite_thread = await invite_message.start_thread(name=f"Invites for {guild.name}", auto_archive_duration=10080)
+			join_message = await guild_channel.send(embed=discord.Embed(title=f"Joins", color=embedcolor))
+			invite_message = await guild_channel.send(embed=discord.Embed(title=f"Invites", color=embedcolor))
 
-		await join_thread.add_user(self.bot.owner)
-		await invite_thread.add_user(self.bot.owner)
-		database.cursor.execute("INSERT INTO log_threads (guild_id, log_channel, join_thread, invite_thread) values (?,?,?,?)", (guild.id, guild_channel.id, join_thread.id, invite_thread.id))
-		database.commit()
+			join_thread = await join_message.start_thread(name=f"Joins for {guild.name}", auto_archive_duration=10080)
+			invite_thread = await invite_message.start_thread(name=f"Invites for {guild.name}", auto_archive_duration=10080)
+
+			await join_thread.add_user(self.bot.owner)
+			await invite_thread.add_user(self.bot.owner)
+			database.cursor.execute("INSERT INTO log_threads (guild_id, log_channel, join_thread, invite_thread) values (?,?,?,?)", (guild.id, guild_channel.id, join_thread.id, invite_thread.id))
+			database.commit()
 
 
 def setup(bot):
