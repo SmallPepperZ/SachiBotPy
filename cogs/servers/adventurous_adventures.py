@@ -21,12 +21,9 @@ class AACog(commands.Cog, name="Server/Adventurous Adventures"):
 		self.bot:discord.Client = bot
 		self.guild_limit = 855519898025459782
 	
-	async def cog_before_invoke(self, ctx):
-
-		if CustomChecks.check_enabled_guild(ctx, self.guild_limit):
-			return
-		else:
-			raise IncorrectGuild
+	async def cog_check(self, ctx):
+		enabled = CustomChecks.check_enabled_guild(ctx, self.guild_limit, True)
+		return enabled
 
 	@CustomChecks.limit_to_guild(764981968579461130)
 	@commands.command()

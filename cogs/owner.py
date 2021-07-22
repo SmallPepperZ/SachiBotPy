@@ -53,6 +53,14 @@ class OwnerCog(commands.Cog,name="Owner"):
 		self.bot:discord.Client = bot
 		self.hide_help = True
 
+	async def cog_check(self, ctx):
+		is_owner =  await self.bot.is_owner(ctx.author)
+		if is_owner:
+			return True
+		else:
+			raise commands.NotOwner("You don't own this bot")
+
+
 	@property
 	def bot_member(self):
 		try:
@@ -62,7 +70,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 
 
 	@commands.command()
-	@commands.is_owner()
 	async def restart(self, ctx):
 		await del_msg(ctx.message)
 		current_time = time.time()
@@ -76,7 +83,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 		#await self.bot.logout()
 
 	@commands.command()
-	@commands.is_owner()
 	async def stop(self, ctx):
 		await del_msg(ctx.message)
 		embed = discord.Embed(color=embedcolor, title="Stopping...")
@@ -86,7 +92,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 		#await self.bot.logout()
 
 	@commands.command()
-	@commands.is_owner()
 	@commands.guild_only()
 	async def export(self, ctx, channel:int):
 		embed = discord.Embed(color=embedcolor)
@@ -95,7 +100,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 		await ctx.reply(embed=embed)
 
 	@commands.command()
-	@commands.is_owner()
 	async def embedcolor(self, ctx, color:str):
 		colorint      = f"0x{color}"
 		oldembedcolor = config("embedcolor")
@@ -135,7 +139,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 			return
 
 	@commands.group()
-	@commands.is_owner()
 	async def status(self,ctx):
 
 
@@ -221,7 +224,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 		await ctx.reply(embed=embed)
 
 	@commands.command()
-	@commands.check(is_owner())
 	#commands.check(guild_only)
 	async def bottalk(self, ctx):
 		global BOT_TALK_CHANNEL, BOT_TALK_CHANNEL_OBJ, DM_CHANNEL #pylint:disable=global-variable-undefined
@@ -246,7 +248,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 			elif msg.channel.id == BOT_TALK_CHANNEL and not (msg.author.id) == self.bot.user.id:
 				await DM_CHANNEL.send(f'**{msg.author}:** {msg.content}')
 	@commands.command()
-	@commands.check(is_owner())
 	async def enable_guild(self, ctx, guild_id:int):
 		guild_ids = [guild.id for guild in self.bot.guilds]
 		if guild_id in guild_ids:
@@ -256,7 +257,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 			await ctx.reply(embed=EmbedMaker.simple_embed("I am not in that server", embedcolor))
 
 	@commands.command()
-	@commands.check(is_owner())
 	async def exec(self, ctx, *, code:str):
 		if int(ctx.author.id) != self.bot.owner.id:
 			raise NotOwner
@@ -282,5 +282,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 			await ctx.message.remove_reaction('<a:loading:846527533691568128>', ctx.guild.me)
 		else:
 			await ctx.reply("Please put the code in a codeblock")
+			
 def setup(bot):
 	bot.add_cog(OwnerCog(bot))

@@ -234,7 +234,6 @@ class MdspCog(commands.Cog, name="Server/MDSP"):
 
 	async def cog_check(self, ctx):
 		enabled = CustomChecks.check_enabled_guild(ctx, self.guild_limit, True)
-		logger.info(enabled)
 		return enabled
 
 	@commands.group(aliases=['invitee', 'invitees'])
