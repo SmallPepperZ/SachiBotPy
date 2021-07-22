@@ -1,10 +1,11 @@
 import discord
 from discord.ext import commands
-from customfunctions import config, MinecraftApi, master_logger, EmbedMaker
+from customfunctions import config, MinecraftApi, master_logger, EmbedMaker, DBManager
 
 
 embedcolor = config("embedcolor")
 logger = master_logger.getChild("minecraft")
+database = DBManager.Database()
 
 class MinecraftCog(commands.Cog, name="Minecraft"):
 	def __init__(self, bot):
@@ -63,17 +64,45 @@ class MinecraftCog(commands.Cog, name="Minecraft"):
 		await ctx.send(embed=embed)
 
 	@minecraft.command()
-	async def server(self, ctx, server:str, port:int=25565, save_name:str=None):
+	async def server(self, ctx, server:str="default", port:int=25565, save_name:str=None):
 		"""
 		Gets information about a Minecraft Server
 
-		server_ip should be the numeric ip address for the server, eg 123.456.789.012. It can also be a server's saved name, if it is saved
+		server_ip should be the numeric ip address for the server, eg 123.456.789.012. It can also be a server's saved name, if it is saved. 
 
 		port should be the port of the server, 25565 by default
 
-		save_name is used to save the server so it can be easily accessed again
+		save_name is used to save the server so it can be easily accessed again. If the server name is "default", it will be used when no guild is specified
 		"""
-		server_data = MinecraftApi.MinecraftServer(server, port)
+		database.cursor.execute("""CREATE TABLE IF NOT EXISTS mc_servers (
+			guild_id     INT  NOT NULL,
+			owner_id     INT              NOT NULL,
+			ip_address   TEXT             NOT NULL,
+			port         INT              NOT NULL,
+			name         TEXT             NOT NULL,
+			PRIMARY KEY (guild_id,name))""")
+		stored_server = database.cursor.execute("SELECT * FROM mc_servers WHERE guild_id=? AND name=?", (ctx.guild.id,server)).fetchone()
+		database.commit()
+		if stored_server is not None:
+			server_ip = stored_server[2]
+			server_port = stored_server[3]
+		else:
+			server_ip = server
+			server_port = port
+		author:discord.Member = ctx.author
+		if save_name is not None:
+			if database.cursor.execute("SELECT * FROM mc_servers WHERE guild_id=? AND name=?", (ctx.guild.id,save_name)).fetchone() is None:
+				database.cursor.execute("INSERT INTO mc_servers (guild_id, owner_id, ip_address, port, name) values (?,?,?,?,?)", (ctx.guild.id, ctx.author.id, server, port, save_name))
+				database.commit()
+			elif author.guild_permissions.manage_messages:
+				database.cursor.execute("INSERT OR REPLACE INTO mc_servers (guild_id, owner_id, ip_address, port, name) values (?,?,?,?,?)", (ctx.guild.id, ctx.author.id, server, port, save_name))
+				database.commit()
+				server_ip = server
+				server_port = port
+			else:
+				database.commit()
+		await ctx.channel.trigger_typing()
+		server_data = MinecraftApi.MinecraftServer(server_ip, server_port)
 		embed = discord.Embed(color=server_data.color, title="Server Status")
 		embed.set_author(name=server_data.ip)
 		embed.set_thumbnail(url=server_data.server_icon)
