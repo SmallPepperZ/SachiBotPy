@@ -5,16 +5,16 @@ OVERRIDE_CHANNEL = 814213585939988527
 class IncorrectGuild(commands.CommandError):
 	pass
 
-def check_enabled_guild(ctx, guild_id:int):
-		try:
-			guild_id = ctx.guild.id
-			channel_id = ctx.channel.id
-		except AttributeError as err:
-			raise commands.NoPrivateMessage from err
-		if guild_id == guild_id or channel_id == OVERRIDE_CHANNEL:
+def check_enabled_guild(ctx, guild_id:int, error:bool=False):
+		if ctx.guild is None:
+			raise commands.NoPrivateMessage
+		if ctx.guild.id == guild_id or ctx.channel.id == OVERRIDE_CHANNEL:
 			return True
 		else:
-			return False
+			if error:
+				raise IncorrectGuild
+			else:
+				return False
 
 def limit_to_guild(guild:int):
 	def predicate(ctx):

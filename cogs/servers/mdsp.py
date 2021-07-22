@@ -1,3 +1,4 @@
+from customfunctions.funcs.checks import limit_to_guild
 import sqlite3
 import traceback
 
@@ -231,11 +232,10 @@ class MdspCog(commands.Cog, name="Server/MDSP"):
 		self.bot:discord.Client = bot
 		self.guild_limit = 764981968579461130
 
-	async def cog_before_invoke(self, ctx):
-		if CustomChecks.check_enabled_guild(ctx, self.guild_limit):
-			return
-		else:
-			raise CustomChecks.IncorrectGuild
+	async def cog_check(self, ctx):
+		enabled = CustomChecks.check_enabled_guild(ctx, self.guild_limit, True)
+		logger.info(enabled)
+		return enabled
 
 	@commands.group(aliases=['invitee', 'invitees'])
 	async def invite(self, ctx):
@@ -535,7 +535,6 @@ class MdspCog(commands.Cog, name="Server/MDSP"):
 	@pause.error
 	@accept.error
 	@decline.error
-	@invite.error
 	@update.error
 	async def invite_cog_error_handler(self, ctx, error):
 		if isinstance(error, BadArgument):
