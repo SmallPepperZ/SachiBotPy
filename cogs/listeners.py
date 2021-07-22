@@ -307,6 +307,15 @@ class ListenerCog(commands.Cog, name="Logging"):
 			database.cursor.execute("INSERT INTO log_threads (guild_id, log_channel, join_thread, invite_thread) values (?,?,?,?)", (guild.id, guild_channel.id, join_thread.id, invite_thread.id))
 			database.commit()
 
+	@commands.Cog.listener("on_guild_remove")
+	async def on_guild_remove(self, guild:discord.Guild):
+		channel = get_logging_channel(self.bot, "servers")
+		join_embed = discord.Embed(color=embedcolor,title="left guild", description=f"""
+		**Guild**
+		ID       : `{guild.id}`
+		Name     : [{guild.name}](https://discord.com/channels/{guild.id})
+		Owner    : {guild.owner.mention}({guild.owner})""")
+		await channel.send(embed=join_embed)
 
 def setup(bot):
 	bot.add_cog(ListenerCog(bot))
