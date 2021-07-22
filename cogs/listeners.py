@@ -32,6 +32,7 @@ def get_logging_channel(bot:discord.Client, channel_name:str, guild:int=None) ->
 	"bedrock_repost": lambda: bot.get_guild(739176312081743934).get_channel(821778441133097021),
 	"servers": lambda: bot.get_guild(797308956162392094).get_channel(867605721424199710)
 	}
+	database.commit()
 	return logging_channels[channel_name]()
 
 def dump_mutes(data:dict) -> None:

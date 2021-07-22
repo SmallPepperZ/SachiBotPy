@@ -26,7 +26,7 @@ def set_config(item:str, value:str, config_type:str="string"):
 	keys = my_db.cursor.execute("""select key from config""").fetchall()
 	if item in [key[0] for key in keys]:
 		my_db.cursor.execute("""UPDATE config SET value = ? WHERE key = ?""", (str(formatted_item), item))
-		my_db.connection.commit()
+		my_db.commit()
 	else:
 		raise ValueError(f'{item} not in config')
 	# with open('storage/config.json', 'w') as file:

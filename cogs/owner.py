@@ -12,9 +12,10 @@ from PIL import Image
 import discord
 
 from discord.ext import commands
+from discord.ext.commands.converter import GuildConverter
 from discord.ext.commands.core import is_owner
 from discord import Status
-from discord.ext.commands.errors import NotOwner
+from discord.ext.commands.errors import BadArgument, NotOwner
 
 
 from customfunctions import config, set_config
@@ -23,6 +24,8 @@ from customfunctions import EmbedMaker
 from customfunctions import del_msg
 from customfunctions import master_logger
 from customfunctions import StatusManager
+
+from cogs.listeners import get_logging_channel
 
 #region Variable Stuff
 BASE_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -68,6 +71,32 @@ class OwnerCog(commands.Cog,name="Owner"):
 		except IndexError:
 			return None
 
+	@commands.command()
+	async def leave(self, ctx, guild_id:str=None):
+
+		if guild_id is None:
+			guild:discord.Guild = ctx.guild
+		else:
+			try:
+				guild = await GuildConverter().convert(ctx, guild_id)
+			except BadArgument:
+				await ctx.reply("I'm not in that guild")
+				return
+		if not guild in self.bot.guilds:
+			await ctx.reply("I'm not in that guild")
+			return
+		channel = get_logging_channel(self.bot,"servers")
+		embed = discord.Embed(color=embedcolor, title="Leave Guild", description=f"Are you sure you want me to leave '{guild.name}'?")
+		msg = await channel.send(embed=embed)
+		await (await channel.send(self.bot.owner.mention)).delete()
+		confirmed:bool = await ConfirmationCheck.confirm(self, ctx, msg)
+		if confirmed:
+			embed = discord.Embed(color=embedcolor, title="Left Guild", description=f"Left guild '{guild.name}'")
+			await guild.leave()
+			await msg.edit(embed=embed)
+		else:
+			embed = discord.Embed(color=embedcolor, title="Did Not Leave Guild", description=f"Remained in guild '{guild.name}'")
+			await msg.edit(embed=embed)
 
 	@commands.command()
 	async def restart(self, ctx):
@@ -282,6 +311,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 			await ctx.message.remove_reaction('<a:loading:846527533691568128>', ctx.guild.me)
 		else:
 			await ctx.reply("Please put the code in a codeblock")
-			
+
 def setup(bot):
 	bot.add_cog(OwnerCog(bot))
