@@ -41,7 +41,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 					pass
 				else:
 					short_help = " - "+command.help.split("\n")[0] if command.help is not None else ""
-					signature = f" {command.signature}" if command.signature is not "" else ""
+					signature = f" {command.signature}" if command.signature != "" else ""
 					cog_commands.append(f'''`{self.bot.prefix}{command.qualified_name}{signature}` {short_help}''')
 
 			cog_help_page="\n".join(cog_commands)
