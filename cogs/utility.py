@@ -2,7 +2,10 @@ import time
 import datetime
 import asyncio
 import json
+from types import CoroutineType, coroutine
+from typing import Coroutine
 import discord
+import inspect
 from discord.ext import commands
 from discord.ext.commands.converter import Greedy
 
@@ -25,40 +28,69 @@ class UtilityCog(commands.Cog, name="Utility"):
 		self.bot:discord.Client = bot
 
 	@commands.command()
-	async def help(self, ctx):
-		logger.debug("dumping to json finished")
+	async def help(self, ctx, *, command_name:str=None):
+		"""Shows information about commands. You can optionally specify a command to see more information"""
 		pages   = []
-		for cog, cog_data in self.bot.cogs.items():
-			cog:str
-			cog_data:commands.Cog
-			print(cog_data)
-			cog_commands:"list[commands.Command|commands.Group]" = []
-			logger.debug(f"Starting cog loop for {cog}")
+		if command_name is None:
+			for cog, cog_data in self.bot.cogs.items():
+				cog:str
+				cog_data:commands.Command
+				cog_commands:"list[commands.Command|commands.Group]" = []
+				logger.debug(f"Starting cog loop for {cog}")
 
-			for command in cog_data.walk_commands():
-				command:"commands.Command|commands.Group"
-				if command.hidden or not command.enabled:
-					pass
+				for command in cog_data.walk_commands():
+					command:"commands.Command|commands.Group"
+					if command.hidden or not command.enabled:
+						pass
+					else:
+						short_help = " - "+command.help.split("\n")[0] if command.help is not None else ""
+						signature = f" {command.signature}" if command.signature != "" else ""
+						cog_commands.append(f'''`{self.bot.prefix}{command.qualified_name}{signature}` {short_help}''')
+
+				cog_help_page="\n".join(cog_commands)
+
+				if hasattr(cog_data, "hide_help") and cog_data.hide_help:
+					if ctx.author.id == self.bot.owner.id:
+						pages.append(discord.Embed(title=f'Help: {cog}', description=cog_help_page, color=embedcolor))
+
+				elif hasattr(cog_data, "guild_limit"):
+					if CustomChecks.check_enabled_guild(ctx, cog_data.guild_limit):
+						pages.append(discord.Embed(title=f'Help: {cog}', description=cog_help_page, color=embedcolor))
+
 				else:
-					short_help = " - "+command.help.split("\n")[0] if command.help is not None else ""
-					signature = f" {command.signature}" if command.signature != "" else ""
-					cog_commands.append(f'''`{self.bot.prefix}{command.qualified_name}{signature}` {short_help}''')
-
-			cog_help_page="\n".join(cog_commands)
-
-			if hasattr(cog_data, "hide_help") and cog_data.hide_help:
-				if ctx.author.id == self.bot.owner.id:
 					pages.append(discord.Embed(title=f'Help: {cog}', description=cog_help_page, color=embedcolor))
 
-			elif hasattr(cog_data, "guild_limit"):
-				if CustomChecks.check_enabled_guild(ctx, cog_data.guild_limit):
-					pages.append(discord.Embed(title=f'Help: {cog}', description=cog_help_page, color=embedcolor))
-
+			paginator = BotEmbedPaginator(ctx, pages)
+			await paginator.run()
+		else:
+			bot_commands = self.bot.commands
+			command:commands.Command = discord.utils.get(bot_commands, qualified_name=command_name)
+			if command is None:
+				await ctx.reply(f"Commmand '{command_name}' not found")
 			else:
-				pages.append(discord.Embed(title=f'Help: {cog}', description=cog_help_page, color=embedcolor))
-
-		paginator = BotEmbedPaginator(ctx, pages)
-		await paginator.run()
+				embed = discord.Embed(color=embedcolor,title=f'{self.bot.prefix}{command_name.title()}', description=command.description)
+				embed.set_author(name="SachiBot Help")
+				embed.add_field(name="Cog", value=command.cog_name)
+				signature = f" {command.signature}" if command.signature != "" else ""
+				embed.add_field(name="Usage", value=f'`{self.bot.prefix}{command.qualified_name}{signature}`')
+				embed.add_field(name="Enabled", value=command.enabled)
+				check_results = []
+				for check in command.checks:
+					try:
+						check_results.append(await check(ctx))
+					except Exception as e:
+						check_results.append(False)
+				cog:commands.Cog = command.cog
+				try:
+					if inspect.iscoroutinefunction(cog.cog_check):
+						check_results.append(await cog.cog_check(ctx))
+					else:
+						check_results.append(cog.cog_check(ctx))
+				except:
+					check_results.append(False)
+				logger.info(check_results)
+				embed.add_field(name="Can Execute", value=all(check_results))
+				await ctx.reply(embed=embed)
 
 	@commands.command(aliases=['uptime'])
 	async def ping(self, ctx):
