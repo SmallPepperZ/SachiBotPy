@@ -47,7 +47,7 @@ class FunCog(commands.Cog, name="Fun"):
 				await ctx.reply(msg)
 			else:
 				await del_msg(ctx.message)
-				await ctx.send(content)
+				await ctx.send(content, allowed_mentions=discord.AllowedMentions.all())
 
 	@commands.command(aliases=['repeatembed'])
 	async def simonsaysembed(self, ctx, *, content:str=None):
@@ -62,7 +62,7 @@ class FunCog(commands.Cog, name="Fun"):
 			else:
 				await del_msg(ctx.message)
 				embed=discord.Embed(color=embedcolor, description=content)
-				await ctx.send(embed=embed)
+				await ctx.send(embed=embed, allowed_mentions=discord.AllowedMentions.all())
 
 
 	@commands.command(aliases=['factoid'])

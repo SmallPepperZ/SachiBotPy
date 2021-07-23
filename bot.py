@@ -8,6 +8,7 @@ import traceback
 
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound, errors
+from discord.mentions import AllowedMentions
 
 from customfunctions.funcs import handling #pylint:disable=unused-import
 from customfunctions import config
@@ -32,6 +33,8 @@ intents.typing = False
 bot = commands.Bot(command_prefix=prefix,
 				   intents=intents,
 				   case_insensitive=True)
+
+bot.allowed_mentions=discord.AllowedMentions(everyone=False,roles=False)
 
 
 errorchannel = int(config("errorchannel"))
