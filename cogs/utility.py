@@ -63,10 +63,25 @@ class UtilityCog(commands.Cog, name="Utility"):
 			paginator = BotEmbedPaginator(ctx, pages)
 			await paginator.run()
 		else:
-			bot_commands = self.bot.commands
-			command:commands.Command = discord.utils.get(bot_commands, qualified_name=command_name)
+			bot_commands:"list[commands.Command|commands.Group]" = self.bot.walk_commands()
+			split_command_name = command_name.split(" ")
+			command = None
+			for bot_command in bot_commands:
+				if len(split_command_name) == 1:
+					if split_command_name[0] in bot_command.aliases or split_command_name[0] in bot_command.name:
+						command = bot_command
+						break
+				if len(bot_command.parents) == len(split_command_name[:-1]):
+					matching_parents=[]
+					for index, parent in enumerate(split_command_name[:-1]):
+						matching_parents.append(parent in bot_command.parents[index].aliases or parent == bot_command.parents[index].name)
+					if all(matching_parents):
+						if bot_command.name == split_command_name[-1]:
+							command = bot_command
+							break
+			# command:"commands.Command|commands.Group" = discord.utils.get(bot_commands, qualified_name=command_name)
 			if command is None:
-				await ctx.reply(f"Commmand '{command_name}' not found")
+				await ctx.reply(f"Command '{command_name}' not found")
 			else:
 				embed = discord.Embed(color=embedcolor,title=f'{self.bot.prefix}{command_name.title()}', description=command.description)
 				embed.set_author(name="SachiBot Help")
@@ -74,6 +89,9 @@ class UtilityCog(commands.Cog, name="Utility"):
 				signature = f" {command.signature}" if command.signature != "" else ""
 				embed.add_field(name="Usage", value=f'`{self.bot.prefix}{command.qualified_name}{signature}`')
 				embed.add_field(name="Enabled", value=command.enabled)
+				if isinstance(command, commands.Group):
+					subcommands = "\n".join([f'`{self.bot.prefix}{subcommand.qualified_name}`' for subcommand in command.commands])
+					embed.add_field(name="Subcommands",value=subcommands)
 				check_results = []
 				for check in command.checks:
 					try:
