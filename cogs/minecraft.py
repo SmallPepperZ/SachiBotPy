@@ -63,10 +63,9 @@ class MinecraftCog(commands.Cog, name="Minecraft"):
 		embed.__setattr__("description", "\n".join(names))
 		await ctx.send(embed=embed)
 
-	@minecraft.command()
+	@minecraft.command(aliases=["status", "serverstatus"])
 	async def server(self, ctx, server:str="default", port:int=25565, save_name:str=None):
-		"""
-		Gets information about a Minecraft Server
+		"""Gets information about a Minecraft Server
 
 		server_ip should be the numeric ip address for the server, eg 123.456.789.012. It can also be a server's saved name, if it is saved. 
 
