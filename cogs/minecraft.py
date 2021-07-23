@@ -67,11 +67,9 @@ class MinecraftCog(commands.Cog, name="Minecraft"):
 	async def server(self, ctx, server:str="default", port:int=25565, save_name:str=None):
 		"""Gets information about a Minecraft Server
 
-		server_ip should be the numeric ip address for the server, eg 123.456.789.012. It can also be a server's saved name, if it is saved. 
-
-		port should be the port of the server, 25565 by default
-
-		save_name is used to save the server so it can be easily accessed again. If the server name is "default", it will be used when no guild is specified
+		> `server` should be the numeric ip address for the server, eg 123.456.789.012. It can also be a server's saved name, if it is saved. 
+		> `port` should be the port of the server, 25565 by default
+		> `save_name` is used to save the server so it can be easily accessed again. If the server name is "default", it will be used when no guild is specified. Saving a server as default requires manage messages
 		"""
 		database.cursor.execute("""CREATE TABLE IF NOT EXISTS mc_servers (
 			guild_id     INT  NOT NULL,

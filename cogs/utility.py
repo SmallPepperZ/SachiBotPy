@@ -29,7 +29,19 @@ class UtilityCog(commands.Cog, name="Utility"):
 
 	@commands.command()
 	async def help(self, ctx, *, command_name:str=None):
-		"""Shows information about commands. You can optionally specify a command to see more information"""
+		"""**Shows information about commands. You can optionally specify a command to see more information**
+		
+		*Parameters*
+		
+		> `command_name` should be the fully qualified name of a command, and you can use aliases. `%help minecraft server` and `%help mc server` will both give you the help page for `%minecraft server`. If it is not included, it will show a list of commands paginated by cog
+
+		*Information*
+
+		> `Cog` shows what cog a command is in. This is only really useful for the owner.
+		> `Usage` shows the position of arguments. Arguments surrounded by <angled brackets> are required, and arguments surrounded by [square brackets] are optional
+		> `Enabled` shows whether the command is enabled. If it is disabled, nobody can use it.
+		> `Can Execute` shows whether the commmand can be run with the current context. This will be false if you don't have permissions, you're in the wrong server, etc
+		"""
 		pages   = []
 		if command_name is None:
 			for cog, cog_data in self.bot.cogs.items():
@@ -68,7 +80,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 			command = None
 			for bot_command in bot_commands:
 				if len(split_command_name) == 1:
-					if split_command_name[0] in bot_command.aliases or split_command_name[0] in bot_command.name:
+					if split_command_name[0] in bot_command.aliases or split_command_name[0] == bot_command.name:
 						command = bot_command
 						break
 				if len(bot_command.parents) == len(split_command_name[:-1]):
@@ -79,11 +91,10 @@ class UtilityCog(commands.Cog, name="Utility"):
 						if split_command_name[-1] == bot_command.name or split_command_name[-1] in bot_command.aliases :
 							command = bot_command
 							break
-			# command:"commands.Command|commands.Group" = discord.utils.get(bot_commands, qualified_name=command_name)
 			if command is None:
 				await ctx.reply(f"Command '{command_name}' not found")
 			else:
-				embed = discord.Embed(color=embedcolor,title=f'{self.bot.prefix}{command_name.lower()}', description=command.description)
+				embed = discord.Embed(color=embedcolor,title=f'{self.bot.prefix}{command_name.lower()}', description="\n\n".join([item for item in (command.description, command.help) if item is not None]))
 				embed.set_author(name="SachiBot Help")
 				embed.add_field(name="Cog", value=command.cog_name)
 				signature = f" {command.signature}" if command.signature != "" else ""
@@ -96,7 +107,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 				for check in command.checks:
 					try:
 						check_results.append(await check(ctx))
-					except Exception as e:
+					except Exception:
 						check_results.append(False)
 				cog:commands.Cog = command.cog
 				try:
