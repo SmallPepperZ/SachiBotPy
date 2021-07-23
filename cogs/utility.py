@@ -76,14 +76,14 @@ class UtilityCog(commands.Cog, name="Utility"):
 					for index, parent in enumerate(split_command_name[:-1]):
 						matching_parents.append(parent in bot_command.parents[index].aliases or parent == bot_command.parents[index].name)
 					if all(matching_parents):
-						if bot_command.name == split_command_name[-1]:
+						if split_command_name[-1] == bot_command.name or split_command_name[-1] in bot_command.aliases :
 							command = bot_command
 							break
 			# command:"commands.Command|commands.Group" = discord.utils.get(bot_commands, qualified_name=command_name)
 			if command is None:
 				await ctx.reply(f"Command '{command_name}' not found")
 			else:
-				embed = discord.Embed(color=embedcolor,title=f'{self.bot.prefix}{command_name.title()}', description=command.description)
+				embed = discord.Embed(color=embedcolor,title=f'{self.bot.prefix}{command_name.lower()}', description=command.description)
 				embed.set_author(name="SachiBot Help")
 				embed.add_field(name="Cog", value=command.cog_name)
 				signature = f" {command.signature}" if command.signature != "" else ""
