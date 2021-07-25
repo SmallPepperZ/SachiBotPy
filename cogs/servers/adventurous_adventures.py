@@ -1,4 +1,4 @@
-from customfunctions.funcs.checks import IncorrectGuild
+import os
 import datetime
 
 import discord
@@ -25,12 +25,23 @@ class AACog(commands.Cog, name="Server/Adventurous Adventures"):
 		enabled = CustomChecks.check_enabled_guild(ctx, self.guild_limit, True)
 		return enabled
 
-	@CustomChecks.limit_to_guild(764981968579461130)
-	@commands.command()
-	async def server_status(self, ctx):
-		"""Gets the status of the Adventureous Adventures server
+	@commands.group(aliases=["aa"])
+	async def adventureousadventures(self, ctx):
+		"""Commands for the Adventureous Adventures server
 		"""
-		pass
+		await ctx.reply("Run `%help adventureousadventures` for subcommands")
+	
+	@commands.command()
+	async def start(self, ctx):
+		if not ctx.author.id in (545463550802395146,749415687897743371):
+			await ctx.send("You cannot run this command")
+			return
+		else:
+			cmd = os.system('"$HOME"/Minecraft Servers/Adventureous Adventures/S3/script-run.sh"')
+			if cmd != 0:
+				await ctx.reply("something went wrong!")
+			else:
+				await ctx.reply("Started with no errors, probably?")
 
 def setup(bot):
 	bot.add_cog(AACog(bot))
