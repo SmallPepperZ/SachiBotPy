@@ -29,19 +29,30 @@ class AACog(commands.Cog, name="Server/Adventurous Adventures"):
 	async def adventureousadventures(self, ctx):
 		"""Commands for the Adventureous Adventures server
 		"""
-		await ctx.reply("Run `%help adventureousadventures` for subcommands")
+		if ctx.invoked_subcommand is None:
+			await ctx.reply("Run `%help adventureousadventures` for subcommands")
 	
-	@commands.command()
+	@adventureousadventures.command()
 	async def start(self, ctx):
 		if not ctx.author.id in (545463550802395146,749415687897743371):
 			await ctx.send("You cannot run this command")
 			return
 		else:
-			cmd = os.system('"$HOME"/Minecraft Servers/Adventureous Adventures/S3/script-run.sh"')
-			if cmd != 0:
-				await ctx.reply("something went wrong!")
-			else:
-				await ctx.reply("Started with no errors, probably?")
+			await ctx.message.add_reaction('<a:loading:846527533691568128>')
+			cmd = os.popen('"$HOME/Minecraft Servers/Adventureous Adventures/S3/script-run.sh"')
+			await ctx.message.remove_reaction('<a:loading:846527533691568128>', ctx.guild.me)
+			await ctx.reply(cmd.read().replace(os.getenv("USER"), ""))
+
+	@adventureousadventures.command()
+	async def stop(self, ctx):
+		if not ctx.author.id in (545463550802395146,749415687897743371):
+			await ctx.send("You cannot run this command")
+			return
+		else:
+			await ctx.message.add_reaction('<a:loading:846527533691568128>')
+			cmd = os.popen('"$HOME/Minecraft Servers/Adventureous Adventures/S3/script-stop.sh"')
+			await ctx.message.remove_reaction('<a:loading:846527533691568128>', ctx.guild.me)
+			await ctx.reply(cmd.read().replace(os.getenv("USER"), ""))
 
 def setup(bot):
 	bot.add_cog(AACog(bot))

@@ -64,7 +64,7 @@ bot.coglist = [	'cogs.owner',
 				'cogs.listeners',
 				'cogs.testing',
 				'cogs.servers.mdsp',
-				# 'cogs.server_specific',
+				'cogs.servers.adventurous_adventures',
 				'cogs.minecraft'
 				]
 
