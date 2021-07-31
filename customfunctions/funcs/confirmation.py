@@ -1,8 +1,7 @@
-import asyncio
-import discord
-emojis = {"✅": True, "❎": False}
 
-async def confirm(self:discord.ext.commands.Cog, ctx:discord.ext.commands.Context, msg:discord.Message, *_, timeout:int=20) -> bool or None:
+import discord
+
+async def confirm(self:discord.ext.commands.Cog, ctx:discord.ext.commands.Context, msg:discord.Message, *, timeout:int=20) -> "bool|None":
 	"""Waits for confirmation via reaction from the user before continuing
 
 	Parameters
@@ -24,19 +23,39 @@ async def confirm(self:discord.ext.commands.Cog, ctx:discord.ext.commands.Contex
 	output : bool or None
 		True if user confirms action, False if user does not confirm action, None if confirmation times out
 	"""
-	for emoji in emojis.keys():
-		await msg.add_reaction(emoji)
-	try:
-		reaction, _ = await self.bot.wait_for(
-			'reaction_add',
-			check=lambda r, u: (r.message.id == msg.id) and (u.id == ctx.author.id) and (r.emoji in emojis),
-			timeout=timeout
-			)
-		if emojis[reaction.emoji] is True:
-			return True
+	view = Confirm(invoker=ctx.author, timeout=timeout)
+	await msg.edit(view=view)
+	# Wait for the View to stop listening for input...
+	await view.wait()
+	return view.value
+
+class Confirm(discord.ui.View):
+	def __init__(self, invoker:"discord.User|discord.Member", *, timeout:float=None):
+		if timeout is not None:
+			super().__init__(timeout=timeout)
 		else:
-			return False
-	except asyncio.TimeoutError:
-		return None
-	finally:
-		await msg.clear_reactions()
+			super().__init__()
+		self.value = None
+		self.invoker = invoker
+
+	# When the confirm button is pressed, set the inner value to `True` and
+	# stop the View from listening to more input.
+	# We also send the user an ephemeral message that we're confirming their choice.
+	@discord.ui.button(label='Confirm', style=discord.ButtonStyle.green)
+	async def confirm(self, button: discord.ui.Button, interaction: discord.Interaction):
+		await self.confirmation(interaction, True)
+
+	@discord.ui.button(label='Cancel', style=discord.ButtonStyle.gray)
+	async def cancel(self, button: discord.ui.Button, interaction: discord.Interaction):
+		await self.confirmation(interaction, False)
+
+	async def confirmation(self, interaction:discord.Interaction, confirm:bool):
+		if not interaction.user.id == self.invoker.id:
+			await interaction.response.send_message('You do not have permissions to do this', ephemeral=True)
+			return
+		elif confirm:
+			await interaction.response.send_message('Confirming', ephemeral=True)
+		else:
+			await interaction.response.send_message('Cancelling', ephemeral=True)
+		self.value = confirm
+		self.stop()
