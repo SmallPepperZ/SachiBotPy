@@ -165,6 +165,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 
 	@commands.command()
 	async def embedcolor(self, ctx, color:str):
+		color = color.strip("#")
 		colorint      = f"0x{color}"
 		oldembedcolor = config("embedcolor")
 		try:
@@ -209,25 +210,6 @@ class OwnerCog(commands.Cog,name="Owner"):
 			status_view = StatusButtons(self.bot, ctx.author)
 			await ctx.send("What status would you like to use?",view=status_view)
 
-			# status = self.bot_member.raw_status
-			# if status == "online":
-			# 	statusemoji = '🟢 - '
-			# 	statuscolor = 0x00FF00
-			# elif status == "offline" or status == "invisible":
-			# 	statusemoji = '⚫ - '
-			# 	statuscolor = 0x444444
-			# elif status == "dnd" or status == "do_not_disturb":
-			# 	statusemoji = '🔴 - '
-			# 	statuscolor = 0xFF0000
-			# elif status == "idle":
-			# 	statusemoji = '🟡 - '
-			# 	statuscolor = 0xFFFF00
-			# else:
-			# 	statusemoji = ''
-			# 	statuscolor = embedcolor
-			# embed = discord.Embed(color=statuscolor, title="Status:", description=f'**Status:** {statusemoji}{status} - {statuses[self.bot_member.activity.type.value]} {self.bot_member.activity.name}')
-			# await ctx.reply(embed=embed)
-			# StatusManager.save_status(self)
 
 
 	@status.group()
