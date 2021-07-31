@@ -48,9 +48,10 @@ statuses={
 }
 
 class StatusButtons(discord.ui.View):
-	def __init__(self, bot:discord.Client):
+	def __init__(self, bot:discord.Client, invoker:"discord.User|discord.Member"):
 		super().__init__()
 		self.bot:discord.Client = bot
+		self.authorized_user = invoker
 	
 	@property
 	def bot_member(self):
@@ -77,8 +78,11 @@ class StatusButtons(discord.ui.View):
 		await self.update_status(Status.offline, interaction, button.label)
 
 	async def update_status(self, status:discord.Status, interaction:discord.Interaction, response_message:str):
-		await StatusManager.changestatus(self, status)
-		await interaction.response.send_message(f"Status set to {response_message}", ephemeral=True)
+		if interaction.user.id == self.authorized_user.id:
+			await StatusManager.changestatus(self, status)
+			await interaction.response.send_message(f"Status set to {response_message}", ephemeral=True)
+		else:
+			await interaction.response.send_message(f"You do not have permission to do this", ephemeral=True)
 
 
 
@@ -202,7 +206,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 	async def status(self,ctx):
 
 		if ctx.invoked_subcommand is None:
-			status_view = StatusButtons(self.bot)
+			status_view = StatusButtons(self.bot, ctx.author)
 			await ctx.send("What status would you like to use?",view=status_view)
 
 			# status = self.bot_member.raw_status
