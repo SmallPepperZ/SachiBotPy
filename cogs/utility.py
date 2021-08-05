@@ -243,9 +243,9 @@ class UtilityCog(commands.Cog, name="Utility"):
 			await ctx.send(f"{ctx.author.mention}, your self mute for {duration_str} seconds has expired")
 
 
-	@commands.command(aliases=["online", "areyouthere"])
-	async def didyoudie(self, ctx):
-		await ctx.reply("I am very much alive", delete_after=20)
+	@commands.command()
+	async def areyouthere(self, ctx):
+		await ctx.reply("Excuse me? Of course I'm here, I'm always here! When have I never not been here for you? After all these years, you still doubt my unwavering hereness. I'm offended", delete_after=20)
 
 	@commands.command(aliases=["vote"])
 	async def react(self, ctx, message:discord.Message, *args):
