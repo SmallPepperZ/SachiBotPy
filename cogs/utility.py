@@ -2,11 +2,10 @@ import time
 import datetime
 import asyncio
 import json
-from types import CoroutineType, coroutine
-from typing import Coroutine
 import discord
 import inspect
 from discord.ext import commands
+from discord import UserFlags
 from discord.ext.commands.converter import Greedy
 
 
@@ -133,73 +132,83 @@ class UtilityCog(commands.Cog, name="Utility"):
 		await ctx.reply(embed=embed)
 
 
-	# @commands.command(aliases=['userinfo'])
-	# async def whois(self,ctx, members:Greedy[discord.Member]=None, users:Greedy[discord.User]=None):
-	# 	for member in members:
+	@commands.command(aliases=['userinfo'])
+	async def whois(self,ctx, *users):
+		badgelist = {
+			UserFlags.staff                    : "<:developer:802021494778626080>",
+			UserFlags.partner                  : "<:partneredserverowner:802021495089004544>",
+			UserFlags.hypesquad                : "<:hypesquad:802021494925557791>",
+			UserFlags.bug_hunter               : "<:bughunterl1:802021561967575040>",
+			UserFlags.hypesquad_bravery        : "<:hypesquadbravery:802021495185473556>",
+			UserFlags.hypesquad_brilliance     : "<:hypesquadbrilliance:802021495433461810>",
+			UserFlags.hypesquad_balance        : "<:hypesquadbalance:802010940698132490>",
+			UserFlags.early_supporter          : "<:earlysupporter:802021494989389885>",
+			UserFlags.bug_hunter_level_2       : "<:bughunterl2:802021494975889458>",
+			UserFlags.verified_bot_developer   : "<:earlybotdeveloper:802021494875488297>"
+		}
+		statuseemojis  = {
+				"online" : "🟢",
+				"idle"   : "🟡",
+				"dnd"    : "🔴",
+				"offline": "⚫"
+		}
+		for user in users:
+			try:
+				user = await commands.MemberConverter().convert(ctx, str(user))
+				if ctx.guild is None:
+					raise commands.MemberNotFound(f'Member "{user}" not found.')
+			except commands.MemberNotFound:
+				try:
+					user = await commands.UserConverter().convert(ctx, str(user))
+				except commands.UserNotFound:
+					await ctx.reply(f"User '{user}' could not be found")
+				else:
+					embed       = discord.Embed(color=user.color,title=user)
+					embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
+					embed.set_image(url=user.avatar.url)
+					EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)		
+					EmbedMaker.add_blank_field(embed)
+					EmbedMaker.add_description_field(embed, "Mention", user.mention)
+					EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
+					EmbedMaker.add_blank_field(embed)
+					EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{int(user.created_at.timestamp())}:R>')
+					EmbedMaker.add_blank_field(embed)
+					try:
+						badges = [badgelist[badge] for badge in user.public_flags.all()]
+					except KeyError:
+						pass
+					else:
+						if len(badges) > 0:
+							EmbedMaker.add_description_field(embed, "Profile Badges",  " ".join(list(map(str, badges))))
+					await ctx.send(embed=embed)
+			else:
+				embed       = discord.Embed(color=user.color,title=user)
+				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
+				embed.set_image(url=user.avatar.url)
+				EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)
+				EmbedMaker.add_description_field(embed, "Is the owner?", bool(ctx.guild.owner.id == user.id))
+				EmbedMaker.add_description_field(embed, "Is an admin?", user.guild_permissions.administrator)
+				EmbedMaker.add_blank_field(embed)
+				platform = "📱 - " if user.is_on_mobile() else ""
+				EmbedMaker.add_description_field(embed, "Status", f"{platform}{statuseemojis[str(user.status)]}{f' | {user.activity.name}' if user.activity is not None else ''}")
+				EmbedMaker.add_blank_field(embed)
+				EmbedMaker.add_description_field(embed, "Mention", user.mention)
+				EmbedMaker.add_description_field(embed, "Nickname", user.display_name)
+				EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
+				EmbedMaker.add_blank_field(embed)
+				EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{int(user.created_at.timestamp())}:R>')
+				EmbedMaker.add_description_field(embed, "Account Join Date", f'<t:{int(user.joined_at.timestamp())}:R>')
+				EmbedMaker.add_blank_field(embed)
+				try:
+					badges = [badgelist[badge] for badge in user.public_flags.all()]
+				except KeyError:
+					pass
+				else:
+					if len(badges) > 0:
+						EmbedMaker.add_description_field(embed, "Profile Badges",  " ".join(list(map(str, badges))))
+				await ctx.send(embed=embed)
 
-	# 	statuseemojis  = {
-	# 			"online" : "🟢",
-	# 			"idle"   : "🟡",
-	# 			"dnd"    : "🔴",
-	# 			"offline": "⚫"
 
-	# 		}
-	# 	if isguildmember:
-	# 		if member.is_on_mobile():
-	# 			platform  = '📱 - '
-	# 		elif str(user.status) != "offline":
-	# 			platform = '💻 - '
-	# 		else:
-	# 			platform = ""
-	# 	else:
-	# 		assert user is discord.User
-	# 		platform = None
-	# 	flags = user.public_flags.all()
-	# 	badgelist = {
-	# 		"staff"                 : "<:developer:802021494778626080>",
-	# 		"partner"               : "<:partneredserverowner:802021495089004544>",
-	# 		"hypesquad"             : "<:hypesquad:802021494925557791>",
-	# 		"bug_hunter"            : "<:bughunterl1:802021561967575040>",
-	# 		"hypesquad_bravery"     : "<:hypesquadbravery:802021495185473556>",
-	# 		"hypesquad_brilliance"  : "<:hypesquadbrilliance:802021495433461810>",
-	# 		"hypesquad_balance"     : "<:hypesquadbalance:802010940698132490>",
-	# 		"early_supporter"       : "<:earlysupporter:802021494989389885>",
-	# 		"bug_hunter_level_2"    : "<:bughunterl2:802021494975889458>",
-	# 		"verified_bot_developer": "<:earlybotdeveloper:802021494875488297>"
-	# 	}
-	# 	flagnames = [flag.name for flag in flags]
-	# 	badgeicons = [badgelist[badge] for badge in badgelist if badge in flagnames]
-	# 	badgestr   = " ".join(list(map(str, badgeicons)))
-
-	# 	avatar     = user.avatar.url
-	# 	mention    = user.mention
-	# 	username   = user.name+"#"+user.discriminator
-	# 	color      = user.color
-
-	# 	embed       = discord.Embed(color=color,title=username)
-	# 	embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
-	# 	embed.set_image(url=avatar)
-	# 	if isguildmember:
-	# 		EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)
-	# 		EmbedMaker.add_description_field(embed, "Is the owner?", bool(ctx.guild.owner.id == user.id))
-	# 		EmbedMaker.add_description_field(embed, "Is an admin?", user.guild_permissions.administrator)
-	# 		EmbedMaker.add_blank_field(embed)
-	# 		EmbedMaker.add_description_field(embed, "Status", f"{platform}{statuseemojis[str(user.status)]}{f' | {user.activity.name}' if user.activity is not None else ''}")
-	# 		EmbedMaker.add_blank_field(embed)
-	# 	EmbedMaker.add_description_field(embed, "Mention", mention)
-	# 	if isguildmember:
-	# 		EmbedMaker.add_description_field(embed, "Nickname", user.display_name)
-	# 	EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
-	# 	EmbedMaker.add_blank_field(embed)
-	# 	EmbedMaker.add_description_field(embed, "Account Creation Date", user.created_at)
-	# 	if isguildmember:
-	# 		EmbedMaker.add_description_field(embed, "Join Date", user.joined_at)
-	# 	EmbedMaker.add_blank_field(embed)
-	# 	if str(badgeicons) != "[]":
-	# 		EmbedMaker.add_description_field(embed, "Profile Badges", badgestr)
-
-	# 	await ctx.send(embed=embed)
-	# 	#ctx.guild.get_member(user)
 
 	@commands.command()
 	async def suggest(self, ctx, *, suggestion):
