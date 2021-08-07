@@ -4,6 +4,8 @@ import asyncio
 import json
 import discord
 import inspect
+import aiohttp
+from discord.errors import Forbidden
 from discord.ext import commands
 from discord import UserFlags
 from discord.ext.commands.converter import Greedy
@@ -134,6 +136,7 @@ class UtilityCog(commands.Cog, name="Utility"):
 
 	@commands.command(aliases=['userinfo'])
 	async def whois(self,ctx, *users):
+		"""Gets information about specified users"""
 		badgelist = {
 			UserFlags.staff                    : "<:developer:802021494778626080>",
 			UserFlags.partner                  : "<:partneredserverowner:802021495089004544>",
@@ -171,7 +174,8 @@ class UtilityCog(commands.Cog, name="Utility"):
 					EmbedMaker.add_description_field(embed, "Mention", user.mention)
 					EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
 					EmbedMaker.add_blank_field(embed)
-					EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{int(user.created_at.timestamp())}:R>')
+					creation_time = int(user.created_at.timestamp())
+					EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{creation_time}> (<t:{creation_time}:R>)')
 					EmbedMaker.add_blank_field(embed)
 					try:
 						badges = [badgelist[badge] for badge in user.public_flags.all()]
@@ -196,8 +200,9 @@ class UtilityCog(commands.Cog, name="Utility"):
 				EmbedMaker.add_description_field(embed, "Nickname", user.display_name)
 				EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
 				EmbedMaker.add_blank_field(embed)
-				EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{int(user.created_at.timestamp())}:R>')
-				EmbedMaker.add_description_field(embed, "Account Join Date", f'<t:{int(user.joined_at.timestamp())}:R>')
+				timestamps = int(user.created_at.timestamp()), int(user.joined_at.timestamp())
+				EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{timestamps[0]}> (<t:{timestamps[0]}:R>)')
+				EmbedMaker.add_description_field(embed, "Account Join Date", f'<t:{timestamps[1]}> (<t:{timestamps[1]}:R>)')
 				EmbedMaker.add_blank_field(embed)
 				try:
 					badges = [badgelist[badge] for badge in user.public_flags.all()]
@@ -209,6 +214,21 @@ class UtilityCog(commands.Cog, name="Utility"):
 				await ctx.send(embed=embed)
 
 
+	@commands.command()
+	async def whatis(self, ctx, guild_id):
+		"""Whois, but for guilds"""
+		try:
+			guild = await self.bot.fetch_widget(guild_id)
+		except Forbidden:
+			await ctx.send("This guild does not have its widget enabled")
+			return
+		embed = discord.Embed(title=guild.name, color=embedcolor)
+		EmbedMaker.add_description_field(embed, "Creation Time", f"<t:{int(guild.created_at.timestamp())}> (<t:{int(guild.created_at.timestamp())}:R>)")
+		if guild.channels is not None:
+			EmbedMaker.add_description_field(embed, "Voice Channels", "\n".join([channel.name for channel in guild.channels]))
+		if guild.invite_url is not None:
+			EmbedMaker.add_description_field(embed, "Invite URL", guild.invite_url)
+		await ctx.send(embed=embed)
 
 	@commands.command()
 	async def suggest(self, ctx, *, suggestion):
