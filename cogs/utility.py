@@ -156,8 +156,10 @@ class UtilityCog(commands.Cog, name="Utility"):
 				"offline": "⚫"
 		}
 		for user in users:
+			member = False
 			try:
 				user = await commands.MemberConverter().convert(ctx, str(user))
+				member = True
 				if ctx.guild is None:
 					raise commands.MemberNotFound(f'Member "{user}" not found.')
 			except commands.MemberNotFound:
@@ -165,53 +167,39 @@ class UtilityCog(commands.Cog, name="Utility"):
 					user = await commands.UserConverter().convert(ctx, str(user))
 				except commands.UserNotFound:
 					await ctx.reply(f"User '{user}' could not be found")
-				else:
-					embed       = discord.Embed(color=user.color,title=user)
-					embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
-					embed.set_image(url=user.avatar.url)
-					EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)		
-					EmbedMaker.add_blank_field(embed)
-					EmbedMaker.add_description_field(embed, "Mention", user.mention)
-					EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
-					EmbedMaker.add_blank_field(embed)
-					creation_time = int(user.created_at.timestamp())
-					EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{creation_time}> (<t:{creation_time}:R>)')
-					EmbedMaker.add_blank_field(embed)
-					try:
-						badges = [badgelist[badge] for badge in user.public_flags.all()]
-					except KeyError:
-						pass
-					else:
-						if len(badges) > 0:
-							EmbedMaker.add_description_field(embed, "Profile Badges",  " ".join(list(map(str, badges))))
-					await ctx.send(embed=embed)
-			else:
-				embed       = discord.Embed(color=user.color,title=user)
-				embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
-				embed.set_image(url=user.avatar.url)
-				EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)
+			embed       = discord.Embed(color=user.color,title=user)
+			embed.set_footer(text=f"Request by {ctx.author}", icon_url= ctx.author.avatar.url)
+			embed.set_image(url=user.avatar.url)
+			EmbedMaker.add_description_field(embed, "Is a bot?", user.bot)
+			if member:
 				EmbedMaker.add_description_field(embed, "Is the owner?", bool(ctx.guild.owner.id == user.id))
 				EmbedMaker.add_description_field(embed, "Is an admin?", user.guild_permissions.administrator)
-				EmbedMaker.add_blank_field(embed)
+			EmbedMaker.add_blank_field(embed)
+			if member:
 				platform = "📱 - " if user.is_on_mobile() else ""
 				EmbedMaker.add_description_field(embed, "Status", f"{platform}{statuseemojis[str(user.status)]}{f' | {user.activity.name}' if user.activity is not None else ''}")
 				EmbedMaker.add_blank_field(embed)
-				EmbedMaker.add_description_field(embed, "Mention", user.mention)
-				EmbedMaker.add_description_field(embed, "Nickname", user.display_name)
-				EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
-				EmbedMaker.add_blank_field(embed)
-				timestamps = int(user.created_at.timestamp()), int(user.joined_at.timestamp())
-				EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{timestamps[0]}> (<t:{timestamps[0]}:R>)')
+			EmbedMaker.add_description_field(embed, "Mention", user.mention)
+			if member:
+				EmbedMaker.add_description_field(embed, "Nickname", f"[{user.display_name}](https://discord.com/users/{user.id})")
+			else:
+				EmbedMaker.add_description_field(embed, "Username", f"[{user.display_name}](https://discord.com/users/{user.id})")
+			EmbedMaker.add_description_field(embed, "User ID", f'`{user.id}`')
+			EmbedMaker.add_blank_field(embed)
+			timestamps = [int(user.created_at.timestamp())]
+			if member:
+				timestamps.append(int(user.joined_at.timestamp()))
 				EmbedMaker.add_description_field(embed, "Account Join Date", f'<t:{timestamps[1]}> (<t:{timestamps[1]}:R>)')
-				EmbedMaker.add_blank_field(embed)
-				try:
-					badges = [badgelist[badge] for badge in user.public_flags.all()]
-				except KeyError:
-					pass
-				else:
-					if len(badges) > 0:
-						EmbedMaker.add_description_field(embed, "Profile Badges",  " ".join(list(map(str, badges))))
-				await ctx.send(embed=embed)
+			EmbedMaker.add_description_field(embed, "Account Creation Date", f'<t:{timestamps[0]}> (<t:{timestamps[0]}:R>)')
+			EmbedMaker.add_blank_field(embed)
+			try:
+				badges = [badgelist[badge] for badge in user.public_flags.all()]
+			except KeyError:
+				pass
+			else:
+				if len(badges) > 0:
+					EmbedMaker.add_description_field(embed, "Profile Badges",  " ".join(list(map(str, badges))))
+			await ctx.send(embed=embed)
 
 
 	@commands.command()
