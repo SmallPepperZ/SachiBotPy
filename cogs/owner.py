@@ -47,7 +47,42 @@ statuses={
 
 }
 
-#endregion
+class StatusButtons(discord.ui.View):
+	def __init__(self, bot:discord.Client, invoker:"discord.User|discord.Member"):
+		super().__init__()
+		self.bot:discord.Client = bot
+		self.authorized_user = invoker
+	
+	@property
+	def bot_member(self):
+		try:
+			return self.bot.guilds[0].me
+		except IndexError:
+			return None
+	
+	@discord.ui.button(label='Online', style=discord.ButtonStyle.green)
+	async def online(self, button: discord.ui.Button, interaction: discord.Interaction):
+		await self.update_status(Status.online, interaction, button.label)
+
+
+	@discord.ui.button(label='Idle', style=discord.ButtonStyle.blurple)
+	async def idle(self, button: discord.ui.Button, interaction: discord.Interaction):
+		await self.update_status(Status.idle, interaction, button.label)
+
+	@discord.ui.button(label='DnD', style=discord.ButtonStyle.red)
+	async def dnd(self, button: discord.ui.Button, interaction: discord.Interaction):
+		await self.update_status(Status.dnd, interaction, button.label)
+
+	@discord.ui.button(label='Offline', style=discord.ButtonStyle.gray)
+	async def offline(self, button: discord.ui.Button, interaction: discord.Interaction):
+		await self.update_status(Status.offline, interaction, button.label)
+
+	async def update_status(self, status:discord.Status, interaction:discord.Interaction, response_message:str):
+		if interaction.user.id == self.authorized_user.id:
+			await StatusManager.changestatus(self, status)
+			await interaction.response.send_message(f"Status set to {response_message}", ephemeral=True)
+		else:
+			await interaction.response.send_message(f"You do not have permission to do this", ephemeral=True)
 
 
 
@@ -130,6 +165,7 @@ class OwnerCog(commands.Cog,name="Owner"):
 
 	@commands.command()
 	async def embedcolor(self, ctx, color:str):
+		color = color.strip("#")
 		colorint      = f"0x{color}"
 		oldembedcolor = config("embedcolor")
 		try:
@@ -170,51 +206,11 @@ class OwnerCog(commands.Cog,name="Owner"):
 	@commands.group()
 	async def status(self,ctx):
 
-
 		if ctx.invoked_subcommand is None:
-			status = self.bot_member.raw_status
-			if status == "online":
-				statusemoji = '🟢 - '
-				statuscolor = 0x00FF00
-			elif status == "offline" or status == "invisible":
-				statusemoji = '⚫ - '
-				statuscolor = 0x444444
-			elif status == "dnd" or status == "do_not_disturb":
-				statusemoji = '🔴 - '
-				statuscolor = 0xFF0000
-			elif status == "idle":
-				statusemoji = '🟡 - '
-				statuscolor = 0xFFFF00
-			else:
-				statusemoji = ''
-				statuscolor = embedcolor
-			embed = discord.Embed(color=statuscolor, title="Status:", description=f'**Status:** {statusemoji}{status} - {statuses[self.bot_member.activity.type.value]} {self.bot_member.activity.name}')
-			await ctx.reply(embed=embed)
-			StatusManager.save_status(self)
+			status_view = StatusButtons(self.bot, ctx.author)
+			await ctx.send("What status would you like to use?",view=status_view)
 
-	@status.command(aliases=['green', 'good'])
-	async def online(self, ctx):
-		await StatusManager.changestatus(self, ctx, Status.online)
-		await ctx.message.add_reaction(str('🟢'))
-		StatusManager.save_status(self)
 
-	@status.command(aliases=['yellow', 'okay', 'ok', 'decent', 'afk'])
-	async def idle(self, ctx):
-		await StatusManager.changestatus(self, ctx, Status.idle)
-		await ctx.message.add_reaction(str('🟡'))
-		StatusManager.save_status(self)
-
-	@status.command(aliases=['red', 'bad', 'broken', 'error', 'donotdisturb'])
-	async def dnd(self, ctx):
-		await StatusManager.changestatus(self, ctx, Status.dnd)
-		await ctx.message.add_reaction(str('🔴'))
-		StatusManager.save_status(self)
-
-	@status.command(aliases=['grey','gray', 'hide', 'offline', 'invis', 'hidden'])
-	async def invisible(self, ctx):
-		await StatusManager.changestatus(self, ctx, Status.invisible)
-		await ctx.message.add_reaction(str('⚫'))
-		StatusManager.save_status(self)
 
 	@status.group()
 	async def activity(self, ctx): #pylint:disable=unused-argument

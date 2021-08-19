@@ -32,7 +32,10 @@ async def uncaught_error(ctx, error, bot:discord.Client, silent:bool=False):
 	# Send user a message
 	if not silent:
 		await ctx.message.add_reaction('<:CommandError:804193351758381086>')
-		await ctx.reply(f"Error:\n```{error_str}```\n{bot.owner.name} will be informed", delete_after=60)
+		try:
+			await ctx.reply(f"Error:\n```{error_str}```\n{bot.owner.name} will be informed", delete_after=60)
+		except discord.errors.HTTPException:
+			await ctx.reply(f"An error occurred. {bot.owner.name} will be informed")
 
 	# Get traceback info
 
