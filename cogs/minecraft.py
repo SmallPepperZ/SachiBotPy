@@ -29,8 +29,8 @@ class MinecraftCog(commands.Cog, name="Minecraft"):
 			await ctx.reply("Invalid username")
 			return
 		embed = discord.Embed(title=user.name,color=embedcolor)
-		embed.set_footer(text="Avatars provided by Crafatar.com")
-		embed.set_image(url=user.skin("body_render"))
+		# embed.set_footer(text="Avatars provided by Crafatar.com")
+		embed.set_image(url=user.get_skin("head_render"))
 		await ctx.reply(embed=embed)
 
 	@minecraft.command(aliases=["id", "userid"])

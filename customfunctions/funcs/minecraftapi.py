@@ -38,6 +38,7 @@ class MinecraftUser():
 	def name_history(self) -> "list[dict[str,str|int]]":
 		return requests.get(f'https://api.mojang.com/user/profiles/{self.uuid}/names').json()
 
+
 	def get_skin(self, skin_format:str="avatar", helm:bool=True) -> str:
 		"""Gets a user's skin in different formats
 
@@ -58,7 +59,7 @@ class MinecraftUser():
 		"""
 		skin_formats = {
 			"avatar": f'https://crafatar.com/avatars/{self.uuid}{"?overlay" if helm else ""}',
-			"head_render": f'https://crafatar.com/renders/head/{self.uuid}{"?overlay" if helm else ""}',
+			"head_render": f'https://cravatar.eu/{"helm" if helm else ""}head/{self.uuid}',
 			"body_render": f'https://crafatar.com/renders/body/{self.uuid}{"?overlay" if helm else ""}',
 			"skin": f'https://crafatar.com/skins/{self.uuid}',
 			"cape": f'https://crafatar.com/capes/{self.uuid}'
