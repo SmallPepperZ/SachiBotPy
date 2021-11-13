@@ -255,9 +255,9 @@ class MdspCog(commands.Cog, name="Server/MDSP"):
 		force = False
 		usedflags, args = CustomUtilities.find_flags(flags, args)
 		try:
-			userid = int(args[0])
-		except:
-			await ctx.reply('Use a userid. There is no reason to have a mention')
+			userid = commands.converter.UserConverter().convert(ctx, args[0])
+		except errors.UserNotFound:
+			await ctx.send("Invalid user")
 			return
 		for flag in flags:
 			if flag in usedflags:
