@@ -8,7 +8,8 @@ async def apply_status(bot:discord.Client):
 	status = config('status')
 	await bot.change_presence(activity=discord.Activity(type=status[0], name=status[1]), status=status[2])
 
-async def changestatus(self, status_type): #pylint:disable=unused-argument
+async def changestatus(self, status_type:discord.Status): #pylint:disable=unused-argument
+	print(self.bot_member.activity)
 	if self.bot_member.activity is not None:
 		await self.bot.change_presence(activity=discord.Activity(type=self.bot_member.activity.type, name=self.bot_member.activity.name), status=status_type)
 	else:

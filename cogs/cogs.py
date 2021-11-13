@@ -1,4 +1,5 @@
 import os
+import glob
 import inspect
 import discord
 from discord.ext import commands
@@ -9,6 +10,20 @@ from customfunctions import config,master_logger,ErrorHandling
 embedcolor = config("embedcolor")
 logger = master_logger.getChild("cogs")
 
+class CogDropdown(discord.ui.Select):
+	def __init__(self, bot:discord.Client, cogs:"list[tuple[str,str]]"):
+		self.bot = bot
+		options = []
+		for cog in cogs:
+				options.append(discord.SelectOption(label=cog[1].split("/")[-1].replace("_", " ").title(), description=cog[1], value=cog[0]))
+
+		
+		super().__init__(placeholder='Choose cogs to load', min_values=1, max_values=len(options), options=options)
+	
+	async def callback(self, interaction:discord.Interaction):
+		for cog in self.values:
+			self.bot.load_extension(cog)
+		await interaction.response.send_message(f'Loaded cogs', ephemeral=True)
 
 
 class CogsCog(commands.Cog, name="Cogs"):
@@ -66,14 +81,30 @@ class CogsCog(commands.Cog, name="Cogs"):
 
 	@commands.command()
 	@commands.is_owner()
-	async def load(self, ctx, *, cog:str):
-		import_path:str = f'cogs.{cog.replace("cogs.", "").strip("./").replace(".py", "").replace("/", ".").replace(" ", "_").lower()}'
-		file_path:str=f'{import_path.replace(".", "/")}.py'
-		if os.path.exists(file_path):
-			self.bot.load_extension(import_path)
-			await ctx.send("Cog sucessfully loaded")
+	async def load(self, ctx, *, cog:str=None):
+		if cog is not None:
+			import_path:str = f'cogs.{cog.replace("cogs.", "").strip("./").replace(".py", "").replace("/", ".").replace(" ", "_").lower()}'
+			file_path:str=f'{import_path.replace(".", "/")}.py'
+			if os.path.exists(file_path):
+				self.bot.load_extension(import_path)
+				await ctx.send("Cog sucessfully loaded")
+			else:
+				await ctx.reply(f"Cannot find cog at {file_path}")
 		else:
-			await ctx.reply(f"Cannot find cog at {file_path}")
+			cogs = [(file.replace(".py", "").replace("/", "."), file.replace(".py", "").replace("cogs/", "")) for file in glob.glob("cogs" + '/**/*.py', recursive=True) if not file.endswith("__.py")]
+			cogs = [cog for cog in cogs if not cog[0] in [inspect.getmodule(cog).__name__ for cog in self.bot.cogs.values()]]
+			if len(cogs) > 0:
+				bot = self.bot
+				class CogsDropdownView(discord.ui.View):
+					def __init__(self):
+						super().__init__()
+
+						# Adds the dropdown to our view object.
+						self.add_item(CogDropdown(bot, cogs))
+
+				await ctx.send("Select cogs to load", view=CogsDropdownView())
+			else:
+				await ctx.send("All cogs are already loaded")
 
 def setup(bot):
 	bot.add_cog(CogsCog(bot))
