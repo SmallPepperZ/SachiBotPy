@@ -3,9 +3,10 @@ from datetime import datetime
 import datetime as dt
 import json
 import time
+import requests 
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from customfunctions import config, DBManager, EmbedMaker, StatusManager
 from customfunctions import master_logger
@@ -14,6 +15,7 @@ from customfunctions import master_logger
 
 embedcolor = config("embedcolor")
 prefix = config("prefix")
+heartbeat_url = config("heartbeat")
 database = DBManager.Database()
 messages_database = DBManager.Database("messages")
 logger = master_logger.getChild("listeners")
@@ -58,6 +60,11 @@ class ListenerCog(commands.Cog, name="Logging"):
         self.bot: discord.Client = bot
         self.sachibotland = bot.get_guild(797308956162392094)
         self.guild_log_guild = bot.get_guild(909148074260168784)
+        self.send_heartbeat.start()
+
+    @tasks.loop(minutes=10)
+    async def send_heartbeat(self):
+        requests.get(heartbeat_url)
 
     @commands.Cog.listener("on_message")
     async def logmessages(self, message: discord.Message):
@@ -189,21 +196,14 @@ class ListenerCog(commands.Cog, name="Logging"):
             # 	self.bot.mutes.pop(indexes[0])
             # 	dump_mutes(self.bot.mutes)
 
-    @commands.Cog.listener('on_message')
-    @commands.Cog.listener('on_resumed')
-    @commands.Cog.listener('on_raw_reaction_add')
-    @commands.Cog.listener('on_raw_reaction_remove')
-    @commands.Cog.listener('on_raw_message_edit')
-    @commands.Cog.listener('on_user_update')
-    async def run_unmutes(self, *_args):
-        for index, mute in enumerate(self.bot.mutes.copy()):
-            if mute["expiration"] <= datetime.now().timestamp():
-                guild = self.bot.get_guild(mute["guild"])
-                role = guild.get_role(mute["role"])
-                await guild.get_member(mute["userid"]).remove_roles(role, reason="Self mute expiring")
-                self.bot.mutes.pop(index)
-                dump_mutes(self.bot.mutes)
-                break
+    # @commands.Cog.listener('on_message')
+    # @commands.Cog.listener('on_resumed')
+    # @commands.Cog.listener('on_raw_reaction_add')
+    # @commands.Cog.listener('on_raw_reaction_remove')
+    # @commands.Cog.listener('on_raw_message_edit')
+    # @commands.Cog.listener('on_user_update')
+    # async def bot_periodic(self, *_args):
+    #     pass
 
     @commands.Cog.listener("on_resumed")
     async def on_resume(self):
@@ -322,6 +322,19 @@ class ListenerCog(commands.Cog, name="Logging"):
 		Name     : [{guild.name}](https://discord.com/channels/{guild.id})
 		Owner    : {guild.owner.mention}({guild.owner})""")
         await channel.send(embed=join_embed)
+
+    
+
+    async def run_unmutes(self, *_args):
+        for index, mute in enumerate(self.bot.mutes.copy()):
+            if mute["expiration"] <= datetime.now().timestamp():
+                guild = self.bot.get_guild(mute["guild"])
+                role = guild.get_role(mute["role"])
+                await guild.get_member(mute["userid"]).remove_roles(role, reason="Self mute expiring")
+                self.bot.mutes.pop(index)
+                dump_mutes(self.bot.mutes)
+                break
+
 
 def setup(bot):
     bot.add_cog(ListenerCog(bot))
