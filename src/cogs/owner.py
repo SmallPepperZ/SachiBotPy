@@ -18,12 +18,12 @@ from discord import Status
 from discord.ext.commands.errors import BadArgument, NotOwner
 
 
-from customfunctions import config, set_config
-from customfunctions import ConfirmationCheck
-from customfunctions import EmbedMaker
-from customfunctions import del_msg
-from customfunctions import master_logger
-from customfunctions import StatusManager
+from utils import config, set_config
+from utils import ConfirmationCheck
+from utils import EmbedMaker
+from utils import del_msg
+from utils import master_logger
+from utils import StatusManager
 
 from cogs.listeners import get_logging_channel
 

@@ -3,8 +3,8 @@ import datetime
 
 import discord
 from discord.ext import commands
-from customfunctions import config,DBManager, CustomChecks
-from customfunctions import master_logger,del_msg
+from utils import config,DBManager, CustomChecks
+from utils import master_logger,del_msg
 
 # region Variable Stuff
 

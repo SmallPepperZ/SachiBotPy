@@ -1,4 +1,4 @@
-from customfunctions.funcs.checks import limit_to_guild
+from utils.funcs.checks import limit_to_guild
 import sqlite3
 import traceback
 
@@ -13,7 +13,7 @@ from discord.ext.commands import BadArgument, BucketType, errors
 
 
 
-from customfunctions import config, DatabaseFromDict, CustomUtilities, CustomChecks, Mee6Api
+from utils import config, DatabaseFromDict, CustomUtilities, CustomChecks, Mee6Api
 from cogs.servers import master_logger
 
 

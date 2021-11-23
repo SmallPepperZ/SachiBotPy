@@ -1,5 +1,5 @@
 import json
-from customfunctions.funcs import database_manager as DBManager
+from utils.funcs import database_manager as DBManager
 
 def get_config(item:str) -> "str|list|int":
 	my_db = DBManager.Database()

@@ -1,9 +1,9 @@
 import discord
 from discord.ext import commands
 from discord.ext.commands import MessageConverter
-from customfunctions import config, CustomUtilities
-from customfunctions import master_logger
-from customfunctions import del_msg
+from utils import config, CustomUtilities
+from utils import master_logger
+from utils import del_msg
 #region Variable Stuff
 
 

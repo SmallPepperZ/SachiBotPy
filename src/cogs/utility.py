@@ -12,10 +12,10 @@ from discord.ext.commands.converter import Greedy
 
 
 from disputils import BotEmbedPaginator
-from customfunctions import EmbedMaker, CustomChecks
-from customfunctions import config
-from customfunctions import TimeUtils
-from customfunctions import master_logger
+from utils import EmbedMaker, CustomChecks
+from utils import config
+from utils import TimeUtils
+from utils import master_logger
 
 logger = master_logger.getChild("utility")
 embedcolor = config("embedcolor")

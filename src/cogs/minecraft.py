@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from customfunctions import config, MinecraftApi, master_logger, EmbedMaker, DBManager
+from utils import config, MinecraftApi, master_logger, EmbedMaker, DBManager
 
 
 embedcolor = config("embedcolor")

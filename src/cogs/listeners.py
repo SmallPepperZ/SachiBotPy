@@ -8,8 +8,8 @@ import requests
 import discord
 from discord.ext import commands, tasks
 
-from customfunctions import config, DBManager, EmbedMaker, StatusManager
-from customfunctions import master_logger
+from utils import config, DBManager, EmbedMaker, StatusManager
+from utils import master_logger
 # region Variable Stuff
 
 

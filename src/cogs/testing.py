@@ -4,8 +4,8 @@ import discord
 from discord.enums import AuditLogAction, AuditLogActionCategory
 from discord.ext import commands
 from discord.utils import get
-from customfunctions import config,DBManager
-from customfunctions import master_logger,del_msg
+from utils import config,DBManager
+from utils import master_logger,del_msg
 import inspect
 
 # region Variable Stuff

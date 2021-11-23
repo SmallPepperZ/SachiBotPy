@@ -10,10 +10,10 @@ from discord.ext import commands
 from discord.ext.commands import CommandNotFound, errors
 from discord.mentions import AllowedMentions
 
-from customfunctions.funcs import handling #pylint:disable=unused-import
-from customfunctions import config
-from customfunctions import CustomChecks, ErrorHandling, StatusManager
-from customfunctions import master_logger
+from utils.funcs import handling #pylint:disable=unused-import
+from utils import config
+from utils import CustomChecks, ErrorHandling, StatusManager
+from utils import master_logger
 # endregion
 
 # region Variable Stuff

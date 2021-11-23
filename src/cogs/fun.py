@@ -4,8 +4,8 @@ import os
 import requests
 import discord
 from discord.ext import commands
-from customfunctions import del_msg
-from customfunctions import config, OBJECTS_TO_BONK_WITH, master_logger
+from utils import del_msg
+from utils import config, OBJECTS_TO_BONK_WITH, master_logger
 
 
 #region Variable Stuff

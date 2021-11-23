@@ -4,7 +4,7 @@ import traceback
 import requests
 from discord.ext import commands
 import discord
-from customfunctions import config, set_config
+from utils import config, set_config
 
 errorchannel = int(config("errorchannel"))
 personal_info = config("pathtohide")

@@ -2,7 +2,7 @@ import sys
 from types import TracebackType
 from typing import Type
 import traceback as traceback_lib
-from customfunctions import master_logger
+from utils import master_logger
 
 def error_handling(exctype:Type[BaseException], value:BaseException, traceback:TracebackType):
 	try:

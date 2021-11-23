@@ -1,4 +1,4 @@
-from customfunctions import config, set_config
+from utils import config, set_config
 import discord 
 
 def save_status(self):

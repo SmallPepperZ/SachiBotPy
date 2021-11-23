@@ -5,7 +5,7 @@ import discord
 from discord.ext import commands
 from discord.ext.commands.errors import ExtensionNotLoaded, ExtensionFailed
 from discord.ext.commands import Context
-from customfunctions import config,master_logger,ErrorHandling
+from utils import config,master_logger,ErrorHandling
 
 embedcolor = config("embedcolor")
 logger = master_logger.getChild("cogs")
