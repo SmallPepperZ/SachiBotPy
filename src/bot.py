@@ -11,33 +11,31 @@ from discord.ext.commands import CommandNotFound, errors
 from discord.mentions import AllowedMentions
 
 from utils.funcs import handling #pylint:disable=unused-import
-from utils import config
 from utils import CustomChecks, ErrorHandling, StatusManager
 from utils import master_logger
 # endregion
+from helpers import config
 
 # region Variable Stuff
 
 
-embedcolor = config("embedcolor")
-token = config('discordtoken')
-
-personal_info = config("pathtohide")
 
 
-prefix = config("prefix")
+
+
+
 start_time_local = time.time()
 
 intents = discord.Intents.all()
 intents.typing = False
-bot = commands.Bot(command_prefix=prefix,
+bot = commands.Bot(command_prefix=config.prefix,
 				   intents=intents,
 				   case_insensitive=True)
 
-bot.allowed_mentions=discord.AllowedMentions(everyone=False,roles=False)
+bot.allowed_mentions=AllowedMentions(everyone=False,roles=False)
 
 
-errorchannel = int(config("errorchannel"))
+errorchannel = int(config.errorchannel)
 
 bot.start_time = start_time_local
 
@@ -50,22 +48,13 @@ bot.enabled_guilds = [764981968579461130, #MDSP
 					  797308956162392094, #SachiBotLand
 					  739176312081743934  #Notifications
 					  ]
-with open("storage/mutes.json", "r") as file:
-	bot.mutes = json.load(file)
+
 # endregion
 
 
 # region Cogs
-bot.coglist = [	'cogs.owner',
-				'cogs.cogs',
-				'cogs.fun',
-				'cogs.utility',
-				'cogs.admin',
-				'cogs.listeners',
-				'cogs.testing',
-				'cogs.servers.mdsp',
-				'cogs.servers.adventurous_adventures',
-				'cogs.minecraft'
+bot.coglist = [	'cogs.utility.ping',
+				'cogs.utility.help'
 				]
 
 if __name__ == '__main__':
@@ -99,10 +88,10 @@ async def on_ready():
 	logger.info("Bot initialized")
 	await StatusManager.apply_status(bot)
 	startup_channel:discord.TextChannel = bot.get_guild(797308956162392094).get_channel(867140356424466448)
-	await startup_channel.send(embed=discord.Embed(color=embedcolor,title="Startup", description=startup_text))
+	await startup_channel.send(embed=discord.Embed(color=config.embedcolor,title="Startup", description=startup_text))
 
 	bot.owner = (await bot.application_info()).owner
-	bot.prefix = prefix
+	bot.prefix = config.prefix
 
 
 # region Bot Events
@@ -143,4 +132,4 @@ async def get_error(ctx, error:object):
 # endregion
 
 
-bot.run(token)
+bot.run(config.discordtoken)

@@ -1,8 +1,5 @@
-#git+git://github.com/eunwoo1104/discord-py-slash-command@master#egg=discord-py-slash-command
-git+https://github.com/Rapptz/discord.py
+git+git://github.com/Pycord-Development/pycord@master
 requests~=2.25.1
-disputils
 pytz~=2020.5
-discord~=1.0.1
 Pillow~=8.2.0
 pony
