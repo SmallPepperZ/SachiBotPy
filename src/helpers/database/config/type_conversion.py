@@ -2,7 +2,7 @@ import json
 
 def load_type(item) -> "str|int|dict|list":
         if item.type == "string":
-            return str(item)
+            return str(item.value)
         if item.type == "list":
             return json.loads(item.value)
         if item.type == "hex":
