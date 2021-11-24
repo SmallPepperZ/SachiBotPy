@@ -3,3 +3,4 @@ src/storage
 .vscode/**
 **/__pycache__
 src/logs
+oldcogs
