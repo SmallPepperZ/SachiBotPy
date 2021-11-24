@@ -1,25 +1,9 @@
 from pony.orm.core import select
-import json
 
 from .entry import Config
+from .type_conversion import load_type
 
-def load_type(item) -> "str|int|dict|list":
-        if item.type == "string":
-            return str(item)
-        if item.type == "list":
-            return json.loads(item.value)
-        if item.type == "hex":
-            return int(item.value, 16)
-        else:
-            raise ValueError("Invalid config type")
-
-def dump_type(value) -> "str":
-    if type(value) in (str, int):
-        return str(value)
-    if type(value) == list:
-        return json.dumps(value)
-    else:
-        raise ValueError("Invalid config type")
+from .set import set_config
 
 
 class __ConfigData():

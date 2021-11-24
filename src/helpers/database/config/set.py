@@ -1,9 +1,6 @@
 from pony.orm.core import ObjectNotFound, db_session
 from .entry import Config
-from . import dump_type
-
-def set_config_key(key:str, value):
-    pass
+from .type_conversion import dump_type
 
 @db_session
 def set_config(**kwargs):
