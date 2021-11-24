@@ -1,6 +1,6 @@
 from pony.orm.core import select
 
-from .entry import Config
+from .config import Config
 from .type_conversion import load_type
 
 from .set import set_config

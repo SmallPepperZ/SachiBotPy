@@ -1,5 +1,5 @@
 from pony.orm.core import ObjectNotFound, db_session
-from .entry import Config
+from .config import Config
 from .type_conversion import dump_type
 
 @db_session
