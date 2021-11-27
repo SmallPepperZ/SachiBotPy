@@ -89,6 +89,7 @@ class WhoisCommand(commands.Cog):
                 user = await self.bot.fetch_user(int(user))
             except NotFound:
                 await ctx.respond("User could not be found", ephemeral=True)
+                return
         user:discord.User
         
         embed = DescriptionEmbed(color=user.color,title=user)
