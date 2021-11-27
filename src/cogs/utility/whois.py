@@ -82,13 +82,13 @@ class WhoisCommand(commands.Cog):
 
         add_badges(user,embed)
 
-    @slash_command(guild_ids=[797308956162392094])
+    @slash_command(guild_ids=[797308956162392094], description="Gets information about a user")
     async def whois(self, ctx:ApplicationContext, user:Option(discord.User, "User to query")):
         if isinstance(user, int):
             try:
                 user = await self.bot.fetch_user(int(user))
             except NotFound:
-                await ctx.respond("User could not be found")
+                await ctx.respond("User could not be found", ephemeral=True)
         user:discord.User
         
         embed = DescriptionEmbed(color=user.color,title=user)
