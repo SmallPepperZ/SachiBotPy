@@ -1,12 +1,7 @@
 import discord
 from pony.orm.core import db_session
 from .edit_invite import get_invitee
-
-
-class DescriptionEmbed(discord.Embed):
-    def add_field(self, key, value):
-        self.description = f'{self.description}\n**{key}:** {value}'
-        return self
+from ...embed.embed_helper import DescriptionEmbed
 
 @db_session
 def create_embed(user_id:int):
