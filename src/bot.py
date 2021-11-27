@@ -34,7 +34,6 @@ bot = commands.Bot(command_prefix=config.prefix,
 
 bot.allowed_mentions=AllowedMentions(everyone=False,roles=False)
 
-
 errorchannel = int(config.errorchannel)
 
 bot.start_time = start_time_local
@@ -53,11 +52,7 @@ bot.enabled_guilds = [764981968579461130, #MDSP
 
 
 # region Cogs
-bot.coglist = [	'cogs.utility.ping',
-				'cogs.utility.whois',
-				'cogs.utility.whatis',
-				'cogs.utility.react',
-				'cogs.utility.suggest',
+bot.coglist = [	'cogs.utility'
 				]
 
 if __name__ == '__main__':
