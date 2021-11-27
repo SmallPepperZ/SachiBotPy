@@ -55,7 +55,9 @@ bot.enabled_guilds = [764981968579461130, #MDSP
 # region Cogs
 bot.coglist = [	'cogs.utility.ping',
 				'cogs.utility.whois',
-				'cogs.utility.whatis'
+				'cogs.utility.whatis',
+				'cogs.utility.react',
+				'cogs.utility.suggest',
 				]
 
 if __name__ == '__main__':
