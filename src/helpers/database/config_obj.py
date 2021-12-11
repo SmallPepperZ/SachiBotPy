@@ -1,5 +1,6 @@
+from typing import Any
 from pony.orm.core import db_session, select
-
+import builtins
 from .config import Config
 from .config.type_conversion import load_type
 
@@ -23,10 +24,14 @@ class __ConfigData():
     def __init__(self):
         config_items = select(c for c in Config)
         for item in config_items:
-            setattr(self, item.key, load_type(item))
+            print(item)
+            value = load_type(item)
+            print(value)
+            super().__setattr__(item.key, value)
 
-
-    
+    def __setattr__(self, __name: str, __value: Any) -> None:
+        set_config(**{__name:__value})
+        super().__setattr__(__name, __value)
 
 
 config = __ConfigData()
