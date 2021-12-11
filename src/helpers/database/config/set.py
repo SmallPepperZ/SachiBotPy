@@ -7,6 +7,6 @@ def set_config(**kwargs):
     for key, value in kwargs.items():
         try:
             config_item = Config[key]
-            config_item.value = dump_type(value)
+            config_item.value = dump_type(value, config_item.type)
         except ObjectNotFound as error:
             raise KeyError(f"No config item found for key '{key}'") from error

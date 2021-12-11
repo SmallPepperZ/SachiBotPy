@@ -6,14 +6,20 @@ def load_type(item) -> "str|int|dict|list":
         if item.type == "list":
             return json.loads(item.value)
         if item.type == "hex":
-            return int(item.value, 16)
+            int_version = int(item.value, 16)
+            if hex(int_version) == item.value:
+                return int_version
+            else:
+                return int(item.value)
         else:
             raise ValueError("Invalid config type")
 
-def dump_type(value) -> "str":
-    if type(value) in (str, int):
+def dump_type(value, type) -> "str":
+    if type in ("string","int"):
         return str(value)
-    if type(value) == list:
+    if type in ("list","dict"):
         return json.dumps(value)
+    if type in ("hex",):
+        return hex(value)
     else:
         raise ValueError("Invalid config type")
