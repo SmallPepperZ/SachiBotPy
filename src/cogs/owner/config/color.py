@@ -31,6 +31,7 @@ class ColorCommand(commands.Cog):
     @permissions.is_owner()
     async def color(self, ctx:ApplicationContext, color:Option(str, "The new embed color")):
         embed = discord.Embed(color=config.embedcolor, title="Embed Color", description = f"Set embed color?")
+        color_int = int(color.strip("#"), 16)
         await ctx.defer(ephemeral=True)
         file = discord.File(fp=create_image(color), filename="colorimage.png")
         embed.set_thumbnail(url='attachment://colorimage.png')
@@ -39,7 +40,8 @@ class ColorCommand(commands.Cog):
 
         if await confirmation.confirm(self, ctx, msg, silent=True):
             webhook = ctx.followup
-            await webhook.send(embed=discord.Embed(color=int(color.strip("#"), 16), title="Embed Color Set"), ephemeral=True)
+            await webhook.send(embed=discord.Embed(color=color_int, title="Embed Color Set"), ephemeral=True)
+            config.embedcolor = color_int
 
 
 
