@@ -1,10 +1,7 @@
-from . import ping, react, suggest, whatis, whois
-
-
-
-def setup(bot):
-    ping.setup(bot)
-    react.setup(bot)
-    suggest.setup(bot)
-    whatis.setup(bot)
-    whois.setup(bot)
+cogs = [
+        "cogs.utility.ping",
+        "cogs.utility.react",
+        "cogs.utility.suggest",
+        "cogs.utility.whatis",
+        "cogs.utility.whois",
+    ]

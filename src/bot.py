@@ -1,4 +1,3 @@
-# region Imports
 
 import time
 import json
@@ -13,13 +12,15 @@ from discord.mentions import AllowedMentions
 from utils.funcs import handling #pylint:disable=unused-import
 from utils import CustomChecks, ErrorHandling, StatusManager
 from utils import master_logger
-# endregion
+
 from helpers import config
 
-# region Variable Stuff
+from cogs import utility
 
-
-
+COGS = [	
+        'cogs.owner.config.color',
+		'cogs.cog.reload'
+       ] + utility.cogs
 
 
 
@@ -38,24 +39,11 @@ errorchannel = int(config.errorchannel)
 
 bot.start_time = start_time_local
 
-
+print(COGS)
 
 bot.remove_command('help')
 
-bot.enabled_guilds = [764981968579461130, #MDSP
-					  813992520915615796, #Gapple
-					  797308956162392094, #SachiBotLand
-					  739176312081743934  #Notifications
-					  ]
-
-# endregion
-
-
-# region Cogs
-bot.coglist = [	'cogs.utility',
-				'cogs.owner.config.color'
-				]
-
+startup_cogs = ''
 if __name__ == '__main__':
 	def format_cog_name(cog_name:str) -> str:
 			return cog_name.replace('cogs.', '').replace('_', ' ').title().replace('.','/')
@@ -63,7 +51,7 @@ if __name__ == '__main__':
 	
 	startup_lines = []
 	
-	for extension in bot.coglist:
+	for extension in COGS:
 		try:
 			bot.load_extension(extension)
 			startup_lines.append(f'<:Success:865674863330328626> | {format_cog_name(extension)}')
@@ -71,29 +59,24 @@ if __name__ == '__main__':
 			startup_lines.append(f'<:Failure:865674863031877663> | {format_cog_name(extension)}')
 			for line in traceback.format_exception(type(error), error, error.__traceback__):
 				master_logger.error(line)
-	startup_text = "\n".join(startup_lines)
+	startup_cogs = "\n".join(startup_lines)
 	
 
-# endregion
 
-# region Logger Stuff
 logger = master_logger.getChild("main")
 
 
-# endregion
 
 @bot.event
 async def on_ready():
 	logger.info("Bot initialized")
 	await StatusManager.apply_status(bot)
 	startup_channel:discord.TextChannel = bot.get_guild(797308956162392094).get_channel(867140356424466448)
-	await startup_channel.send(embed=discord.Embed(color=config.embedcolor,title="Startup", description=startup_text))
+	await startup_channel.send(embed=discord.Embed(color=config.embedcolor,title="Startup", description=startup_cogs))
 
 	bot.owner = (await bot.application_info()).owner
 	bot.prefix = config.prefix
 
-
-# region Bot Events
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -127,8 +110,6 @@ async def get_error(ctx, error:object):
 	else: # if the error isn't handled, handle it with the uncaught error handler
 		await ErrorHandling.uncaught_error(ctx, error, bot)
 
-
-# endregion
 
 
 bot.run(config.discordtoken)
