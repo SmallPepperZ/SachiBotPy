@@ -12,6 +12,9 @@ then
 	cd ./src
 	source ../venv/bin/activate
 	/usr/local/bin/tmux new-session -d -s $dirname ../venv/bin/python ./bot.py
+	if [ $1=="attached" ]; then
+		/usr/local/bin/tmux attach-session -t "$dirname"
+	fi
 else
 	exit 2
 fi
