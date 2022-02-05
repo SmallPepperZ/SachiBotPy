@@ -9,18 +9,15 @@ from discord.ext import commands
 from discord.ext.commands import CommandNotFound, errors
 from discord.mentions import AllowedMentions
 
-from utils.funcs import handling #pylint:disable=unused-import
-from utils import CustomChecks, ErrorHandling, StatusManager
-from utils import master_logger
 
 from helpers import config
 
-from cogs import utility
+from cogs import utility, listeners
 
 COGS = [	
         'cogs.owner.config.color',
 		'cogs.cog.reload'
-       ] + utility.cogs
+       ] + utility.cogs + listeners.cogs
 
 
 
