@@ -3,6 +3,8 @@
 cd $(dirname "$0")/../
 dirname="$(basename "$PWD")"
 
+/usr/local/bin/git pull
+
 if ! which /usr/local/bin/tmux >/dev/null
 then
 	echo "tmux is not installed"
@@ -12,7 +14,7 @@ then
 	cd ./src
 	source ../venv/bin/activate
 	/usr/local/bin/tmux new-session -d -s $dirname ../venv/bin/python ./bot.py
-	if [ $1=="attached" ]; then
+	if [ "$1"=="attached" ]; then
 		/usr/local/bin/tmux attach-session -t "$dirname"
 	fi
 else
