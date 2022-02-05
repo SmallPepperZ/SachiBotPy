@@ -13,7 +13,7 @@ class WhatisCommand(commands.Cog):
     def __init__(self, bot:Bot):
         self.bot = bot
 
-    @slash_command(guild_ids=[797308956162392094],description="Looks up information for a guild using its widget (often disabled)")
+    @slash_command(guild_ids=[],description="Looks up information for a guild using its widget (often disabled)")
     async def whatis(self, ctx, guild:Option(str, "The ID of the guild to look up")):
         try:
             guild = await self.bot.fetch_widget(int(guild))

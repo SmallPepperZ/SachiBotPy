@@ -16,10 +16,10 @@ class BotInviteCommand(commands.Cog):
 
 
 
-    @slash_command(guild_ids=[797308956162392094], description='Creates a bot invite link')
+    @slash_command(guild_ids=[], description='Creates a bot invite link')
     async def oauth_invite(self, ctx:ApplicationContext, 
             bot:Option(discord.User, "The bot to invite", required=False, default=None), 
-            guild:Option(str, "The guild to invite to", required=False, default=None), 
+            guild:Option(str, "The guild to invite it to", required=False, default=None), 
             slash_scope:Option(bool, "Whether to give the bot the slash command scope", required=False, default=False)):
 
         bot:Bot = bot or self.bot.user

@@ -9,7 +9,7 @@ class PingCommand(commands.Cog):
     def __init__(self, bot):
         self.bot:discord.Client = bot
 
-    @slash_command(guild_ids=[797308956162392094], description="Gets the bot's uptime and latency")
+    @slash_command(guild_ids=[], description="Gets the bot's uptime and latency")
     async def ping(self, ctx:discord.ApplicationContext):
         current_time = time.time()
         difference   = int(round(current_time - ctx.bot.start_time))

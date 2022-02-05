@@ -82,7 +82,7 @@ class WhoisCommand(commands.Cog):
 
         add_badges(user,embed)
 
-    @slash_command(guild_ids=[797308956162392094], description="Gets information about a user")
+    @slash_command(guild_ids=[], description="Gets information about a user")
     async def whois(self, ctx:ApplicationContext, user:Option(discord.User, "User to query")):
         if isinstance(user, int):
             try:

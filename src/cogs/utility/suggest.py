@@ -13,7 +13,7 @@ class SuggestCommand(commands.Cog):
         self.bot = bot
 
 
-    @slash_command(guild_ids=[797308956162392094], description='Leave feedback about the bot')
+    @slash_command(guild_ids=[], description='Leave feedback about the bot')
     async def suggest(self, ctx:ApplicationContext, suggestion:Option(str, "Feedback or suggestion you have")):
         suggestion_channel = self.bot.get_channel(801576966952058910)
         embed = discord.Embed(title='', description=suggestion)
