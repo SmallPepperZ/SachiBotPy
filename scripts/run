@@ -1,0 +1,17 @@
+#!/bin/bash
+
+cd $(dirname "$0")/../
+dirname="$(basename "$PWD")"
+
+if ! which /usr/local/bin/tmux >/dev/null
+then
+	echo "tmux is not installed"
+	exit 1
+elif ! /usr/local/bin/tmux has-session -t=$dirname &> /dev/null
+then
+	cd ./src
+	source ../venv/bin/activate
+	/usr/local/bin/tmux new-session -d -s $dirname ../venv/bin/python ./bot.py
+else
+	exit 2
+fi
