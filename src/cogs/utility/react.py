@@ -1,7 +1,7 @@
 import discord
 from discord import emoji
 from discord.commands import permissions
-from discord.commands.commands import slash_command
+from discord.commands import slash_command
 from discord.commands.permissions import permission
 from discord.ext import commands
 from discord.ext.commands import Bot

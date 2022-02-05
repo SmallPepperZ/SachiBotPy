@@ -1,5 +1,5 @@
 git+git://github.com/Pycord-Development/pycord@master
 requests~=2.25.1
+Pillow
 pytz~=2020.5
-Pillow~=8.2.0
 pony
