@@ -4,4 +4,5 @@ cogs = [
         "cogs.utility.suggest",
         "cogs.utility.whatis",
         "cogs.utility.whois",
+        "cogs.utility.bot_invite"
     ]
