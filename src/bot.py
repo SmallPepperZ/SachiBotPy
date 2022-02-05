@@ -10,7 +10,8 @@ from discord.ext.commands import CommandNotFound, errors
 from discord.mentions import AllowedMentions
 
 
-from helpers import config
+from helpers import config, errors, status
+from helpers.logging import root_logger
 
 from cogs import utility, listeners
 
@@ -31,8 +32,8 @@ bot = commands.Bot(command_prefix=config.prefix,
 				   case_insensitive=True)
 
 bot.allowed_mentions=AllowedMentions(everyone=False,roles=False)
-
 errorchannel = int(config.errorchannel)
+logger = root_logger.getChild("main")
 
 bot.start_time = start_time_local
 
@@ -55,19 +56,19 @@ if __name__ == '__main__':
 		except Exception as error:
 			startup_lines.append(f'<:Failure:865674863031877663> | {format_cog_name(extension)}')
 			for line in traceback.format_exception(type(error), error, error.__traceback__):
-				master_logger.error(line)
+				logger.error(line)
 	startup_cogs = "\n".join(startup_lines)
 	
 
 
-logger = master_logger.getChild("main")
+logger = logger.getChild("main")
 
 
 
 @bot.event
 async def on_ready():
 	logger.info("Bot initialized")
-	await StatusManager.apply_status(bot)
+	await status.apply_status(bot)
 	startup_channel:discord.TextChannel = bot.get_guild(797308956162392094).get_channel(867140356424466448)
 	await startup_channel.send(embed=discord.Embed(color=config.embedcolor,title="Startup", description=startup_cogs))
 
@@ -93,19 +94,16 @@ async def get_error(ctx, error:object):
 		errors.MissingPermissions       : lambda: ctx.message.add_reaction(str('🔐')),
 		errors.BotMissingPermissions    : lambda: ctx.reply("I do not have the requisite permissions"),
 		errors.MissingRole              : lambda: ctx.message.add_reaction(str('🔐')),
-		errors.MissingRequiredArgument  : lambda: ErrorHandling.invalid_invocation(ctx,error),
-		errors.BadArgument              : lambda: ErrorHandling.invalid_invocation(ctx,error),
 		errors.NoPrivateMessage         : lambda: ctx.message.add_reaction(str('<:ServerOnlyCommand:803789780793950268>')),
 		discord.errors.Forbidden        : lambda: ctx.reply("I do not have the requisite permissions"),
-		CustomChecks.IncorrectGuild     : lambda: ctx.reply(content="This command does not work in this server.", delete_after=10),
-		errors.CommandOnCooldown        : lambda: ErrorHandling.command_on_cooldown(ctx,error)
+		errors.CommandOnCooldown        : lambda: errors.send_cooldown(ctx,error)
 	}
 
 	error_type = type(error.original) if isinstance(error, errors.CommandInvokeError) else type(error) # Get the type of the error
 	if error_type in error_handling.keys(): # check if the error is in the dictionary dictionary and if so, call the handling function
 		await error_handling[error_type]()
 	else: # if the error isn't handled, handle it with the uncaught error handler
-		await ErrorHandling.uncaught_error(ctx, error, bot)
+		await errors.report_error(ctx, error, bot)
 
 
 

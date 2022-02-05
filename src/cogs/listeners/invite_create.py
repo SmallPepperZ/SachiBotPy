@@ -4,7 +4,7 @@ from discord.ext.commands import Bot
 from discord.commands import slash_command, Option
 from discord.commands.context import ApplicationContext
 
-from helpers.database.logs.log_channels import LogChannel
+from helpers.database.logs.log_channels import LogChannel, db_session
 from datetime import timedelta
 
 
@@ -15,9 +15,10 @@ class InviteCreateListener(commands.Cog):
         self.bot = bot
 
 
-    @commands.Cog.listener("on_invite_create")
-    async def invite_create(self, invite:discord.Invite):
-        channel:discord.TextChannel = LogChannel[str(invite.guild.id)].get_invite_channel()
+    @commands.Cog.listener()
+    async def on_invite_create(self, invite:discord.Invite):
+        print("invite created")
+        with db_session: channel:discord.TextChannel = LogChannel[str(invite.guild.id)].get_invite_channel(self.bot)
         embed = discord.Embed(title='Invite Created', color=0x2BDE1F, description=f"""
         **Guild**
         ID       : `{invite.guild.id}`
@@ -35,11 +36,11 @@ class InviteCreateListener(commands.Cog):
         Max Uses : `{invite.max_uses}`
         Code     : `{invite.code}`
         """)
-        await channel.send(embed=embed, content=f"{invite.guild.name} invite created by {invite.inviter}")
+        await channel.send(embed=embed, content=f"`{invite.guild.name}` invite created by `{invite.inviter}`")
 
     @commands.Cog.listener("on_invite_delete")
     async def invite_create(self, invite:discord.Invite):
-        channel:discord.TextChannel = LogChannel[str(invite.guild.id)].get_invite_channel()
+        with db_session: channel:discord.TextChannel = LogChannel[str(invite.guild.id)].get_invite_channel(self.bot)
         embed = discord.Embed(title='Invite Deleted', color=0xD9361C, description=f"""
         **Guild**
         ID       : `{invite.guild.id}`
@@ -51,7 +52,7 @@ class InviteCreateListener(commands.Cog):
         **Other**
         Code     : `{invite.code}`
         """)
-        await channel.send(embed=embed, content=f"{invite.guild.name} invite deleted")
+        await channel.send(embed=embed, content=f"`{invite.guild.name}` invite deleted")
 
 
 
