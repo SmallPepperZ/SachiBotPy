@@ -15,9 +15,8 @@ class InviteCreateListener(commands.Cog):
         self.bot = bot
 
 
-    @commands.Cog.listener()
-    async def on_invite_create(self, invite:discord.Invite):
-        print("invite created")
+    @commands.Cog.listener("on_invite_create")
+    async def invite_create(self, invite:discord.Invite):
         with db_session: channel:discord.TextChannel = LogChannel[str(invite.guild.id)].get_invite_channel(self.bot)
         embed = discord.Embed(title='Invite Created', color=0x2BDE1F, description=f"""
         **Guild**
@@ -39,7 +38,7 @@ class InviteCreateListener(commands.Cog):
         await channel.send(embed=embed, content=f"`{invite.guild.name}` invite created by `{invite.inviter}`")
 
     @commands.Cog.listener("on_invite_delete")
-    async def invite_create(self, invite:discord.Invite):
+    async def invite_delete(self, invite:discord.Invite):
         with db_session: channel:discord.TextChannel = LogChannel[str(invite.guild.id)].get_invite_channel(self.bot)
         embed = discord.Embed(title='Invite Deleted', color=0xD9361C, description=f"""
         **Guild**
